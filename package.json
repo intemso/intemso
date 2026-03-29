@@ -1,0 +1,40 @@
+{
+  "name": "intemso",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "db:generate": "npx prisma generate --schema=packages/database/prisma/schema.prisma",
+    "db:push": "npx prisma db push --schema=packages/database/prisma/schema.prisma",
+    "db:migrate": "npx prisma migrate dev --schema=packages/database/prisma/schema.prisma",
+    "db:seed": "npm run seed --workspace=@intemso/database",
+    "db:studio": "npx prisma studio --schema=packages/database/prisma/schema.prisma",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "prettier": "^3",
+    "turbo": "^2"
+  },
+  "packageManager": "npm@10.9.3",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.4",
+    "effect": "^3.21.0",
+    "emojilib": "^4.0.2",
+    "node-emoji": "^2.2.0",
+    "styled-jsx": "^5.1.7",
+    "validator": "^13.15.26"
+  }
+}

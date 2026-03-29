@@ -1,0 +1,52 @@
+# ── Stage 1: Install dependencies ──
+FROM node:22-alpine AS deps
+WORKDIR /app
+
+# Copy root workspace files
+COPY package.json package-lock.json turbo.json ./
+
+# Copy workspace package.json files
+COPY apps/web/package.json ./apps/web/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/config/package.json ./packages/config/
+
+# Install all dependencies
+RUN npm ci --include=dev
+
+# ── Stage 2: Build ──
+FROM node:22-alpine AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Set build-time env
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+# Build shared packages, then the web app
+RUN npx turbo run build --filter=@intemso/web
+
+# ── Stage 3: Production image ──
+FROM node:22-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy Next.js standalone output
+COPY --from=builder /app/apps/web/public ./apps/web/public
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "apps/web/server.js"]

@@ -1,0 +1,1363 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// USERS & PROFILES
+// ============================================================
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String?   @map("password_hash") @db.VarChar(255)
+  role          UserRole
+  emailVerified Boolean   @default(false) @map("email_verified")
+  avatarUrl     String?   @map("avatar_url")
+  bannerUrl     String?   @map("banner_url")
+  isActive      Boolean   @default(true) @map("is_active")
+  isSuspended   Boolean   @default(false) @map("is_suspended")
+  reputationScore Int     @default(0) @map("reputation_score")
+  lastLoginAt   DateTime? @map("last_login_at") @db.Timestamptz
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  studentProfile  StudentProfile?
+  employerProfile EmployerProfile?
+  wallet          Wallet?
+
+  sentMessages    Message[]      @relation("MessageSender")
+  notifications   Notification[]
+  reviewsGiven    Review[]       @relation("ReviewsGiven")
+  reviewsReceived Review[]       @relation("ReviewsReceived")
+  reports         Report[]       @relation("ReportsBy")
+  disputesRaised  Dispute[]      @relation("DisputesRaised")
+  disputesResolved Dispute[]     @relation("DisputesResolved")
+  endedContracts  Contract[]     @relation("ContractEndedBy")
+  auditLogs       AuditLog[]     @relation("AuditLogs")
+
+  // Payments
+  transferRecipients TransferRecipient[]
+  paymentAuthorizations PaymentAuthorization[]
+
+  // Community
+  communityPosts    CommunityPost[]
+  communityComments CommunityComment[]
+  communityLikes    CommunityLike[]
+
+  // Blocked users
+  blocking   BlockedUser[] @relation("Blocking")
+  blockedBy  BlockedUser[] @relation("BlockedBy")
+
+  // Follow system
+  following  UserFollow[] @relation("Following")
+  followers  UserFollow[] @relation("Followers")
+
+  // Saved posts
+  savedPosts SavedPost[]
+
+  // Post views
+  postViews CommunityPostView[]
+
+  @@map("users")
+}
+
+model StudentProfile {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @unique @map("user_id") @db.Uuid
+  firstName        String   @map("first_name") @db.VarChar(100)
+  lastName         String   @map("last_name") @db.VarChar(100)
+  professionalTitle String? @map("professional_title") @db.VarChar(200)
+  phone            String?  @db.VarChar(20)
+  bio              String?
+  university       String   @db.VarChar(255)
+  major            String?  @db.VarChar(255)
+  graduationYear   Int?     @map("graduation_year")
+  studentIdNumber  String?  @map("student_id_number") @db.VarChar(50)
+  isVerified       Boolean  @default(false) @map("is_verified")
+  skills           String[] @default([])
+  hourlyRate       Decimal? @map("hourly_rate") @db.Decimal(10, 2)
+  portfolioUrls    String[] @default([]) @map("portfolio_urls")
+  availability     Json     @default("{}")
+  locationLat      Decimal? @map("location_lat") @db.Decimal(10, 8)
+  locationLng      Decimal? @map("location_lng") @db.Decimal(11, 8)
+  ratingAvg        Decimal  @default(0.00) @map("rating_avg") @db.Decimal(3, 2)
+  ratingCount      Int      @default(0) @map("rating_count")
+  jobSuccessScore  Int      @default(0) @map("job_success_score")
+  talentBadge      TalentBadge @default(none) @map("talent_badge")
+  totalEarned      Decimal  @default(0.00) @map("total_earned") @db.Decimal(12, 2)
+  gigsCompleted    Int      @default(0) @map("gigs_completed")
+  responseTimeHrs  Decimal? @map("response_time_hrs") @db.Decimal(5, 1)
+  onTimeRate       Decimal  @default(100.00) @map("on_time_rate") @db.Decimal(5, 2)
+  rehireRate       Decimal  @default(0.00) @map("rehire_rate") @db.Decimal(5, 2)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proposals         Proposal[]
+  contracts         Contract[]         @relation("ContractStudent")
+  timeEntries       TimeEntry[]
+  connectBalance    ConnectBalance?
+  connectTransactions ConnectTransaction[]
+  connectPurchases  ConnectPurchase[]
+  serviceListings   ServiceListing[]
+  serviceOrders     ServiceOrder[]     @relation("ServiceOrderStudent")
+  specializedProfiles SpecializedProfile[]
+  portfolioItems    PortfolioItem[]
+  clientRelationships ClientRelationship[] @relation("StudentRelationships")
+  savedGigs         SavedGig[]
+  savedByEmployers  SavedTalent[]
+
+  @@map("student_profiles")
+}
+
+model EmployerProfile {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @map("user_id") @db.Uuid
+  businessName    String   @map("business_name") @db.VarChar(255)
+  businessType    String?  @map("business_type") @db.VarChar(50)
+  description     String?
+  website         String?  @db.VarChar(500)
+  logoUrl         String?  @map("logo_url")
+  phone           String?  @db.VarChar(20)
+  contactPerson   String?  @map("contact_person") @db.VarChar(200)
+  isVerified      Boolean  @default(false) @map("is_verified")
+  paymentVerified Boolean  @default(false) @map("payment_verified")
+  locationAddress String?  @map("location_address")
+  locationLat     Decimal? @map("location_lat") @db.Decimal(10, 8)
+  locationLng     Decimal? @map("location_lng") @db.Decimal(11, 8)
+  ratingAvg       Decimal  @default(0.00) @map("rating_avg") @db.Decimal(3, 2)
+  ratingCount     Int      @default(0) @map("rating_count")
+  totalSpent      Decimal  @default(0.00) @map("total_spent") @db.Decimal(12, 2)
+  gigsPosted      Int      @default(0) @map("gigs_posted")
+  hireRate        Decimal  @default(0.00) @map("hire_rate") @db.Decimal(5, 2)
+  avgHourlyRate   Decimal? @map("avg_hourly_rate") @db.Decimal(10, 2)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gigs              Gig[]
+  contracts         Contract[]         @relation("ContractEmployer")
+  serviceOrders     ServiceOrder[]     @relation("ServiceOrderEmployer")
+  clientRelationships ClientRelationship[] @relation("EmployerRelationships")
+  savedTalent       SavedTalent[]
+
+  @@map("employer_profiles")
+}
+
+// ============================================================
+// PAYMENT AUTHORIZATIONS (Saved Cards for Recurring Charges)
+// ============================================================
+
+model PaymentAuthorization {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  authorizationCode  String   @map("authorization_code") @db.VarChar(255)
+  cardType           String?  @map("card_type") @db.VarChar(50)
+  last4              String?  @db.VarChar(4)
+  expMonth           String?  @map("exp_month") @db.VarChar(2)
+  expYear            String?  @map("exp_year") @db.VarChar(4)
+  bank               String?  @db.VarChar(100)
+  channel            String?  @db.VarChar(50)
+  isActive           Boolean  @default(true) @map("is_active")
+  isDefault          Boolean  @default(false) @map("is_default")
+  paystackEmail      String?  @map("paystack_email") @db.VarChar(255)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@map("payment_authorizations")
+}
+
+// ============================================================
+// GIGS & CATEGORIES
+// ============================================================
+
+model Category {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique @db.VarChar(100)
+  slug        String  @unique @db.VarChar(100)
+  icon        String? @db.VarChar(50)
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
+  sortOrder   Int     @default(0) @map("sort_order")
+
+  gigs            Gig[]
+  serviceListings ServiceListing[]
+  portfolioItems  PortfolioItem[]
+
+  @@map("categories")
+}
+
+model Gig {
+  id                  String       @id @default(uuid()) @db.Uuid
+  employerId          String       @map("employer_id") @db.Uuid
+  title               String       @db.VarChar(255)
+  description         String
+  categoryId          String?      @map("category_id") @db.Uuid
+  requiredSkills      String[]     @default([]) @map("required_skills")
+  budgetType          BudgetType   @map("budget_type")
+  budgetMin           Decimal?     @map("budget_min") @db.Decimal(10, 2)
+  budgetMax           Decimal?     @map("budget_max") @db.Decimal(10, 2)
+  currency            String       @default("GHS") @db.VarChar(3)
+  locationType        LocationType @map("location_type")
+  locationAddress     String?      @map("location_address")
+  locationLat         Decimal?     @map("location_lat") @db.Decimal(10, 8)
+  locationLng         Decimal?     @map("location_lng") @db.Decimal(11, 8)
+  experienceLevel     ExperienceLevel @default(entry) @map("experience_level")
+  projectScope        ProjectScope @default(small) @map("project_scope")
+  urgency             Urgency      @default(flexible)
+  durationHours       Int?         @map("duration_hours")
+  deadline            DateTime?    @db.Timestamptz
+  maxProposals        Int          @default(50) @map("max_proposals")
+  visibility          GigVisibility @default(public)
+  screeningQuestions  Json         @default("[]") @map("screening_questions")
+  preferredQuals      Json         @default("{}") @map("preferred_quals")
+  connectsRequired    Int          @default(2) @map("connects_required")
+  status              GigStatus    @default(draft)
+  attachments         Json         @default("[]")
+  viewsCount          Int          @default(0) @map("views_count")
+  proposalsCount      Int          @default(0) @map("proposals_count")
+  publishedAt         DateTime?    @map("published_at") @db.Timestamptz
+  createdAt           DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  employer        EmployerProfile @relation(fields: [employerId], references: [id])
+  category        Category?       @relation(fields: [categoryId], references: [id])
+  proposals       Proposal[]
+  contracts       Contract[]
+  conversations   Conversation[]
+  savedBy         SavedGig[]
+  communityPosts  CommunityPost[]
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([employerId])
+  @@index([publishedAt(sort: Desc)])
+  @@map("gigs")
+}
+
+// ============================================================
+// PROPOSALS
+// ============================================================
+
+model Proposal {
+  id                 String         @id @default(uuid()) @db.Uuid
+  gigId              String         @map("gig_id") @db.Uuid
+  studentId          String         @map("student_id") @db.Uuid
+  coverLetter        String         @map("cover_letter")
+  proposedRate       Decimal        @map("proposed_rate") @db.Decimal(10, 2)
+  estimatedDuration  String?        @map("estimated_duration") @db.VarChar(100)
+  proposedMilestones Json           @default("[]") @map("proposed_milestones")
+  screeningAnswers   Json           @default("[]") @map("screening_answers")
+  connectsSpent      Int            @default(2) @map("connects_spent")
+  isBoosted          Boolean        @default(false) @map("is_boosted")
+  boostConnects      Int            @default(0) @map("boost_connects")
+  status             ProposalStatus @default(submitted)
+  employerNotes      String?        @map("employer_notes")
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  gig      Gig            @relation(fields: [gigId], references: [id])
+  student  StudentProfile @relation(fields: [studentId], references: [id])
+  contract Contract?
+
+  @@unique([gigId, studentId])
+  @@index([gigId, status])
+  @@index([studentId, status])
+  @@map("proposals")
+}
+
+// ============================================================
+// CONTRACTS & MILESTONES
+// ============================================================
+
+model Contract {
+  id                String         @id @default(uuid()) @db.Uuid
+  gigId             String?        @map("gig_id") @db.Uuid
+  proposalId        String?        @unique @map("proposal_id") @db.Uuid
+  studentId         String         @map("student_id") @db.Uuid
+  employerId        String         @map("employer_id") @db.Uuid
+  contractType      ContractType   @map("contract_type")
+  title             String         @db.VarChar(255)
+  description       String?
+  agreedRate        Decimal        @map("agreed_rate") @db.Decimal(10, 2)
+  currency          String         @default("GHS") @db.VarChar(3)
+  weeklyLimit       Int?           @map("weekly_limit")
+  feeTierSnapshot   Json           @default("{}") @map("fee_tier_snapshot")
+  status            ContractStatus @default(active)
+  isDirect          Boolean        @default(false) @map("is_direct")
+  startedAt         DateTime       @default(now()) @map("started_at") @db.Timestamptz
+  pausedAt          DateTime?      @map("paused_at") @db.Timestamptz
+  completedAt       DateTime?      @map("completed_at") @db.Timestamptz
+  endedById         String?        @map("ended_by") @db.Uuid
+  endReason         String?        @map("end_reason")
+  lifetimeBillings  Decimal        @default(0.00) @map("lifetime_billings") @db.Decimal(12, 2)
+  createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  gig            Gig?            @relation(fields: [gigId], references: [id])
+  proposal       Proposal?       @relation(fields: [proposalId], references: [id])
+  student        StudentProfile  @relation("ContractStudent", fields: [studentId], references: [id])
+  employer       EmployerProfile @relation("ContractEmployer", fields: [employerId], references: [id])
+  endedBy        User?           @relation("ContractEndedBy", fields: [endedById], references: [id])
+  milestones     Milestone[]
+  timeEntries    TimeEntry[]
+  weeklyInvoices WeeklyInvoice[]
+  payments       Payment[]
+  reviews        Review[]
+  disputes       Dispute[]
+  escrowTransactions EscrowTransaction[]
+
+  @@index([studentId, status])
+  @@index([employerId, status])
+  @@map("contracts")
+}
+
+model Milestone {
+  id                String          @id @default(uuid()) @db.Uuid
+  contractId        String          @map("contract_id") @db.Uuid
+  title             String          @db.VarChar(255)
+  description       String?
+  amount            Decimal         @db.Decimal(10, 2)
+  dueDate           DateTime?       @map("due_date") @db.Timestamptz
+  sortOrder         Int             @default(0) @map("sort_order")
+  status            MilestoneStatus @default(pending)
+  deliverables      Json            @default("[]")
+  revisionCount     Int             @default(0) @map("revision_count")
+  maxRevisions      Int             @default(2) @map("max_revisions")
+  submittedAt       DateTime?       @map("submitted_at") @db.Timestamptz
+  approvedAt        DateTime?       @map("approved_at") @db.Timestamptz
+  paidAt            DateTime?       @map("paid_at") @db.Timestamptz
+  autoApproveAt     DateTime?       @map("auto_approve_at") @db.Timestamptz
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+
+  contract Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  payments Payment[]
+  escrowTransactions EscrowTransaction[]
+  disputes Dispute[]
+
+  @@index([contractId, sortOrder])
+  @@map("milestones")
+}
+
+// ============================================================
+// HOURLY TIME TRACKING
+// ============================================================
+
+model TimeEntry {
+  id          String   @id @default(uuid()) @db.Uuid
+  contractId  String   @map("contract_id") @db.Uuid
+  studentId   String   @map("student_id") @db.Uuid
+  description String
+  hours       Decimal  @db.Decimal(5, 2)
+  dateWorked  DateTime @map("date_worked") @db.Date
+  billingWeek DateTime @map("billing_week") @db.Date
+  isBilled    Boolean  @default(false) @map("is_billed")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  contract Contract       @relation(fields: [contractId], references: [id])
+  student  StudentProfile @relation(fields: [studentId], references: [id])
+
+  @@index([contractId, billingWeek])
+  @@map("time_entries")
+}
+
+model WeeklyInvoice {
+  id          String              @id @default(uuid()) @db.Uuid
+  contractId  String              @map("contract_id") @db.Uuid
+  billingWeek DateTime            @map("billing_week") @db.Date
+  totalHours  Decimal             @map("total_hours") @db.Decimal(5, 2)
+  hourlyRate  Decimal             @map("hourly_rate") @db.Decimal(10, 2)
+  subtotal    Decimal             @db.Decimal(10, 2)
+  platformFee Decimal             @map("platform_fee") @db.Decimal(10, 2)
+  status      WeeklyInvoiceStatus @default(pending)
+  paidAt      DateTime?           @map("paid_at") @db.Timestamptz
+  createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamptz
+
+  contract Contract  @relation(fields: [contractId], references: [id])
+  payments Payment[]
+
+  @@unique([contractId, billingWeek])
+  @@map("weekly_invoices")
+}
+
+// ============================================================
+// CONNECTS SYSTEM
+// ============================================================
+
+model ConnectBalance {
+  id                String   @id @default(uuid()) @db.Uuid
+  studentId         String   @unique @map("student_id") @db.Uuid
+  freeConnects      Int      @default(10) @map("free_connects")
+  purchasedConnects Int      @default(0) @map("purchased_connects")
+  rolloverConnects  Int      @default(0) @map("rollover_connects")
+  lastRefreshAt     DateTime @default(now()) @map("last_refresh_at") @db.Timestamptz
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  student StudentProfile @relation(fields: [studentId], references: [id])
+
+  @@map("connect_balances")
+}
+
+model ConnectTransaction {
+  id          String                @id @default(uuid()) @db.Uuid
+  studentId   String                @map("student_id") @db.Uuid
+  type        ConnectTransactionType
+  amount      Int
+  balanceAfter Int                  @map("balance_after")
+  referenceId String?               @map("reference_id") @db.Uuid
+  description String?
+  createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz
+
+  student StudentProfile @relation(fields: [studentId], references: [id])
+
+  @@index([studentId, createdAt(sort: Desc)])
+  @@map("connect_transactions")
+}
+
+model ConnectPurchase {
+  id               String                @id @default(uuid()) @db.Uuid
+  studentId        String                @map("student_id") @db.Uuid
+  packSize         Int                   @map("pack_size")
+  price            Decimal               @db.Decimal(10, 2)
+  paymentReference String?               @map("payment_reference") @db.VarChar(255)
+  status           ConnectPurchaseStatus @default(pending)
+  createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamptz
+
+  student StudentProfile @relation(fields: [studentId], references: [id])
+
+  @@map("connect_purchases")
+}
+
+// ============================================================
+// STUDENT SERVICE CATALOG
+// ============================================================
+
+model ServiceListing {
+  id           String               @id @default(uuid()) @db.Uuid
+  studentId    String               @map("student_id") @db.Uuid
+  title        String               @db.VarChar(255)
+  description  String
+  categoryId   String?              @map("category_id") @db.Uuid
+  tags         String[]             @default([])
+  deliveryDays Int                  @map("delivery_days")
+  tiers        Json                 @default("[]")
+  images       Json                 @default("[]")
+  faq          Json                 @default("[]")
+  status       ServiceListingStatus @default(draft)
+  isFeatured   Boolean              @default(false) @map("is_featured")
+  ordersCount  Int                  @default(0) @map("orders_count")
+  ratingAvg    Decimal              @default(0.00) @map("rating_avg") @db.Decimal(3, 2)
+  ratingCount  Int                  @default(0) @map("rating_count")
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime             @updatedAt @map("updated_at") @db.Timestamptz
+
+  student  StudentProfile @relation(fields: [studentId], references: [id])
+  category Category?      @relation(fields: [categoryId], references: [id])
+  orders   ServiceOrder[]
+
+  @@index([studentId])
+  @@index([categoryId])
+  @@map("service_listings")
+}
+
+// ============================================================
+// PORTFOLIO SHOWCASE
+// ============================================================
+
+model PortfolioItem {
+  id             String              @id @default(uuid()) @db.Uuid
+  studentId      String              @map("student_id") @db.Uuid
+  title          String              @db.VarChar(255)
+  description    String
+  categoryId     String?             @map("category_id") @db.Uuid
+  skills         String[]            @default([])
+  images         String[]            @default([])
+  projectUrl     String?             @map("project_url") @db.VarChar(500)
+  clientName     String?             @map("client_name") @db.VarChar(200)
+  completedAt    DateTime?           @map("completed_at") @db.Timestamptz
+  status         PortfolioStatus     @default(published)
+  isFeatured     Boolean             @default(false) @map("is_featured")
+  likeCount      Int                 @default(0) @map("like_count")
+  viewCount      Int                 @default(0) @map("view_count")
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+
+  student  StudentProfile @relation(fields: [studentId], references: [id])
+  category Category?      @relation(fields: [categoryId], references: [id])
+
+  @@index([studentId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("portfolio_items")
+}
+
+enum PortfolioStatus {
+  draft
+  published
+  archived
+}
+
+model ServiceOrder {
+  id               String             @id @default(uuid()) @db.Uuid
+  serviceListingId String             @map("service_listing_id") @db.Uuid
+  employerId       String             @map("employer_id") @db.Uuid
+  studentId        String             @map("student_id") @db.Uuid
+  tierSelected     String             @map("tier_selected") @db.VarChar(50)
+  amount           Decimal            @db.Decimal(10, 2)
+  requirements     String?
+  status           ServiceOrderStatus @default(pending)
+  deliveryDeadline DateTime?          @map("delivery_deadline") @db.Timestamptz
+  deliverables     Json               @default("[]")
+  revisionCount    Int                @default(0) @map("revision_count")
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+
+  serviceListing ServiceListing  @relation(fields: [serviceListingId], references: [id])
+  employer       EmployerProfile @relation("ServiceOrderEmployer", fields: [employerId], references: [id])
+  student        StudentProfile  @relation("ServiceOrderStudent", fields: [studentId], references: [id])
+  payments       Payment[]
+  escrowTransactions EscrowTransaction[]
+  disputes       Dispute[]
+
+  @@map("service_orders")
+}
+
+// ============================================================
+// SPECIALIZED PROFILES
+// ============================================================
+
+model SpecializedProfile {
+  id           String   @id @default(uuid()) @db.Uuid
+  studentId    String   @map("student_id") @db.Uuid
+  title        String   @db.VarChar(200)
+  overview     String?
+  skills       String[] @default([])
+  hourlyRate   Decimal? @map("hourly_rate") @db.Decimal(10, 2)
+  portfolioUrls String[] @default([]) @map("portfolio_urls")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  student StudentProfile @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+  @@map("specialized_profiles")
+}
+
+// ============================================================
+// CLIENT RELATIONSHIP TRACKING (sliding fee)
+// ============================================================
+
+model ClientRelationship {
+  id               String   @id @default(uuid()) @db.Uuid
+  studentId        String   @map("student_id") @db.Uuid
+  employerId       String   @map("employer_id") @db.Uuid
+  lifetimeBillings Decimal  @default(0.00) @map("lifetime_billings") @db.Decimal(12, 2)
+  currentFeeTier   FeeTier  @default(tier_1) @map("current_fee_tier")
+  contractsCount   Int      @default(0) @map("contracts_count")
+  firstContractAt  DateTime? @map("first_contract_at") @db.Timestamptz
+  lastContractAt   DateTime? @map("last_contract_at") @db.Timestamptz
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  student  StudentProfile  @relation("StudentRelationships", fields: [studentId], references: [id])
+  employer EmployerProfile @relation("EmployerRelationships", fields: [employerId], references: [id])
+
+  @@unique([studentId, employerId])
+  @@map("client_relationships")
+}
+
+// ============================================================
+// PAYMENTS & WALLET
+// ============================================================
+
+model Wallet {
+  id                     String   @id @default(uuid()) @db.Uuid
+  userId                 String   @unique @map("user_id") @db.Uuid
+  balance                Decimal  @default(0.00) @db.Decimal(12, 2)
+  pendingBalance         Decimal  @default(0.00) @map("pending_balance") @db.Decimal(12, 2)
+  currency               String   @default("GHS") @db.VarChar(3)
+  autoWithdrawEnabled    Boolean  @default(false) @map("auto_withdraw_enabled")
+  autoWithdrawThreshold  Decimal? @map("auto_withdraw_threshold") @db.Decimal(10, 2)
+  dailyWithdrawalLimit   Decimal  @default(10000) @map("daily_withdrawal_limit") @db.Decimal(10, 2)
+  dailyWithdrawnToday    Decimal  @default(0) @map("daily_withdrawn_today") @db.Decimal(10, 2)
+  dailyWithdrawalResetAt DateTime @default(now()) @map("daily_withdrawal_reset_at") @db.Timestamptz
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  withdrawals  Withdrawal[]
+
+  @@map("wallets")
+}
+
+model Payment {
+  id              String        @id @default(uuid()) @db.Uuid
+  contractId      String?       @map("contract_id") @db.Uuid
+  milestoneId     String?       @map("milestone_id") @db.Uuid
+  weeklyInvoiceId String?       @map("weekly_invoice_id") @db.Uuid
+  serviceOrderId  String?       @map("service_order_id") @db.Uuid
+  payerId         String        @map("payer_id") @db.Uuid
+  payeeId         String        @map("payee_id") @db.Uuid
+  amount          Decimal       @db.Decimal(10, 2)
+  platformFee     Decimal       @map("platform_fee") @db.Decimal(10, 2)
+  feePercentage   Decimal       @map("fee_percentage") @db.Decimal(5, 2)
+  netAmount       Decimal       @map("net_amount") @db.Decimal(10, 2)
+  currency        String        @default("GHS") @db.VarChar(3)
+  type            PaymentType
+  status          PaymentStatus @default(pending)
+  paymentMethod   String?       @map("payment_method") @db.VarChar(50)
+  externalTxnId   String?       @map("external_txn_id") @db.VarChar(255)
+  escrowAt        DateTime?     @map("escrow_at") @db.Timestamptz
+  releasedAt      DateTime?     @map("released_at") @db.Timestamptz
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  contract     Contract?     @relation(fields: [contractId], references: [id])
+  milestone    Milestone?    @relation(fields: [milestoneId], references: [id])
+  weeklyInvoice WeeklyInvoice? @relation(fields: [weeklyInvoiceId], references: [id])
+  serviceOrder ServiceOrder? @relation(fields: [serviceOrderId], references: [id])
+  transactions Transaction[]
+
+  @@index([payerId, status])
+  @@index([payeeId, status])
+  @@index([contractId])
+  @@index([status])
+  @@map("payments")
+}
+
+model Transaction {
+  id           String          @id @default(uuid()) @db.Uuid
+  walletId     String          @map("wallet_id") @db.Uuid
+  paymentId    String?         @map("payment_id") @db.Uuid
+  type         TransactionType
+  amount       Decimal         @db.Decimal(10, 2)
+  balanceAfter Decimal         @map("balance_after") @db.Decimal(12, 2)
+  description  String?
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz
+
+  wallet  Wallet   @relation(fields: [walletId], references: [id])
+  payment Payment? @relation(fields: [paymentId], references: [id])
+
+  @@index([walletId, createdAt(sort: Desc)])
+  @@map("transactions")
+}
+
+model Withdrawal {
+  id            String           @id @default(uuid()) @db.Uuid
+  walletId      String           @map("wallet_id") @db.Uuid
+  userId        String           @map("user_id") @db.Uuid
+  amount        Decimal          @db.Decimal(10, 2)
+  destination   Json
+  reference     String?          @unique @db.VarChar(100)
+  status        WithdrawalStatus @default(pending)
+  externalTxnId String?          @map("external_txn_id") @db.VarChar(255)
+  failureReason String?          @map("failure_reason")
+  retryCount    Int              @default(0) @map("retry_count")
+  lastRetryAt   DateTime?        @map("last_retry_at") @db.Timestamptz
+  processedAt   DateTime?        @map("processed_at") @db.Timestamptz
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+
+  @@index([walletId, status])
+  @@index([userId])
+  @@index([status, retryCount])
+  @@map("withdrawals")
+}
+
+// ============================================================
+// ESCROW SYSTEM
+// ============================================================
+
+model EscrowTransaction {
+  id                 String              @id @default(uuid()) @db.Uuid
+  milestoneId        String?             @map("milestone_id") @db.Uuid
+  serviceOrderId     String?             @map("service_order_id") @db.Uuid
+  contractId         String              @map("contract_id") @db.Uuid
+  payerId            String              @map("payer_id") @db.Uuid
+  payeeId            String              @map("payee_id") @db.Uuid
+  amount             Decimal             @db.Decimal(10, 2)
+  currency           String              @default("GHS") @db.VarChar(3)
+  status             EscrowStatus        @default(pending)
+  paystackReference  String?             @unique @map("paystack_reference") @db.VarChar(255)
+  paystackTransferId String?             @map("paystack_transfer_id") @db.VarChar(255)
+  platformFee        Decimal             @default(0) @map("platform_fee") @db.Decimal(10, 2)
+  feePercentage      Decimal             @default(0) @map("fee_percentage") @db.Decimal(5, 2)
+  netAmount          Decimal             @default(0) @map("net_amount") @db.Decimal(10, 2)
+  fundedAt           DateTime?           @map("funded_at") @db.Timestamptz
+  releasedAt         DateTime?           @map("released_at") @db.Timestamptz
+  refundedAt         DateTime?           @map("refunded_at") @db.Timestamptz
+  failedAt           DateTime?           @map("failed_at") @db.Timestamptz
+  failureReason      String?             @map("failure_reason")
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+
+  contract     Contract      @relation(fields: [contractId], references: [id])
+  milestone    Milestone?    @relation(fields: [milestoneId], references: [id])
+  serviceOrder ServiceOrder? @relation(fields: [serviceOrderId], references: [id])
+
+  @@index([contractId])
+  @@index([milestoneId])
+  @@index([payerId])
+  @@index([payeeId])
+  @@index([status])
+  @@map("escrow_transactions")
+}
+
+model WebhookEvent {
+  id                String    @id @default(uuid()) @db.Uuid
+  paystackReference String    @unique @map("paystack_reference") @db.VarChar(255)
+  eventType         String    @map("event_type") @db.VarChar(100)
+  payload           Json
+  receivedAt        DateTime  @default(now()) @map("received_at") @db.Timestamptz
+  processedAt       DateTime? @map("processed_at") @db.Timestamptz
+
+  @@index([eventType])
+  @@index([processedAt])
+  @@map("webhook_events")
+}
+
+model TransferRecipient {
+  id                  String                  @id @default(uuid()) @db.Uuid
+  userId              String                  @map("user_id") @db.Uuid
+  type                TransferRecipientType
+  recipientCode       String                  @unique @map("recipient_code") @db.VarChar(255)
+  accountName         String                  @map("account_name") @db.VarChar(255)
+  accountNumber       String                  @map("account_number") @db.VarChar(50)
+  bankCode            String                  @map("bank_code") @db.VarChar(50)
+  bankName            String?                 @map("bank_name") @db.VarChar(255)
+  currency            String                  @default("GHS") @db.VarChar(3)
+  isDefault           Boolean                 @default(false) @map("is_default")
+  isActive            Boolean                 @default(true) @map("is_active")
+  createdAt           DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime                @updatedAt @map("updated_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("transfer_recipients")
+}
+
+model FinancialAuditLog {
+  id              String   @id @default(uuid()) @db.Uuid
+  action          String   @db.VarChar(100)
+  entityType      String   @map("entity_type") @db.VarChar(50)
+  entityId        String?  @map("entity_id") @db.Uuid
+  userId          String?  @map("user_id") @db.Uuid
+  amount          Decimal? @db.Decimal(10, 2)
+  balanceBefore   Decimal? @map("balance_before") @db.Decimal(12, 2)
+  balanceAfter    Decimal? @map("balance_after") @db.Decimal(12, 2)
+  currency        String   @default("GHS") @db.VarChar(3)
+  paystackRef     String?  @map("paystack_ref") @db.VarChar(255)
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt(sort: Desc)])
+  @@map("financial_audit_log")
+}
+
+// ============================================================
+// RECONCILIATION
+// ============================================================
+
+model ReconciliationRun {
+  id                        String               @id @default(uuid()) @db.Uuid
+  runDate                   DateTime             @map("run_date") @db.Date
+  runType                   String               @map("run_type") @db.VarChar(50) // daily, weekly, manual
+
+  // Our ledger totals
+  totalEscrowHeld           Decimal              @map("total_escrow_held") @db.Decimal(14, 2)
+  totalStudentWallets       Decimal              @map("total_student_wallets") @db.Decimal(14, 2)
+  totalPendingWithdrawals   Decimal              @map("total_pending_withdrawals") @db.Decimal(14, 2)
+  totalPlatformRevenue      Decimal              @map("total_platform_revenue") @db.Decimal(14, 2)
+  calculatedPaystackBalance Decimal              @map("calculated_paystack_balance") @db.Decimal(14, 2)
+
+  // Actual Paystack balance
+  actualPaystackBalance     Decimal?             @map("actual_paystack_balance") @db.Decimal(14, 2)
+
+  // Discrepancy
+  discrepancy               Decimal?             @db.Decimal(14, 2)
+  discrepancyPercentage     Decimal?             @map("discrepancy_percentage") @db.Decimal(7, 4)
+
+  isBalanced                Boolean              @map("is_balanced")
+  orphanedTransactions      Int                  @default(0) @map("orphaned_transactions")
+  stuckTransfers            Int                  @default(0) @map("stuck_transfers")
+  notes                     String?
+  resolvedAt                DateTime?            @map("resolved_at") @db.Timestamptz
+  createdAt                 DateTime             @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([runDate])
+  @@index([isBalanced])
+  @@map("reconciliation_runs")
+}
+
+// ============================================================
+// MESSAGING
+// ============================================================
+
+model Conversation {
+  id             String    @id @default(uuid()) @db.Uuid
+  gigId          String?   @map("gig_id") @db.Uuid
+  participantIds String[]  @map("participant_ids") @db.Uuid
+  lastMessageAt  DateTime? @map("last_message_at") @db.Timestamptz
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  gig      Gig?      @relation(fields: [gigId], references: [id])
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(uuid()) @db.Uuid
+  conversationId String   @map("conversation_id") @db.Uuid
+  senderId       String   @map("sender_id") @db.Uuid
+  content        String
+  attachments    Json     @default("[]")
+  isRead         Boolean  @default(false) @map("is_read")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@map("messages")
+}
+
+// ============================================================
+// REVIEWS
+// ============================================================
+
+model Review {
+  id         String   @id @default(uuid()) @db.Uuid
+  contractId String   @map("contract_id") @db.Uuid
+  reviewerId String   @map("reviewer_id") @db.Uuid
+  revieweeId String   @map("reviewee_id") @db.Uuid
+  rating     Int
+  comment    String?
+  isFlagged  Boolean  @default(false) @map("is_flagged")
+  isVisible  Boolean  @default(true) @map("is_visible")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  contract Contract @relation(fields: [contractId], references: [id])
+  reviewer User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  reviewee User     @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+
+  @@unique([contractId, reviewerId])
+  @@map("reviews")
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String   @db.VarChar(50)
+  title     String   @db.VarChar(255)
+  body      String?
+  data      Json     @default("{}")
+  isRead    Boolean  @default(false) @map("is_read")
+  channel   String   @default("in_app") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+// ============================================================
+// DISPUTES
+// ============================================================
+
+model Dispute {
+  id               String        @id @default(uuid()) @db.Uuid
+  contractId       String        @map("contract_id") @db.Uuid
+  milestoneId      String?       @map("milestone_id") @db.Uuid
+  serviceOrderId   String?       @map("service_order_id") @db.Uuid
+  raisedById       String        @map("raised_by") @db.Uuid
+  reason           String
+  description      String?
+  desiredResolution String?      @map("desired_resolution") @db.VarChar(50)
+  evidence         Json          @default("[]")
+  status           DisputeStatus @default(open)
+  // Response from the other party
+  responseNote     String?       @map("response_note")
+  responseEvidence Json          @default("[]") @map("response_evidence")
+  respondedAt      DateTime?     @map("responded_at") @db.Timestamptz
+  responseDeadline DateTime?     @map("response_deadline") @db.Timestamptz
+  // Resolution details
+  adminNotes       String?       @map("admin_notes")
+  splitPercentage  Int?          @map("split_percentage")
+  refundAmount     Decimal?      @map("refund_amount") @db.Decimal(10, 2)
+  releaseAmount    Decimal?      @map("release_amount") @db.Decimal(10, 2)
+  resolvedById     String?       @map("resolved_by") @db.Uuid
+  resolvedAt       DateTime?     @map("resolved_at") @db.Timestamptz
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  contract     Contract      @relation(fields: [contractId], references: [id])
+  milestone    Milestone?    @relation(fields: [milestoneId], references: [id])
+  serviceOrder ServiceOrder? @relation(fields: [serviceOrderId], references: [id])
+  raisedBy     User          @relation("DisputesRaised", fields: [raisedById], references: [id])
+  resolvedBy   User?         @relation("DisputesResolved", fields: [resolvedById], references: [id])
+
+  @@index([contractId])
+  @@index([milestoneId])
+  @@index([status])
+  @@map("disputes")
+}
+
+// ============================================================
+// SAVED / BOOKMARKED
+// ============================================================
+
+model SavedGig {
+  id        String   @id @default(uuid()) @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  gigId     String   @map("gig_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  student StudentProfile @relation(fields: [studentId], references: [id])
+  gig     Gig            @relation(fields: [gigId], references: [id])
+
+  @@unique([studentId, gigId])
+  @@map("saved_gigs")
+}
+
+model SavedTalent {
+  id         String   @id @default(uuid()) @db.Uuid
+  employerId String   @map("employer_id") @db.Uuid
+  studentId  String   @map("student_id") @db.Uuid
+  notes      String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  employer EmployerProfile @relation(fields: [employerId], references: [id])
+  student  StudentProfile  @relation(fields: [studentId], references: [id])
+
+  @@unique([employerId, studentId])
+  @@map("saved_talent")
+}
+
+// ============================================================
+// REPORTS
+// ============================================================
+
+model Report {
+  id             String       @id @default(uuid()) @db.Uuid
+  reporterId     String       @map("reporter_id") @db.Uuid
+  reportedEntity String       @map("reported_entity") @db.VarChar(50)
+  reportedId     String       @map("reported_id") @db.Uuid
+  reason         String
+  status         ReportStatus @default(pending)
+  adminNotes     String?      @map("admin_notes")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  reporter User @relation("ReportsBy", fields: [reporterId], references: [id])
+
+  @@unique([reporterId, reportedEntity, reportedId])
+  @@index([status])
+  @@index([reporterId])
+  @@map("reports")
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  action     String   @db.VarChar(100)
+  entity     String   @db.VarChar(50)
+  entityId   String?  @map("entity_id") @db.Uuid
+  details    Json?
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation("AuditLogs", fields: [userId], references: [id])
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserRole {
+  student
+  employer
+  admin
+}
+
+enum TalentBadge {
+  none
+  rising_talent
+  top_rated
+  top_rated_plus
+}
+
+enum BudgetType {
+  fixed
+  hourly
+}
+
+enum LocationType {
+  remote
+  on_site
+  hybrid
+}
+
+enum ExperienceLevel {
+  entry
+  intermediate
+  expert
+}
+
+enum ProjectScope {
+  small
+  medium
+  large
+}
+
+enum Urgency {
+  asap
+  this_week
+  flexible
+}
+
+enum GigVisibility {
+  public
+  invite_only
+}
+
+enum GigStatus {
+  draft
+  open
+  reviewing
+  hired
+  in_progress
+  completed
+  closed
+  cancelled
+}
+
+enum ProposalStatus {
+  submitted
+  viewed
+  shortlisted
+  interview
+  offer_sent
+  hired
+  declined
+  withdrawn
+  archived
+}
+
+enum ContractType {
+  fixed
+  hourly
+}
+
+enum ContractStatus {
+  active
+  paused
+  completed
+  disputed
+  cancelled
+}
+
+enum MilestoneStatus {
+  pending
+  funded
+  in_progress
+  submitted
+  revision_requested
+  approved
+  paid
+  cancelled
+  disputed
+}
+
+enum WeeklyInvoiceStatus {
+  pending
+  paid
+  failed
+  disputed
+}
+
+enum ConnectTransactionType {
+  monthly_grant
+  purchase
+  proposal_spent
+  proposal_refund
+  boost_spent
+  rollover
+}
+
+enum ConnectPurchaseStatus {
+  pending
+  completed
+  failed
+}
+
+enum ServiceListingStatus {
+  draft
+  active
+  paused
+  removed
+}
+
+enum ServiceOrderStatus {
+  pending
+  active
+  delivered
+  revision_requested
+  completed
+  cancelled
+  disputed
+}
+
+enum FeeTier {
+  tier_1
+  tier_2
+  tier_3
+}
+
+enum PaymentType {
+  milestone_escrow
+  milestone_release
+  hourly_weekly
+  service_order
+  bonus
+  refund
+}
+
+enum PaymentStatus {
+  pending
+  escrow
+  released
+  refunded
+  partially_refunded
+  failed
+}
+
+enum TransactionType {
+  credit
+  debit
+  withdrawal
+  refund
+  fee
+  connects_purchase
+  bonus
+}
+
+enum WithdrawalStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum EscrowStatus {
+  pending
+  funded
+  in_progress
+  submitted
+  released
+  refunded
+  partially_refunded
+  failed
+  expired
+  disputed
+}
+
+enum TransferRecipientType {
+  mobile_money
+  ghipss
+}
+
+enum DisputeStatus {
+  open
+  under_review
+  resolved_student
+  resolved_employer
+  resolved_split
+  closed
+}
+
+enum ReportStatus {
+  pending
+  reviewed
+  action_taken
+  dismissed
+}
+
+// ============================================================
+// COMMUNITY / SOCIAL FEED
+// ============================================================
+
+enum PostType {
+  discussion
+  question
+  tip
+  achievement
+  event
+  gig_posted
+  gig_completed
+  review_received
+}
+
+model CommunityPost {
+  id        String   @id @default(uuid()) @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  type      PostType @default(discussion)
+  content   String
+  images    String[] @default([])
+  tags      String[] @default([])
+  gigId     String?  @map("gig_id") @db.Uuid
+  isPinned  Boolean  @default(false) @map("is_pinned")
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  likeCount Int      @default(0) @map("like_count")
+  commentCount Int   @default(0) @map("comment_count")
+  viewCount Int      @default(0) @map("view_count")
+  editedAt DateTime? @map("edited_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  author   User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  gig      Gig?               @relation(fields: [gigId], references: [id], onDelete: SetNull)
+  comments CommunityComment[]
+  likes    CommunityLike[]
+  savedBy  SavedPost[]
+  views    CommunityPostView[]
+
+  @@index([authorId])
+  @@index([createdAt(sort: Desc)])
+  @@index([type])
+  @@index([gigId])
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id        String   @id @default(uuid()) @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  authorId  String   @map("author_id") @db.Uuid
+  parentId  String?  @map("parent_id") @db.Uuid
+  content   String
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  likeCount Int      @default(0) @map("like_count")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  post     CommunityPost      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author   User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent   CommunityComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  CommunityComment[] @relation("CommentReplies")
+  likes    CommunityLike[]
+
+  @@index([postId, createdAt])
+  @@index([authorId])
+  @@map("community_comments")
+}
+
+model CommunityLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  postId    String?  @map("post_id") @db.Uuid
+  commentId String?  @map("comment_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post    CommunityPost?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment CommunityComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@map("community_likes")
+}
+
+// ============================================================
+// BLOCKED USERS 
+// ============================================================
+
+model BlockedUser {
+  id        String   @id @default(uuid()) @db.Uuid
+  blockerId String   @map("blocker_id") @db.Uuid
+  blockedId String   @map("blocked_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  blocker User @relation("Blocking", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("BlockedBy", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+  @@map("blocked_users")
+}
+
+model UserFollow {
+  id          String   @id @default(uuid()) @db.Uuid
+  followerId  String   @map("follower_id") @db.Uuid
+  followingId String   @map("following_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  follower  User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("user_follows")
+}
+
+model SavedPost {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("saved_posts")
+}
+
+model CommunityPostView {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("community_post_views")
+}
