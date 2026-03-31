@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
+import Logo from '@/components/ui/Logo';
 import {
   MagnifyingGlassIcon,
   BellIcon,
@@ -124,12 +125,7 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">In</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900 hidden sm:block">
-                Intemso
-              </span>
+              <Logo size={32} showText={true} textClassName="text-xl font-bold text-gray-900 hidden sm:block" />
             </Link>
 
             {/* Desktop nav */}

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Logo from '@/components/ui/Logo';
 
 const footerLinks = {
   'For Students': [
@@ -40,10 +41,7 @@ export default function Footer() {
           {/* Brand column */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1 mb-2 sm:mb-4 lg:mb-0">
             <Link href="/" className="flex items-center gap-2 mb-3 sm:mb-4">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">In</span>
-              </div>
-              <span className="text-xl font-bold text-white">Intemso</span>
+              <Logo size={32} showText={true} textClassName="text-xl font-bold text-white" />
             </Link>
             <p className="text-xs sm:text-sm text-gray-400 leading-relaxed mb-4 sm:mb-6 max-w-xs">
               The digital marketplace connecting university students with

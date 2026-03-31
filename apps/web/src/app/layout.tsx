@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   title: 'Intemso — Student Gig Marketplace',
   description:
     'Find short-term flexible work opportunities designed for university students.',
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/logo.svg',
+  },
 };
 
 export default function RootLayout({
