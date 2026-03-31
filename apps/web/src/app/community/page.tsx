@@ -714,12 +714,12 @@ function CommentItem({
 
   return (
     <div className="flex gap-2.5 group">
-      <Link href={`/profile/${comment.author.id}`}>
+      <Link href={`/profile/${comment.author.id}`} prefetch={false}>
         <Avatar author={comment.author} size={32} />
       </Link>
       <div className="flex-1 min-w-0">
         <div className="bg-gray-100 rounded-2xl px-3.5 py-2.5 inline-block max-w-full">
-          <Link href={`/profile/${comment.author.id}`} className="text-[13px] font-semibold text-gray-900 block hover:underline">
+          <Link href={`/profile/${comment.author.id}`} prefetch={false} className="text-[13px] font-semibold text-gray-900 block hover:underline">
             {getAuthorName(comment.author)}
           </Link>
           <p className="text-[13px] text-gray-700 whitespace-pre-wrap wrap-break-word">{comment.content}</p>
@@ -761,12 +761,12 @@ function CommentItem({
           <div className="mt-2 space-y-2">
             {comment.replies.map((reply) => (
               <div key={reply.id} className="flex gap-2 group/reply">
-                <Link href={`/profile/${reply.author.id}`}>
+                <Link href={`/profile/${reply.author.id}`} prefetch={false}>
                   <Avatar author={reply.author} size={24} />
                 </Link>
                 <div className="flex-1 min-w-0">
                   <div className="bg-gray-100 rounded-2xl px-3 py-2 inline-block max-w-full">
-                    <Link href={`/profile/${reply.author.id}`} className="text-xs font-semibold text-gray-900 block hover:underline">
+                    <Link href={`/profile/${reply.author.id}`} prefetch={false} className="text-xs font-semibold text-gray-900 block hover:underline">
                       {getAuthorName(reply.author)}
                     </Link>
                     <p className="text-xs text-gray-700 whitespace-pre-wrap wrap-break-word">{reply.content}</p>
@@ -950,12 +950,12 @@ function PostCard({
 
       {/* Header */}
       <div className="px-4 pt-4 flex items-start gap-3">
-        <Link href={`/profile/${post.author.id}`}>
+        <Link href={`/profile/${post.author.id}`} prefetch={false}>
           <Avatar author={post.author} size={40} />
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <Link href={`/profile/${post.author.id}`} className="text-[15px] font-bold text-gray-900 hover:underline">
+            <Link href={`/profile/${post.author.id}`} prefetch={false} className="text-[15px] font-bold text-gray-900 hover:underline">
               {getAuthorName(post.author)}
             </Link>
             <ReputationBadge score={post.author.reputationScore} />
@@ -1653,7 +1653,7 @@ function SuggestedConnections() {
           const isStudent = s.role === 'student';
 
           return (
-            <Link key={s.id} href={`/profile/${s.id}`} className="flex items-center gap-3 group">
+            <Link key={s.id} href={`/profile/${s.id}`} prefetch={false} className="flex items-center gap-3 group">
               {s.avatarUrl ? (
                 <img src={s.avatarUrl.includes('/uploads/') ? `${s.avatarUrl}?w=80&h=80` : s.avatarUrl} alt={name} className="w-10 h-10 rounded-full object-cover" loading="lazy" decoding="async" />
               ) : (

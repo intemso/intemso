@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsString, MinLength, MaxLength } from 'class-validator';
+import { IsEmail, IsEnum, IsString, MinLength, MaxLength, Matches } from 'class-validator';
 import { UserRole } from '@intemso/shared';
 
 export class RegisterDto {
@@ -8,6 +8,9 @@ export class RegisterDto {
   @IsString()
   @MinLength(8)
   @MaxLength(72)
+  @Matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+    message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
+  })
   password!: string;
 
   @IsEnum(UserRole, { message: 'Role must be either student or employer' })

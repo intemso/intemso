@@ -74,7 +74,7 @@ export class AuthService {
       });
 
       const user = await this.usersService.findById(payload.sub);
-      if (!user || !user.isActive) {
+      if (!user || !user.isActive || user.isSuspended) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
@@ -109,10 +109,9 @@ export class AuthService {
       },
     );
 
-    const resetUrl = `${this.config.get('FRONTEND_URL', 'http://localhost:3000')}/auth/reset-password?token=${resetToken}`;
-
-    // TODO: Replace with actual email sending (Phase 5.2)
-    console.log(`[Password Reset] Email: ${email}, URL: ${resetUrl}`);
+    // TODO: Send resetToken via email service (Phase 5.2)
+    // const resetUrl = `${this.config.get('FRONTEND_URL', 'http://localhost:3000')}/auth/reset-password?token=${resetToken}`;
+    // await emailService.sendPasswordReset(email, resetUrl);
 
     return { message: 'If the email exists, a reset link has been sent.' };
   }

@@ -14,7 +14,7 @@ import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:3000'],
+    origin: (process.env.CORS_ORIGINS || 'http://localhost:3000').split(','),
     credentials: true,
   },
   namespace: '/community',
@@ -47,7 +47,7 @@ export class CommunityGateway
       }
 
       const payload = this.jwtService.verify(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
+        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
       });
 
       const userId = payload.sub;
