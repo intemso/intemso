@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-ioredis-yet';
 import { PrismaModule } from './prisma/prisma.module';
+import { EmailModule } from './email/email.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { GigsModule } from './gigs/gigs.module';
@@ -52,6 +53,7 @@ import { DisputesModule } from './disputes/disputes.module';
       },
     }),
     PrismaModule,
+    EmailModule,
     AuthModule,
     UsersModule,
     GigsModule,

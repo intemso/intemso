@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { BCRYPT_ROUNDS } from '@intemso/shared';
 import { UsersService } from '../users/users.service';
+import { EmailService } from '../email/email.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -18,6 +19,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -92,10 +94,6 @@ export class AuthService {
     return user;
   }
 
-  /**
-   * Generate a password-reset JWT and log the reset link.
-   * In production, this would send an email via Resend/SendGrid.
-   */
   async forgotPassword(email: string) {
     const user = await this.usersService.findByEmail(email);
     // Always return success to prevent email enumeration
@@ -109,9 +107,7 @@ export class AuthService {
       },
     );
 
-    // TODO: Send resetToken via email service (Phase 5.2)
-    // const resetUrl = `${this.config.get('FRONTEND_URL', 'http://localhost:3000')}/auth/reset-password?token=${resetToken}`;
-    // await emailService.sendPasswordReset(email, resetUrl);
+    await this.emailService.sendPasswordReset(email, resetToken);
 
     return { message: 'If the email exists, a reset link has been sent.' };
   }

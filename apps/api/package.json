@@ -34,6 +34,7 @@
     "ioredis": "^5.10.1",
     "passport": "^0.7",
     "passport-jwt": "^4",
+    "resend": "^4",
     "reflect-metadata": "^0.2",
     "rxjs": "^7",
     "sanitize-html": "^2.17.2",
