@@ -5,18 +5,29 @@ import { Resend } from 'resend';
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private readonly resend: Resend;
+  private readonly resend: Resend | null;
   private readonly fromEmail: string;
   private readonly frontendUrl: string;
 
   constructor(private readonly config: ConfigService) {
-    this.resend = new Resend(this.config.get('RESEND_API_KEY'));
+    const apiKey = this.config.get<string>('RESEND_API_KEY');
+    if (apiKey) {
+      this.resend = new Resend(apiKey);
+    } else {
+      this.resend = null;
+      this.logger.warn('RESEND_API_KEY not set — email sending disabled');
+    }
     this.fromEmail = this.config.get('EMAIL_FROM', 'Intemso <onboarding@resend.dev>');
     this.frontendUrl = this.config.get('FRONTEND_URL', 'http://localhost:3000');
   }
 
   async sendPasswordReset(email: string, resetToken: string): Promise<boolean> {
     const resetUrl = `${this.frontendUrl}/auth/reset-password?token=${resetToken}`;
+
+    if (!this.resend) {
+      this.logger.warn(`Password reset requested for ${email} but email sending is disabled`);
+      return false;
+    }
 
     try {
       await this.resend.emails.send({
