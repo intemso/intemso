@@ -81,7 +81,7 @@ export default function DashboardPage() {
         if (contractsRes.status === 'fulfilled') setContracts(contractsRes.value?.data ?? []);
         if (proposalsRes.status === 'fulfilled') setProposals(proposalsRes.value?.data ?? []);
       } catch {
-        // silently fail — dashboard shows zeros
+        // silently fail â€” dashboard shows zeros
       } finally {
         setLoading(false);
       }

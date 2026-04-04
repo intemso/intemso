@@ -207,7 +207,7 @@ export default function ProfilePage() {
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Response Time</span>
                 <span className="font-semibold text-gray-800">
-                  {sp.responseTimeHrs ? `${sp.responseTimeHrs}h` : '—'}
+                  {sp.responseTimeHrs ? `${sp.responseTimeHrs}h` : 'â€”'}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
