@@ -9,16 +9,37 @@ import {
   UseGuards,
   RawBodyRequest,
   HttpCode,
+  ForbiddenException,
+  Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PaymentsService } from './payments.service';
 import { InitializePaymentDto } from './dto/initialize-payment.dto';
 import { Request } from 'express';
+import * as net from 'net';
+
+// Paystack webhook source IPs (https://paystack.com/docs/payments/webhooks/#ip-whitelisting)
+const PAYSTACK_WEBHOOK_CIDRS = [
+  '52.31.139.75',
+  '52.49.173.169',
+  '52.214.14.220',
+];
+
+function isPaystackIp(ip: string): boolean {
+  const cleaned = ip.replace(/^::ffff:/, '');
+  return PAYSTACK_WEBHOOK_CIDRS.includes(cleaned);
+}
 
 @Controller()
 export class PaymentsController {
-  constructor(private readonly paymentsService: PaymentsService) {}
+  private readonly logger = new Logger(PaymentsController.name);
+
+  constructor(
+    private readonly paymentsService: PaymentsService,
+    private readonly config: ConfigService,
+  ) {}
 
   /** Initialize a Paystack payment (escrow or connect purchase) */
   @UseGuards(JwtAuthGuard)
@@ -30,13 +51,23 @@ export class PaymentsController {
     return this.paymentsService.initialize(userId, dto);
   }
 
-  /** Paystack webhook — no auth guard, verified by HMAC signature */
+  /** Paystack webhook — no auth guard, verified by HMAC signature + IP whitelist */
   @Post('payments/webhook')
   @HttpCode(200)
   async webhook(
     @Headers('x-paystack-signature') signature: string,
+    @Headers('x-forwarded-for') forwardedFor: string | undefined,
     @Req() req: RawBodyRequest<Request>,
   ) {
+    // IP whitelist check in production
+    if (this.config.get('NODE_ENV') === 'production') {
+      const clientIp = forwardedFor?.split(',')[0]?.trim() || req.ip || '';
+      if (!isPaystackIp(clientIp)) {
+        this.logger.warn(`Webhook rejected — untrusted IP: ${clientIp}`);
+        throw new ForbiddenException('Untrusted source');
+      }
+    }
+
     const rawBody = req.rawBody;
     if (!rawBody) {
       return { status: 'error', message: 'Missing raw body' };

@@ -110,28 +110,29 @@ Happy with the work? Approve it and the payment is released to the student. Not 
 
 | Earnings with a client | Platform fee |
 |---|---|
-| First GH₵500 | 20% |
+| First GH₵500 | 15% |
 | GH₵501 – GH₵2,000 | 10% |
 | Above GH₵2,000 | 5% |
 
 The fee **decreases** the more a student earns with the same client. This rewards long-term relationships — the more you work with someone, the more you keep.
 
 **Real example:** A student earns GH₵3,000 total with one client:
-- GH₵500 × 20% = GH₵100
+- GH₵500 × 15% = GH₵75
 - GH₵1,500 × 10% = GH₵150
 - GH₵1,000 × 5% = GH₵50
-- **Total fee: GH₵300 out of GH₵3,000 (10% overall)**
+- **Total fee: GH₵275 out of GH₵3,000 (9.2% overall)**
 
 ### Students also use "Connects" to apply for gigs:
 
-- Every student gets **10 free connects per month**
+- Every student gets **15 free connects per month**
 - Each proposal costs 2–6 connects depending on the gig
-- Need more? Buy packs:
+- **Earn more through activity:** complete gigs (+5), get 5-star reviews (+3), leave reviews (+1), complete your profile (+10), log in daily (+1, max 5/week)
+- **Or buy packs if you prefer:**
   - 10 connects = GH₵5
   - 20 connects = GH₵9
   - 40 connects = GH₵16
 
-**Why connects?** They stop students from spamming every gig with low-effort applications. If you have to "spend" something to apply, you only apply to gigs you actually want and can do. This makes the experience better for everyone — employers get serious applicants, students face less competition from spam.
+**Why connects?** They stop students from spamming every gig with low-effort applications. If you have to "spend" something to apply, you only apply to gigs you actually want and can do. Most students will never need to buy connects — active platform usage earns more than enough.
 
 ### Employers pay nothing to the platform.
 Posting gigs, browsing talent, hiring — all free. They only pay the agreed budget to the student.

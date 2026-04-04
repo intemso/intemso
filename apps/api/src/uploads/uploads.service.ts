@@ -1,3 +1,4 @@
+/// <reference types="multer" />
 import { Injectable, BadRequestException, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
@@ -43,6 +44,18 @@ const ALL_ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_DOCUMENT_TYPES, ..
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2 MB
+
+// Magic byte signatures for real file type validation
+const MAGIC_BYTES: Record<string, { offset: number; bytes: number[] }[]> = {
+  'image/jpeg': [{ offset: 0, bytes: [0xFF, 0xD8, 0xFF] }],
+  'image/png': [{ offset: 0, bytes: [0x89, 0x50, 0x4E, 0x47] }],
+  'image/gif': [{ offset: 0, bytes: [0x47, 0x49, 0x46, 0x38] }],
+  'image/webp': [{ offset: 8, bytes: [0x57, 0x45, 0x42, 0x50] }],
+  'application/pdf': [{ offset: 0, bytes: [0x25, 0x50, 0x44, 0x46] }],
+  'application/zip': [{ offset: 0, bytes: [0x50, 0x4B, 0x03, 0x04] }],
+  'application/x-zip-compressed': [{ offset: 0, bytes: [0x50, 0x4B, 0x03, 0x04] }],
+  'application/gzip': [{ offset: 0, bytes: [0x1F, 0x8B] }],
+};
 
 @Injectable()
 export class UploadsService implements OnModuleInit {
@@ -103,6 +116,20 @@ export class UploadsService implements OnModuleInit {
       throw new BadRequestException(
         `File size ${(file.size / 1024 / 1024).toFixed(1)}MB exceeds the maximum of ${(maxSize / 1024 / 1024).toFixed(0)}MB`,
       );
+    }
+
+    // Validate magic bytes to prevent MIME spoofing
+    const signatures = MAGIC_BYTES[file.mimetype];
+    if (signatures && file.buffer) {
+      const isValid = signatures.some((sig) => {
+        if (file.buffer.length < sig.offset + sig.bytes.length) return false;
+        return sig.bytes.every((byte, i) => file.buffer[sig.offset + i] === byte);
+      });
+      if (!isValid) {
+        throw new BadRequestException(
+          `File content does not match declared type ${file.mimetype}`,
+        );
+      }
     }
   }
 

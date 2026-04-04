@@ -212,14 +212,25 @@ export class WalletService {
     const balanceBefore = Number(wallet.balance);
     const balanceAfter = balanceBefore - dto.amount;
 
-    return this.prisma.$transaction(async (tx) => {
+    const withdrawal = await this.prisma.$transaction(async (tx) => {
+      // Re-check balance inside transaction to prevent race conditions
+      const freshWallet = await tx.wallet.findUnique({
+        where: { id: wallet.id },
+      });
+      if (!freshWallet || Number(freshWallet.balance) < dto.amount) {
+        throw new BadRequestException('Insufficient balance');
+      }
+
+      const actualBalanceBefore = Number(freshWallet.balance);
+      const actualBalanceAfter = actualBalanceBefore - dto.amount;
+
       // Debit wallet immediately
       await tx.wallet.update({
         where: { id: wallet.id },
         data: { balance: { decrement: dto.amount } },
       });
 
-      // Create withdrawal record
+      // Create withdrawal record with 'pending' status
       const withdrawal = await tx.withdrawal.create({
         data: {
           walletId: wallet.id,
@@ -233,7 +244,7 @@ export class WalletService {
             bankCode: recipient.bankCode,
             accountName: recipient.accountName,
           },
-          status: 'processing',
+          status: 'pending',
           externalTxnId: withdrawalRef,
         },
       });
@@ -267,55 +278,66 @@ export class WalletService {
         },
       });
 
-      // Initiate Paystack transfer (outside the DB transaction scope to avoid holding the lock)
-      // The transfer result will be handled via webhook
-      setImmediate(async () => {
-        try {
-          await this.paymentsService.initiateTransfer({
-            amount: dto.amount,
-            recipientCode: recipient.recipientCode,
-            reason: `Intemso earnings withdrawal`,
-            reference: withdrawalRef,
-          });
-          this.logger.log(`Transfer initiated: ${withdrawalRef} — GH₵${dto.amount}`);
-        } catch (err) {
-          this.logger.error(`Transfer initiation failed: ${withdrawalRef}`, err);
-          // Re-credit the wallet on immediate failure
-          await this.prisma.$transaction(async (tx2) => {
-            await tx2.wallet.update({
-              where: { id: wallet.id },
-              data: { balance: { increment: dto.amount } },
-            });
-            await tx2.withdrawal.update({
-              where: { id: withdrawal.id },
-              data: { status: 'failed' },
-            });
-            await tx2.transaction.create({
-              data: {
-                walletId: wallet.id,
-                type: 'refund',
-                amount: dto.amount,
-                balanceAfter: balanceAfter + dto.amount,
-                description: `Withdrawal failed — funds returned (${withdrawalRef})`,
-              },
-            });
-          });
-        }
+      return withdrawal;
+    });
+
+    // Initiate Paystack transfer AFTER the DB transaction commits
+    try {
+      await this.paymentsService.initiateTransfer({
+        amount: dto.amount,
+        recipientCode: recipient.recipientCode,
+        reason: `Intemso earnings withdrawal`,
+        reference: withdrawalRef,
       });
 
-      return {
-        id: withdrawal.id,
-        amount: withdrawal.amount,
-        status: withdrawal.status,
-        reference: withdrawalRef,
-        destination: {
-          type: recipient.type,
-          accountNumber: recipient.accountNumber,
-          accountName: recipient.accountName,
-          bankName: recipient.bankName,
-        },
-      };
+      // Mark as 'processing' only after Paystack accepts the transfer
+      await this.prisma.withdrawal.update({
+        where: { id: withdrawal.id },
+        data: { status: 'processing' },
+      });
+
+      this.logger.log(`Transfer initiated: ${withdrawalRef} — GH₵${dto.amount}`);
+    } catch (err) {
+      this.logger.error(`Transfer initiation failed: ${withdrawalRef}`, err);
+      // Re-credit the wallet on immediate failure
+      await this.prisma.$transaction(async (tx2) => {
+        await tx2.wallet.update({
+          where: { id: wallet.id },
+          data: { balance: { increment: dto.amount } },
+        });
+        await tx2.withdrawal.update({
+          where: { id: withdrawal.id },
+          data: { status: 'failed' },
+        });
+        await tx2.transaction.create({
+          data: {
+            walletId: wallet.id,
+            type: 'refund',
+            amount: dto.amount,
+            balanceAfter: balanceAfter + dto.amount,
+            description: `Withdrawal failed — funds returned (${withdrawalRef})`,
+          },
+        });
+      });
+    }
+
+    // Refresh withdrawal status
+    const updatedWithdrawal = await this.prisma.withdrawal.findUnique({
+      where: { id: withdrawal.id },
     });
+
+    return {
+      id: withdrawal.id,
+      amount: updatedWithdrawal?.amount ?? dto.amount,
+      status: updatedWithdrawal?.status ?? 'pending',
+      reference: withdrawalRef,
+      destination: {
+        type: recipient.type,
+        accountNumber: recipient.accountNumber,
+        accountName: recipient.accountName,
+        bankName: recipient.bankName,
+      },
+    };
   }
 
   // ── Transaction history ──

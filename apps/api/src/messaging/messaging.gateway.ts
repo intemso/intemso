@@ -44,7 +44,7 @@ export class MessagingGateway
       }
 
       const payload = this.jwtService.verify(token, {
-        secret: this.configService.get<string>('JWT_SECRET'),
+        secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
       });
 
       const userId = payload.sub;

@@ -172,6 +172,13 @@ export enum ConnectTransactionType {
   PROPOSAL_REFUND = 'proposal_refund',
   BOOST_SPENT = 'boost_spent',
   ROLLOVER = 'rollover',
+  REWARD_GIG_COMPLETED = 'reward_gig_completed',
+  REWARD_REVIEW_LEFT = 'reward_review_left',
+  REWARD_FIVE_STAR = 'reward_five_star',
+  REWARD_PROFILE_COMPLETE = 'reward_profile_complete',
+  REWARD_REFERRAL_SIGNUP = 'reward_referral_signup',
+  REWARD_REFERRAL_GIG = 'reward_referral_gig',
+  REWARD_DAILY_LOGIN = 'reward_daily_login',
 }
 
 // ── Service Order Status ──
@@ -189,4 +196,93 @@ export enum ServiceOrderStatus {
 export enum GigVisibility {
   PUBLIC = 'public',
   INVITE_ONLY = 'invite_only',
+}
+
+// ── Post Type (Community) ──
+export enum PostType {
+  DISCUSSION = 'discussion',
+  QUESTION = 'question',
+  TIP = 'tip',
+  ACHIEVEMENT = 'achievement',
+  EVENT = 'event',
+  GIG_POSTED = 'gig_posted',
+  GIG_COMPLETED = 'gig_completed',
+  REVIEW_RECEIVED = 'review_received',
+}
+
+// ── Withdrawal Status ──
+export enum WithdrawalStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
+
+// ── Escrow Status ──
+export enum EscrowStatus {
+  PENDING = 'pending',
+  FUNDED = 'funded',
+  IN_PROGRESS = 'in_progress',
+  SUBMITTED = 'submitted',
+  RELEASED = 'released',
+  REFUNDED = 'refunded',
+  PARTIALLY_REFUNDED = 'partially_refunded',
+  FAILED = 'failed',
+  EXPIRED = 'expired',
+  DISPUTED = 'disputed',
+}
+
+// ── Transaction Type ──
+export enum TransactionType {
+  CREDIT = 'credit',
+  DEBIT = 'debit',
+  WITHDRAWAL = 'withdrawal',
+  REFUND = 'refund',
+  FEE = 'fee',
+  CONNECTS_PURCHASE = 'connects_purchase',
+  BONUS = 'bonus',
+}
+
+// ── Weekly Invoice Status ──
+export enum WeeklyInvoiceStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+  DISPUTED = 'disputed',
+}
+
+// ── Connect Purchase Status ──
+export enum ConnectPurchaseStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
+
+// ── Service Listing Status ──
+export enum ServiceListingStatus {
+  DRAFT = 'draft',
+  ACTIVE = 'active',
+  PAUSED = 'paused',
+  REMOVED = 'removed',
+}
+
+// ── Portfolio Status ──
+export enum PortfolioStatus {
+  DRAFT = 'draft',
+  PUBLISHED = 'published',
+  ARCHIVED = 'archived',
+}
+
+// ── Transfer Recipient Type ──
+export enum TransferRecipientType {
+  MOBILE_MONEY = 'mobile_money',
+  GHIPSS = 'ghipss',
+}
+
+// ── Report Status ──
+export enum ReportStatus {
+  PENDING = 'pending',
+  REVIEWED = 'reviewed',
+  ACTION_TAKEN = 'action_taken',
+  DISMISSED = 'dismissed',
 }

@@ -31,6 +31,12 @@ export class AuthController {
     return this.authService.refreshToken(dto.refreshToken);
   }
 
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Body() dto: RefreshTokenDto) {
+    return this.authService.logout(dto.refreshToken);
+  }
+
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { ttl: 60_000, limit: 3 } })

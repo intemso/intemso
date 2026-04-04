@@ -17,7 +17,7 @@ const CONNECT_PACKS: Record<number, number> = {
 };
 
 const FEE_TIERS = [
-  { threshold: 500, rate: 0.20 },   // tier_1: first 500 → 20%
+  { threshold: 500, rate: 0.15 },   // tier_1: first 500 → 15%
   { threshold: 2000, rate: 0.10 },  // tier_2: 500–2000 → 10%
   { threshold: Infinity, rate: 0.05 }, // tier_3: above 2000 → 5%
 ];
@@ -27,6 +27,7 @@ export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
   private readonly paystackSecretKey: string;
   private readonly paystackBaseUrl = 'https://api.paystack.co';
+  private readonly paystackTimeoutMs = 30_000; // 30s timeout for Paystack API calls
 
   constructor(
     private prisma: PrismaService,
@@ -126,12 +127,9 @@ export class PaymentsService {
     }
 
     // Call Paystack initialize
-    const response = await fetch(`${this.paystackBaseUrl}/transaction/initialize`, {
+    const response = await this.paystackFetch(`${this.paystackBaseUrl}/transaction/initialize`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.paystackSecretKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: user.email,
         amount: amountPesewas,
@@ -1448,12 +1446,9 @@ export class PaymentsService {
     bankCode: string;
     currency?: string;
   }) {
-    const response = await fetch(`${this.paystackBaseUrl}/transferrecipient`, {
+    const response = await this.paystackFetch(`${this.paystackBaseUrl}/transferrecipient`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.paystackSecretKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: params.type,
         name: params.name,
@@ -1478,12 +1473,9 @@ export class PaymentsService {
     reason: string;
     reference: string;
   }) {
-    const response = await fetch(`${this.paystackBaseUrl}/transfer`, {
+    const response = await this.paystackFetch(`${this.paystackBaseUrl}/transfer`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.paystackSecretKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         source: 'balance',
         amount: Math.round(params.amount * 100), // Convert to pesewas
@@ -1503,9 +1495,8 @@ export class PaymentsService {
 
   /** Verify a transfer status */
   async verifyTransfer(reference: string) {
-    const response = await fetch(
+    const response = await this.paystackFetch(
       `${this.paystackBaseUrl}/transfer/verify/${encodeURIComponent(reference)}`,
-      { headers: { Authorization: `Bearer ${this.paystackSecretKey}` } },
     );
     if (!response.ok) {
       throw new BadRequestException(`Failed to verify transfer: HTTP ${response.status}`);
@@ -1533,12 +1524,9 @@ export class PaymentsService {
       body.amount = Math.round(params.amount * 100);
     }
 
-    const response = await fetch(`${this.paystackBaseUrl}/refund`, {
+    const response = await this.paystackFetch(`${this.paystackBaseUrl}/refund`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.paystackSecretKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 
@@ -1560,9 +1548,7 @@ export class PaymentsService {
       ? `${this.paystackBaseUrl}/bank?currency=GHS&type=${type}`
       : `${this.paystackBaseUrl}/bank?currency=GHS`;
 
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${this.paystackSecretKey}` },
-    });
+    const response = await this.paystackFetch(url);
     if (!response.ok) {
       throw new BadRequestException(`Failed to fetch banks: HTTP ${response.status}`);
     }
@@ -1572,9 +1558,8 @@ export class PaymentsService {
 
   /** Resolve/verify a bank account number */
   async resolveAccountNumber(accountNumber: string, bankCode: string) {
-    const response = await fetch(
+    const response = await this.paystackFetch(
       `${this.paystackBaseUrl}/bank/resolve?account_number=${encodeURIComponent(accountNumber)}&bank_code=${encodeURIComponent(bankCode)}`,
-      { headers: { Authorization: `Bearer ${this.paystackSecretKey}` } },
     );
     const body: any = await response.json();
     if (!body.status) {
@@ -1588,9 +1573,8 @@ export class PaymentsService {
   // ════════════════════════════════════════════════════════════
 
   async verifyTransaction(reference: string) {
-    const response = await fetch(
+    const response = await this.paystackFetch(
       `${this.paystackBaseUrl}/transaction/verify/${encodeURIComponent(reference)}`,
-      { headers: { Authorization: `Bearer ${this.paystackSecretKey}` } },
     );
     if (!response.ok) {
       throw new BadRequestException(`Failed to verify transaction: HTTP ${response.status}`);
@@ -1613,6 +1597,18 @@ export class PaymentsService {
     }
     const profile = await this.prisma.studentProfile.findFirst({ where: { userId } });
     return profile?.id ?? '';
+  }
+
+  /** Wrapper around fetch with timeout for Paystack API calls */
+  private async paystackFetch(url: string, options: RequestInit = {}): Promise<Response> {
+    return fetch(url, {
+      ...options,
+      signal: AbortSignal.timeout(this.paystackTimeoutMs),
+      headers: {
+        Authorization: `Bearer ${this.paystackSecretKey}`,
+        ...options.headers,
+      },
+    });
   }
 
   private async getOrCreateWallet(tx: any, profileOrUserId: string) {
@@ -1700,12 +1696,9 @@ export class PaymentsService {
     metadata: Record<string, string>;
   }): Promise<{ success: boolean; reference?: string; error?: string }> {
     try {
-      const response = await fetch(`${this.paystackBaseUrl}/transaction/charge_authorization`, {
+      const response = await this.paystackFetch(`${this.paystackBaseUrl}/transaction/charge_authorization`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.paystackSecretKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           authorization_code: params.authorizationCode,
           email: params.email,
@@ -1771,9 +1764,7 @@ export class PaymentsService {
   // ════════════════════════════════════════════════════════════
 
   async getPaystackBalance(): Promise<{ currency: string; balance: number }[]> {
-    const response = await fetch(`${this.paystackBaseUrl}/balance`, {
-      headers: { Authorization: `Bearer ${this.paystackSecretKey}` },
-    });
+    const response = await this.paystackFetch(`${this.paystackBaseUrl}/balance`);
     const body: any = await response.json();
     if (!body.status) {
       this.logger.error('Failed to fetch Paystack balance');
@@ -1957,9 +1948,7 @@ export class PaymentsService {
 
         // Verify with Paystack
         const verifyUrl = `${this.paystackBaseUrl}/transfer/verify/${encodeURIComponent(withdrawal.externalTxnId)}`;
-        const response = await fetch(verifyUrl, {
-          headers: { Authorization: `Bearer ${this.paystackSecretKey}` },
-        });
+        const response = await this.paystackFetch(verifyUrl);
         const body: any = await response.json();
 
         if (!body.status) continue;

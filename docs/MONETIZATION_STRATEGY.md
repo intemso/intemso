@@ -35,7 +35,7 @@ A percentage fee is charged on every completed payment from employer to student.
 
 | Cumulative Earnings with Same Client | Platform Fee |
 |---|---|
-| First GH₵500 | **20%** |
+| First GH₵500 | **15%** |
 | GH₵501 – GH₵2,000 | **10%** |
 | Above GH₵2,000 | **5%** |
 
@@ -45,10 +45,10 @@ A student earns GH₵3,000 total with one employer:
 
 | Earnings Bracket | Amount | Fee Rate | Fee Collected |
 |---|---|---|---|
-| First GH₵500 | GH₵500 | 20% | GH₵100 |
+| First GH₵500 | GH₵500 | 15% | GH₵75 |
 | Next GH₵1,500 | GH₵1,500 | 10% | GH₵150 |
 | Remaining GH₵1,000 | GH₵1,000 | 5% | GH₵50 |
-| **Total** | **GH₵3,000** | **10% effective** | **GH₵300** |
+| **Total** | **GH₵3,000** | **9.2% effective** | **GH₵275** |
 
 **Key details:**
 - Fee is calculated at milestone approval time (not at funding time)
@@ -56,13 +56,26 @@ A student earns GH₵3,000 total with one employer:
 - Fee percentage is locked into the `EscrowTransaction` record at calculation time
 - The platform's share stays in the Paystack balance; the student's share goes to their wallet
 
-**Revenue potential:** If the average gig value is GH₵150 and most are first-time relationships (20% fee), Intemso earns **GH₵30 per completed gig** on average.
+**Revenue potential:** If the average gig value is GH₵150 and most are first-time relationships (15% fee), Intemso earns **GH₵22.50 per completed gig** on average.
 
 ---
 
 ### 2.2 Connects (Application Credits)
 
-Students use connects to apply for gigs. Each proposal costs 2–6 connects depending on gig complexity. Every student gets **10 free connects per month**, which covers 2–5 applications. Students who want to apply more buy connect packs.
+Students use connects to apply for gigs. Each proposal costs 2–6 connects depending on gig complexity. Every student gets **15 free connects per month**, which covers 3–7 applications. Students can also **earn connects through platform activity** or **purchase connect packs** if they want more immediately.
+
+#### Earning Connects (Free)
+
+| Action | Connects Earned |
+|---|---|
+| Monthly refresh | **15** |
+| Complete your profile (one-time) | +10 |
+| Complete a gig | +5 |
+| Receive a 5-star review | +3 |
+| Leave a review | +1 |
+| Daily login (max 5/week) | +1 each |
+
+#### Purchasing Connects (Optional)
 
 | Pack | Price | Per Connect | Savings |
 |---|---|---|---|
@@ -76,13 +89,14 @@ Students use connects to apply for gigs. Each proposal costs 2–6 connects depe
 3. Student pays via card or mobile money on Paystack checkout
 4. Webhook confirms payment → connects credited to balance
 
-**Why connects work:**
-- **Anti-spam:** Students only apply to gigs they're serious about, improving proposal quality for employers
-- **Recurring revenue:** Active students buy connects every month
-- **Low price point:** GH₵5–16 is affordable for Ghanaian students but adds up across thousands of users
-- **Psychological buy-in:** Having "spent" connects to apply makes students more invested in each proposal
+**Why this dual model works:**
+- **Zero paywall:** An active student who logs in, completes gigs, and writes reviews will never *need* to buy connects
+- **Choice, not force:** Students who want to apply to many gigs at once can buy packs, but it's never the only option
+- **Anti-spam:** Connects still gate applications, so employers get quality proposals
+- **Gamifies engagement:** Students are rewarded for behaviors that grow the platform (completing gigs, leaving reviews, staying active)
+- **Revenue from willing buyers:** Students who don't care about grinding activities can simply purchase — no judgement
 
-**Revenue potential:** If 30% of active students buy at least 1 pack/month at an average of GH₵9, that's steady recurring micro-revenue.
+**Revenue potential:** Lower than a purchase-only model, but higher retention and better word-of-mouth ("this app is free to use").
 
 ---
 
@@ -200,16 +214,18 @@ Allow institutions to embed Intemso's gig marketplace into their own platforms.
 - Average 2,000 active students per campus
 - 15% of active students complete at least 1 gig/month
 - Average gig value: GH₵150
-- 30% of active students buy connects
+- 10% of active students buy connects (lower than before — most earn them now)
 
 ### Year 1 (5 Campuses — 10,000 Students)
 
 | Revenue Stream | Calculation | Monthly Revenue |
 |---|---|---|
-| Service Fees | 1,500 gigs × GH₵150 × 18% avg fee | **GH₵40,500** |
-| Connect Sales | 3,000 students × GH₵9 avg | **GH₵27,000** |
-| **Total Monthly** | | **GH₵67,500** |
-| **Total Annual** | | **GH₵810,000** |
+| Service Fees | 1,500 gigs × GH₵150 × 15% avg fee | **GH₵33,750** |
+| Connect Sales | 1,000 students × GH₵9 avg | **GH₵9,000** |
+| **Total Monthly** | | **GH₵42,750** |
+| **Total Annual** | | **GH₵513,000** |
+
+*Note: Connect revenue is intentionally lower because most students earn connects through activity. This is a trade-off: less connect revenue but dramatically better retention, word-of-mouth, and daily engagement.*
 
 ### Year 2 (20 Campuses — 40,000 Students + Premium Features)
 
@@ -234,7 +250,7 @@ Allow institutions to embed Intemso's gig marketplace into their own platforms.
 
 **Sliding scale creates loyalty.** If the fee was flat 15%, students would take clients off-platform after the first gig. With the sliding scale, the fee drops the longer they stay — creating an incentive to keep relationships on Intemso.
 
-**Connects prevent spam, not access.** 10 free connects/month means casual users never pay. Only active job-seekers who apply to 5+ gigs/month need to buy. This keeps the platform accessible while monetizing power users.
+**Connects prevent spam, not access.** 15 free connects/month plus activity-based earning means a casual user never pays. Students who want to mass-apply can buy packs, but it’s always a choice, not a gate. This keeps the platform accessible while monetizing power users who prefer convenience over grinding.
 
 **Employers pay nothing — on purpose.** In marketplace economics, you subsidize the harder side to grow. Employers are the scarce resource (they bring the money and the work). Making it free for them accelerates supply of gigs, which attracts more students, which attracts more employers. The flywheel.
 
@@ -246,12 +262,12 @@ Allow institutions to embed Intemso's gig marketplace into their own platforms.
 
 | Revenue Stream | Backend | Frontend | Paystack | Status |
 |---|---|---|---|---|
-| Service Fees (sliding scale) | ✅ | ✅ | ✅ | **Live** |
+| Service Fees (sliding scale, 15/10/5%) | ✅ | ✅ | ✅ | **Live** |
 | Milestone Escrow | ✅ | ✅ | ✅ | **Live** |
 | Connect Purchase | ✅ | ✅ | ✅ | **Live** |
 | Connect Deduction (proposals) | ✅ | ✅ | — | **Live** |
-| Monthly Free Connects Reset | ❌ | — | — | **Not built** |
-| Earned Connects (gig completion) | ❌ | — | — | **Not built** |
+| Monthly Free Connects Reset (15/mo) | ✅ | — | — | **Live** |
+| Earned Connects (gig/review/profile/login) | ✅ | — | — | **Live** |
 | Proposal Boosts | ❌ | ❌ | — | **Planned** |
 | Featured Gig Listings | ❌ | ❌ | ❌ | **Planned** |
 | Pro Subscription | ❌ | ❌ | ❌ | **Planned** |
@@ -264,8 +280,10 @@ Allow institutions to embed Intemso's gig marketplace into their own platforms.
 
 ## Summary
 
-Intemso has **two live revenue streams** — service fees and connects — that generate income from day one without charging employers. The sliding fee structure rewards loyalty, the connect system prevents spam while creating recurring micro-revenue, and the escrow system makes the platform strictly safer than offline alternatives.
+Intemso has **two live revenue streams** — service fees (15/10/5% sliding scale) and connects (earnable + purchasable) — that generate income from day one without charging employers. The sliding fee structure rewards loyalty, the connect system prevents spam while rewarding engagement, and the escrow system makes the platform strictly safer than offline alternatives.
+
+The dual connects model (earn through activity OR buy packs) means students never hit a paywall, but those who prefer convenience can still purchase. This creates a platform that feels free to use while maintaining a revenue stream from willing buyers.
 
 Future revenue streams (boosts, featured listings, Pro subscriptions, employer tools) layer on top without disrupting the core model. Each one targets a different willingness-to-pay: students who want visibility, students who want lower fees, employers who want efficiency, and institutions who want infrastructure.
 
-**The bottom line:** Intemso makes money every time a student gets paid and every time a student applies for work. As the platform grows, both of these happen more frequently, creating compounding revenue growth tied directly to user success.
+**The bottom line:** Intemso makes money every time a student gets paid. Connect purchases are bonus revenue from willing buyers, not the foundation. As the platform grows, service fee revenue compounds naturally with every completed gig.

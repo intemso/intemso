@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { ConnectsService } from '../connects/connects.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly connectsService: ConnectsService,
   ) {}
 
   // ── Public Profile ──
@@ -171,7 +173,7 @@ export class UsersService {
       hourlyRate?: number;
     },
   ) {
-    return this.prisma.studentProfile.upsert({
+    const profile = await this.prisma.studentProfile.upsert({
       where: { userId },
       update: data as any,
       create: {
@@ -182,6 +184,13 @@ export class UsersService {
         ...data,
       } as any,
     });
+
+    // Check if profile is now "complete" and award connects (one-time)
+    if (profile.firstName && profile.lastName && profile.university && profile.bio && profile.skills?.length > 0) {
+      this.connectsService.rewardProfileComplete(profile.id).catch(() => {});
+    }
+
+    return profile;
   }
 
   async updateEmployerProfile(

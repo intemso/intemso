@@ -3,9 +3,16 @@ import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { SanitizeInterceptor } from './common/interceptors/sanitize.interceptor';
+import * as express from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true,
+  });
+
+  // Body size limits (prevent DoS via large payloads)
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
   // Security
   app.use(
@@ -26,10 +33,18 @@ async function bootstrap() {
       },
       crossOriginEmbedderPolicy: false,
       crossOriginResourcePolicy: { policy: 'cross-origin' },
+      hsts: { maxAge: 63072000, includeSubDomains: true, preload: true },
     }),
   );
+
+  // CORS — require explicit origins in production
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',').filter(Boolean);
+  if (!corsOrigins?.length && process.env.NODE_ENV === 'production') {
+    console.error('FATAL: CORS_ORIGINS env variable is required in production');
+    process.exit(1);
+  }
   app.enableCors({
-    origin: process.env.CORS_ORIGINS?.split(',') ?? ['http://localhost:3000'],
+    origin: corsOrigins ?? ['http://localhost:3000'],
     credentials: true,
   });
 

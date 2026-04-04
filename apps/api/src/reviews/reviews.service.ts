@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { ConnectsService } from '../connects/connects.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class ReviewsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly connectsService: ConnectsService,
   ) {}
 
   /**
@@ -83,6 +85,17 @@ export class ReviewsService {
       body: `You received a ${dto.rating}-star review${dto.comment ? `: "${dto.comment.substring(0, 80)}${dto.comment.length > 80 ? '...' : ''}"` : ''}`,
       data: { reviewId: review.id, contractId, rating: dto.rating },
     }).catch(() => {});
+
+    // Award connects for leaving a review (students only)
+    if (isStudent) {
+      this.connectsService.rewardReviewLeft(contract.student.id, review.id).catch(() => {});
+    }
+
+    // Award connects to reviewee if they're a student and got 5 stars
+    if (dto.rating === 5 && !isStudent) {
+      // Reviewer is employer → reviewee is the student
+      this.connectsService.rewardFiveStarReceived(contract.student.id, review.id).catch(() => {});
+    }
 
     return review;
   }

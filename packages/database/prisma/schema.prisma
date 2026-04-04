@@ -397,14 +397,14 @@ model WeeklyInvoice {
 model ConnectBalance {
   id                String   @id @default(uuid()) @db.Uuid
   studentId         String   @unique @map("student_id") @db.Uuid
-  freeConnects      Int      @default(10) @map("free_connects")
+  freeConnects      Int      @default(15) @map("free_connects")
   purchasedConnects Int      @default(0) @map("purchased_connects")
   rolloverConnects  Int      @default(0) @map("rollover_connects")
   lastRefreshAt     DateTime @default(now()) @map("last_refresh_at") @db.Timestamptz
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  student StudentProfile @relation(fields: [studentId], references: [id])
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@map("connect_balances")
 }
@@ -419,7 +419,7 @@ model ConnectTransaction {
   description String?
   createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz
 
-  student StudentProfile @relation(fields: [studentId], references: [id])
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([studentId, createdAt(sort: Desc)])
   @@map("connect_transactions")
@@ -434,7 +434,7 @@ model ConnectPurchase {
   status           ConnectPurchaseStatus @default(pending)
   createdAt        DateTime              @default(now()) @map("created_at") @db.Timestamptz
 
-  student StudentProfile @relation(fields: [studentId], references: [id])
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@map("connect_purchases")
 }
@@ -712,6 +712,7 @@ model EscrowTransaction {
 
   @@index([contractId])
   @@index([milestoneId])
+  @@index([serviceOrderId])
   @@index([payerId])
   @@index([payeeId])
   @@index([status])
@@ -746,7 +747,7 @@ model TransferRecipient {
   createdAt           DateTime                @default(now()) @map("created_at") @db.Timestamptz
   updatedAt           DateTime                @updatedAt @map("updated_at") @db.Timestamptz
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("transfer_recipients")
@@ -822,6 +823,7 @@ model Conversation {
   gig      Gig?      @relation(fields: [gigId], references: [id])
   messages Message[]
 
+  @@index([gigId])
   @@map("conversations")
 }
 
@@ -834,7 +836,7 @@ model Message {
   isRead         Boolean  @default(false) @map("is_read")
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("MessageSender", fields: [senderId], references: [id])
 
   @@index([conversationId, createdAt(sort: Desc)])
@@ -879,7 +881,7 @@ model Notification {
   channel   String   @default("in_app") @db.VarChar(20)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isRead, createdAt(sort: Desc)])
   @@map("notifications")
@@ -937,8 +939,8 @@ model SavedGig {
   gigId     String   @map("gig_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  student StudentProfile @relation(fields: [studentId], references: [id])
-  gig     Gig            @relation(fields: [gigId], references: [id])
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  gig     Gig            @relation(fields: [gigId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, gigId])
   @@map("saved_gigs")
@@ -951,8 +953,8 @@ model SavedTalent {
   notes      String?
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
 
-  employer EmployerProfile @relation(fields: [employerId], references: [id])
-  student  StudentProfile  @relation(fields: [studentId], references: [id])
+  employer EmployerProfile @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  student  StudentProfile  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([employerId, studentId])
   @@map("saved_talent")
@@ -1114,6 +1116,13 @@ enum ConnectTransactionType {
   proposal_refund
   boost_spent
   rollover
+  reward_gig_completed
+  reward_review_left
+  reward_five_star
+  reward_profile_complete
+  reward_referral_signup
+  reward_referral_gig
+  reward_daily_login
 }
 
 enum ConnectPurchaseStatus {

@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CommunityService } from '../community/community.service';
+import { ConnectsService } from '../connects/connects.service';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractStatusDto } from './dto/update-contract-status.dto';
 
@@ -16,6 +17,7 @@ export class ContractsService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
     private readonly communityService: CommunityService,
+    private readonly connectsService: ConnectsService,
   ) {}
 
   /**
@@ -253,6 +255,9 @@ export class ContractsService {
         gigId: contract.gigId || undefined,
         tags: ['gigcompleted', 'achievement'],
       }).catch(() => {});
+
+      // Award 5 connects to the student for completing a gig
+      this.connectsService.rewardGigCompleted(updated.student.id, contractId).catch(() => {});
     }
 
     return updated;
