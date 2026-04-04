@@ -41,11 +41,9 @@ export default function StudentLoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[45%] bg-linear-to-br from-emerald-600 via-emerald-700 to-teal-800 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-64 h-64 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-80 h-80 bg-emerald-300 rounded-full blur-3xl" />
-        </div>
+      <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden">
+        <img src="/auth-login.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-linear-to-br from-emerald-900/80 via-emerald-800/60 to-teal-900/70" />
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
