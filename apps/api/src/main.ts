@@ -44,7 +44,12 @@ async function bootstrap() {
     process.exit(1);
   }
   app.enableCors({
-    origin: corsOrigins ?? ['http://localhost:3000'],
+    origin: corsOrigins ?? [
+      'http://localhost:3000', // Public site
+      'http://localhost:3002', // Student portal
+      'http://localhost:3003', // Employer portal
+      'http://localhost:3004', // Admin portal
+    ],
     credentials: true,
   });
 

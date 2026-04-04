@@ -16,7 +16,7 @@ alert() { echo "[$TIMESTAMP] ALERT: $1" >> "$ALERT_LOG"; echo "[$TIMESTAMP] ALER
 log "--- Health check started ---"
 
 # 1. Check Docker containers
-EXPECTED_CONTAINERS="intemso-api intemso-web intemso-postgres intemso-redis"
+EXPECTED_CONTAINERS="intemso-api intemso-web intemso-student intemso-employer intemso-admin intemso-postgres intemso-redis"
 for CONTAINER in $EXPECTED_CONTAINERS; do
   STATUS=$(docker inspect --format='{{.State.Status}}' "$CONTAINER" 2>/dev/null)
   if [ "$STATUS" != "running" ]; then
@@ -60,6 +60,30 @@ if [ "$WEB_STATUS" != "200" ]; then
   alert "Web frontend check failed (HTTP $WEB_STATUS)"
 else
   log "Web: healthy"
+fi
+
+# 5b. Check student portal
+STUDENT_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 10 http://127.0.0.1:3002 2>/dev/null)
+if [ "$STUDENT_STATUS" != "200" ] && [ "$STUDENT_STATUS" != "307" ]; then
+  alert "Student portal check failed (HTTP $STUDENT_STATUS)"
+else
+  log "Student portal: healthy"
+fi
+
+# 5c. Check employer portal
+EMPLOYER_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 10 http://127.0.0.1:3003 2>/dev/null)
+if [ "$EMPLOYER_STATUS" != "200" ] && [ "$EMPLOYER_STATUS" != "307" ]; then
+  alert "Employer portal check failed (HTTP $EMPLOYER_STATUS)"
+else
+  log "Employer portal: healthy"
+fi
+
+# 5d. Check admin portal
+ADMIN_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 10 http://127.0.0.1:3004 2>/dev/null)
+if [ "$ADMIN_STATUS" != "200" ] && [ "$ADMIN_STATUS" != "307" ]; then
+  alert "Admin portal check failed (HTTP $ADMIN_STATUS)"
+else
+  log "Admin portal: healthy"
 fi
 
 # 6. Check PostgreSQL connections

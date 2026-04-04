@@ -8,6 +8,7 @@ COPY package.json package-lock.json turbo.json ./
 # Copy workspace package.json files
 COPY apps/web/package.json ./apps/web/
 COPY packages/shared/package.json ./packages/shared/
+COPY packages/api-client/package.json ./packages/api-client/
 COPY packages/config/package.json ./packages/config/
 
 # Install all dependencies

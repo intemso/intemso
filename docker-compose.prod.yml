@@ -83,7 +83,7 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       REDIS_TLS: ${REDIS_TLS:-false}
       API_BASE_URL: ${API_BASE_URL:-https://intemso.com/api}
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://intemso.com,https://www.intemso.com}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://intemso.com,https://www.intemso.com,https://jobs.intemso.com,https://hire.intemso.com,https://admin.intemso.com}
       NODE_ENV: production
       PORT: 3001
       FRONTEND_URL: ${FRONTEND_URL:-https://intemso.com}
@@ -124,6 +124,87 @@ services:
       resources:
         limits:
           memory: 512M
+        reservations:
+          memory: 64M
+    depends_on:
+      - api
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  student:
+    build:
+      context: .
+      dockerfile: apps/student/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://intemso.com/api/v1}
+    container_name: intemso-student
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3002:3002"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://intemso.com/api/v1}
+      NODE_OPTIONS: "--max-old-space-size=256"
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 64M
+    depends_on:
+      - api
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  employer:
+    build:
+      context: .
+      dockerfile: apps/employer/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://intemso.com/api/v1}
+    container_name: intemso-employer
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3003:3003"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://intemso.com/api/v1}
+      NODE_OPTIONS: "--max-old-space-size=256"
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 64M
+    depends_on:
+      - api
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://intemso.com/api/v1}
+    container_name: intemso-admin
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3004:3004"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://intemso.com/api/v1}
+      NODE_OPTIONS: "--max-old-space-size=256"
+    deploy:
+      resources:
+        limits:
+          memory: 384M
         reservations:
           memory: 64M
     depends_on:
