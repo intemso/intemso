@@ -148,10 +148,24 @@ export const authApi = {
     });
   },
 
+  loginWithGhanaCard(ghanaCardNumber: string, password: string) {
+    return apiFetch<AuthResponse>('/auth/login/ghana-card', {
+      method: 'POST',
+      body: JSON.stringify({ ghanaCardNumber, password }),
+    });
+  },
+
   register(email: string, password: string, role: 'student' | 'employer') {
     return apiFetch<AuthResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, role }),
+    });
+  },
+
+  registerWithGhanaCard(data: { ghanaCardNumber: string; fullName: string; password: string; role: 'student' | 'employer'; university?: string }) {
+    return apiFetch<AuthResponse>('/auth/register/ghana-card', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   },
 
