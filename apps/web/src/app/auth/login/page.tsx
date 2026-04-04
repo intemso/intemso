@@ -10,16 +10,21 @@ import {
   EyeIcon,
   EyeSlashIcon,
   CheckIcon,
+  IdentificationIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/auth';
 
+type AuthMethod = 'email' | 'ghana-card';
+
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, loginWithGhanaCard } = useAuth();
+  const [method, setMethod] = useState<AuthMethod>('email');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
+  const [ghanaCard, setGhanaCard] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,7 +33,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
+      if (method === 'email') {
+        await login(email, password);
+      } else {
+        await loginWithGhanaCard(ghanaCard, password);
+      }
       router.push('/dashboard');
     } catch (err: unknown) {
       const apiErr = err as { message?: string | string[] };
@@ -65,8 +74,21 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* Auth method tabs */}
+          <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+            <button type="button" onClick={() => { setMethod('email'); setError(''); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${method === 'email' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+              <EnvelopeIcon className="w-4 h-4" /> Email
+            </button>
+            <button type="button" onClick={() => { setMethod('ghana-card'); setError(''); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${method === 'ghana-card' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+              <IdentificationIcon className="w-4 h-4" /> Ghana Card
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
+            {/* Email or Ghana Card */}
+            {method === 'email' ? (
             <div>
               <label
                 htmlFor="email"
@@ -87,6 +109,29 @@ export default function LoginPage() {
                 />
               </div>
             </div>
+            ) : (
+            <div>
+              <label
+                htmlFor="ghanaCard"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
+                Ghana Card Number
+              </label>
+              <div className="relative">
+                <IdentificationIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  id="ghanaCard"
+                  type="text"
+                  placeholder="GHA-XXXXXXXXX-X"
+                  pattern="GHA-\d{9}-\d"
+                  required
+                  value={ghanaCard}
+                  onChange={(e) => setGhanaCard(e.target.value.toUpperCase())}
+                  className="input-field pl-11 font-mono"
+                />
+              </div>
+            </div>
+            )}
 
             {/* Password */}
             <div>

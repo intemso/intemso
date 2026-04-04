@@ -17,6 +17,8 @@ import {
   type AuthResponse,
 } from '@/lib/api';
 
+type GhanaCardRegisterData = { ghanaCardNumber: string; fullName: string; password: string; role: 'student' | 'employer'; university?: string; };
+
 export interface User {
   id: string;
   email: string;
@@ -33,7 +35,9 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGhanaCard: (ghanaCardNumber: string, password: string) => Promise<void>;
   register: (email: string, password: string, role: 'student' | 'employer') => Promise<void>;
+  registerWithGhanaCard: (data: GhanaCardRegisterData) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
@@ -71,6 +75,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(profile as User);
   }, []);
 
+  const loginWithGhanaCard = useCallback(async (ghanaCardNumber: string, password: string) => {
+    const res: AuthResponse = await authApi.loginWithGhanaCard(ghanaCardNumber, password);
+    setTokens(res.accessToken, res.refreshToken);
+    const profile = await usersApi.getProfile();
+    setUser(profile as User);
+  }, []);
+
   const register = useCallback(
     async (email: string, password: string, role: 'student' | 'employer') => {
       const res: AuthResponse = await authApi.register(email, password, role);
@@ -82,6 +93,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [],
   );
+
+  const registerWithGhanaCard = useCallback(async (data: GhanaCardRegisterData) => {
+    const res: AuthResponse = await authApi.registerWithGhanaCard(data);
+    setTokens(res.accessToken, res.refreshToken);
+    const profile = await usersApi.getProfile();
+    setUser(profile as User);
+  }, []);
 
   const logout = useCallback(() => {
     clearTokens();
@@ -104,7 +122,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAuthenticated: !!user,
         login,
+        loginWithGhanaCard,
         register,
+        registerWithGhanaCard,
         logout,
         refreshProfile,
       }}

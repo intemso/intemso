@@ -114,14 +114,19 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
+  async findByGhanaCard(ghanaCardNumber: string) {
+    return this.prisma.user.findUnique({ where: { ghanaCardNumber } });
+  }
+
   async findById(id: string) {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  async create(data: { email: string; passwordHash: string; role: string }) {
+  async create(data: { email?: string; ghanaCardNumber?: string; passwordHash: string; role: string }) {
     return this.prisma.user.create({
       data: {
-        email: data.email,
+        email: data.email || undefined,
+        ghanaCardNumber: data.ghanaCardNumber || undefined,
         passwordHash: data.passwordHash,
         role: data.role as any,
       },

@@ -5,7 +5,7 @@ export const API_BASE_URL =
 
 /** Shape returned by login/register */
 export interface AuthResponse {
-  user: { id: string; email: string; role: string };
+  user: { id: string; email: string | null; ghanaCardNumber?: string | null; role: string };
   accessToken: string;
   refreshToken: string;
 }
@@ -150,10 +150,24 @@ export const authApi = {
     });
   },
 
+  loginWithGhanaCard(ghanaCardNumber: string, password: string) {
+    return apiFetch<AuthResponse>('/auth/login/ghana-card', {
+      method: 'POST',
+      body: JSON.stringify({ ghanaCardNumber, password }),
+    });
+  },
+
   register(email: string, password: string, role: 'student' | 'employer') {
     return apiFetch<AuthResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, role }),
+    });
+  },
+
+  registerWithGhanaCard(data: { ghanaCardNumber: string; fullName: string; password: string; role: 'student' | 'employer'; university?: string }) {
+    return apiFetch<AuthResponse>('/auth/register/ghana-card', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   },
 

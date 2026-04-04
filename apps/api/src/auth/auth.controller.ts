@@ -3,6 +3,8 @@ import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterGhanaCardDto } from './dto/register-ghana-card.dto';
+import { LoginGhanaCardDto } from './dto/login-ghana-card.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -22,6 +24,19 @@ export class AuthController {
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('register/ghana-card')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  async registerWithGhanaCard(@Body() dto: RegisterGhanaCardDto) {
+    return this.authService.registerWithGhanaCard(dto);
+  }
+
+  @Post('login/ghana-card')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  async loginWithGhanaCard(@Body() dto: LoginGhanaCardDto) {
+    return this.authService.loginWithGhanaCard(dto);
   }
 
   @Post('refresh')

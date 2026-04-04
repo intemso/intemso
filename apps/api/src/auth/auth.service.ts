@@ -11,12 +11,14 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { BCRYPT_ROUNDS } from '@intemso/shared';
+import { BCRYPT_ROUNDS, isBlockedStudentEmail, normalizeGhanaCard, UserRole } from '@intemso/shared';
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
 import { ConnectsService } from '../connects/connects.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterGhanaCardDto } from './dto/register-ghana-card.dto';
+import { LoginGhanaCardDto } from './dto/login-ghana-card.dto';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +32,13 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
+    // Block public email providers for student registration
+    if (dto.role === UserRole.STUDENT && isBlockedStudentEmail(dto.email)) {
+      throw new BadRequestException(
+        'Students must register with their university email address, not a personal email like Gmail or Outlook.',
+      );
+    }
+
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
       throw new ConflictException('An account with this email already exists');
@@ -43,10 +52,62 @@ export class AuthService {
       role: dto.role,
     });
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.email ?? user.ghanaCardNumber ?? user.id, user.role);
 
     return {
       user: { id: user.id, email: user.email, role: user.role },
+      ...tokens,
+    };
+  }
+
+  async registerWithGhanaCard(dto: RegisterGhanaCardDto) {
+    const cardNumber = normalizeGhanaCard(dto.ghanaCardNumber);
+
+    const existingUser = await this.usersService.findByGhanaCard(cardNumber);
+    if (existingUser) {
+      throw new ConflictException('An account with this Ghana Card number already exists');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+
+    const user = await this.usersService.create({
+      ghanaCardNumber: cardNumber,
+      passwordHash,
+      role: dto.role,
+    });
+
+    const tokens = await this.generateTokens(user.id, cardNumber, user.role);
+
+    return {
+      user: { id: user.id, email: user.email, ghanaCardNumber: user.ghanaCardNumber, role: user.role },
+      ...tokens,
+    };
+  }
+
+  async loginWithGhanaCard(dto: LoginGhanaCardDto) {
+    const cardNumber = normalizeGhanaCard(dto.ghanaCardNumber);
+
+    const user = await this.usersService.findByGhanaCard(cardNumber);
+    if (!user || !user.passwordHash) {
+      throw new UnauthorizedException('Invalid Ghana Card number or password');
+    }
+
+    if (user.isSuspended) {
+      throw new UnauthorizedException('Your account has been suspended');
+    }
+
+    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid Ghana Card number or password');
+    }
+
+    await this.usersService.updateLastLogin(user.id);
+    this.connectsService.rewardDailyLogin(user.id).catch(() => {});
+
+    const tokens = await this.generateTokens(user.id, user.email ?? cardNumber, user.role);
+
+    return {
+      user: { id: user.id, email: user.email, ghanaCardNumber: user.ghanaCardNumber, role: user.role },
       ...tokens,
     };
   }

@@ -17,6 +17,8 @@ import {
   type AuthResponse,
 } from '@/lib/api';
 
+type GhanaCardRegisterData = { ghanaCardNumber: string; fullName: string; password: string; role: 'student'; university?: string; };
+
 export interface User {
   id: string;
   email: string;
@@ -33,6 +35,9 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGhanaCard: (ghanaCardNumber: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  registerWithGhanaCard: (data: GhanaCardRegisterData) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
 }
@@ -88,6 +93,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u);
   }, []);
 
+  const loginWithGhanaCard = useCallback(async (ghanaCardNumber: string, password: string) => {
+    const res: AuthResponse = await authApi.loginWithGhanaCard(ghanaCardNumber, password);
+    setTokens(res.accessToken, res.refreshToken);
+
+    const profile = await usersApi.getProfile();
+    const u = profile as User;
+
+    if (u.role !== 'student') {
+      clearTokens();
+      throw new Error('This portal is for students only. Please use the correct portal for your account.');
+    }
+
+    setUser(u);
+  }, []);
+
+  const register = useCallback(async (email: string, password: string) => {
+    const res: AuthResponse = await authApi.register(email, password, 'student');
+    setTokens(res.accessToken, res.refreshToken);
+    const profile = await usersApi.getProfile();
+    setUser(profile as User);
+  }, []);
+
+  const registerWithGhanaCard = useCallback(async (data: GhanaCardRegisterData) => {
+    const res: AuthResponse = await authApi.registerWithGhanaCard(data);
+    setTokens(res.accessToken, res.refreshToken);
+    const profile = await usersApi.getProfile();
+    setUser(profile as User);
+  }, []);
+
   const logout = useCallback(() => {
     clearTokens();
     setUser(null);
@@ -106,6 +140,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAuthenticated: !!user,
         login,
+        loginWithGhanaCard,
+        register,
+        registerWithGhanaCard,
         logout,
         refreshProfile,
       }}

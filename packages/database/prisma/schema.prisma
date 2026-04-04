@@ -13,7 +13,8 @@ datasource db {
 
 model User {
   id            String    @id @default(uuid()) @db.Uuid
-  email         String    @unique @db.VarChar(255)
+  email         String?   @unique @db.VarChar(255)
+  ghanaCardNumber String? @unique @map("ghana_card_number") @db.VarChar(16)
   passwordHash  String?   @map("password_hash") @db.VarChar(255)
   role          UserRole
   emailVerified Boolean   @default(false) @map("email_verified")

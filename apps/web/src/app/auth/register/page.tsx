@@ -13,6 +13,7 @@ import {
   BriefcaseIcon,
   CheckIcon,
   ChevronUpDownIcon,
+  IdentificationIcon,
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useAuth } from '@/context/auth';
@@ -20,19 +21,22 @@ import { usersApi } from '@/lib/api';
 import { GHANA_UNIVERSITIES } from '@intemso/shared';
 
 type Role = 'student' | 'employer';
+type AuthMethod = 'email' | 'ghana-card';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuth();
+  const { register, registerWithGhanaCard } = useAuth();
   const [role, setRole] = useState<Role>('student');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [error, setError] = useState('');
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
 
   // Form fields
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [ghanaCard, setGhanaCard] = useState('');
   const [password, setPassword] = useState('');
   const [university, setUniversity] = useState('');
   const [company, setCompany] = useState('');
@@ -81,7 +85,17 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await register(email, password, role);
+      if (authMethod === 'ghana-card') {
+        await registerWithGhanaCard({
+          ghanaCardNumber: ghanaCard,
+          fullName,
+          password,
+          role,
+          university: role === 'student' ? university || undefined : undefined,
+        });
+      } else {
+        await register(email, password, role);
+      }
 
       // After registration, create the initial profile
       const nameParts = fullName.trim().split(/\s+/);
@@ -275,6 +289,18 @@ export default function RegisterPage() {
               </>
             ) : (
               <>
+                {/* Auth method toggle */}
+                <div className="flex bg-gray-100 rounded-xl p-1 mb-1">
+                  <button type="button" onClick={() => { setAuthMethod('email'); setError(''); }}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${authMethod === 'email' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                    <EnvelopeIcon className="w-4 h-4" /> {role === 'student' ? 'University Email' : 'Email'}
+                  </button>
+                  <button type="button" onClick={() => { setAuthMethod('ghana-card'); setError(''); }}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${authMethod === 'ghana-card' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                    <IdentificationIcon className="w-4 h-4" /> Ghana Card
+                  </button>
+                </div>
+
                 {/* Full Name */}
                 <div>
                   <label
@@ -297,13 +323,14 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                {/* Email */}
+                {/* Email or Ghana Card */}
+                {authMethod === 'email' ? (
                 <div>
                   <label
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700 mb-1.5"
                   >
-                    Email address
+                    {role === 'student' ? 'University email' : 'Email address'}
                   </label>
                   <div className="relative">
                     <EnvelopeIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -312,7 +339,7 @@ export default function RegisterPage() {
                       type="email"
                       placeholder={
                         role === 'student'
-                          ? 'you@university.edu'
+                          ? 'you@st.ug.edu.gh'
                           : 'you@company.com'
                       }
                       required
@@ -323,10 +350,33 @@ export default function RegisterPage() {
                   </div>
                   {role === 'student' && (
                     <p className="text-xs text-gray-400 mt-1.5">
-                      Using a .edu email helps verify your student status
+                      Must be your university domain email (not Gmail or Outlook)
                     </p>
                   )}
                 </div>
+                ) : (
+                <div>
+                  <label
+                    htmlFor="ghanaCard"
+                    className="block text-sm font-medium text-gray-700 mb-1.5"
+                  >
+                    Ghana Card Number
+                  </label>
+                  <div className="relative">
+                    <IdentificationIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      id="ghanaCard"
+                      type="text"
+                      placeholder="GHA-XXXXXXXXX-X"
+                      pattern="GHA-\d{9}-\d"
+                      required
+                      value={ghanaCard}
+                      onChange={(e) => setGhanaCard(e.target.value.toUpperCase())}
+                      className="input-field pl-11 font-mono"
+                    />
+                  </div>
+                </div>
+                )}
 
                 {/* Password */}
                 <div>

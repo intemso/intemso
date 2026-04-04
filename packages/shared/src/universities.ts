@@ -18,27 +18,28 @@ export interface GhanaUniversity {
   location: string;
   region: string;
   founded?: number;
+  emailDomain?: string;
 }
 
 // ════════════════════════════════════════════════════════
 //  PUBLIC TRADITIONAL UNIVERSITIES (16)
 // ════════════════════════════════════════════════════════
 export const PUBLIC_UNIVERSITIES: GhanaUniversity[] = [
-  { name: 'University of Ghana', abbreviation: 'UG', type: UniversityType.PUBLIC, location: 'Legon, Accra', region: 'Greater Accra', founded: 1948 },
-  { name: 'Kwame Nkrumah University of Science and Technology', abbreviation: 'KNUST', type: UniversityType.PUBLIC, location: 'Kumasi', region: 'Ashanti', founded: 1952 },
-  { name: 'University of Cape Coast', abbreviation: 'UCC', type: UniversityType.PUBLIC, location: 'Cape Coast', region: 'Central', founded: 1961 },
-  { name: 'University of Education, Winneba', abbreviation: 'UEW', type: UniversityType.PUBLIC, location: 'Winneba', region: 'Central', founded: 1992 },
-  { name: 'University for Development Studies', abbreviation: 'UDS', type: UniversityType.PUBLIC, location: 'Tamale', region: 'Northern', founded: 1992 },
-  { name: 'University of Professional Studies, Accra', abbreviation: 'UPSA', type: UniversityType.PUBLIC, location: 'Legon, Accra', region: 'Greater Accra', founded: 1965 },
+  { name: 'University of Ghana', abbreviation: 'UG', type: UniversityType.PUBLIC, location: 'Legon, Accra', region: 'Greater Accra', founded: 1948, emailDomain: 'st.ug.edu.gh' },
+  { name: 'Kwame Nkrumah University of Science and Technology', abbreviation: 'KNUST', type: UniversityType.PUBLIC, location: 'Kumasi', region: 'Ashanti', founded: 1952, emailDomain: 'st.knust.edu.gh' },
+  { name: 'University of Cape Coast', abbreviation: 'UCC', type: UniversityType.PUBLIC, location: 'Cape Coast', region: 'Central', founded: 1961, emailDomain: 'ucc.edu.gh' },
+  { name: 'University of Education, Winneba', abbreviation: 'UEW', type: UniversityType.PUBLIC, location: 'Winneba', region: 'Central', founded: 1992, emailDomain: 'uew.edu.gh' },
+  { name: 'University for Development Studies', abbreviation: 'UDS', type: UniversityType.PUBLIC, location: 'Tamale', region: 'Northern', founded: 1992, emailDomain: 'uds.edu.gh' },
+  { name: 'University of Professional Studies, Accra', abbreviation: 'UPSA', type: UniversityType.PUBLIC, location: 'Legon, Accra', region: 'Greater Accra', founded: 1965, emailDomain: 'upsa.edu.gh' },
   { name: 'University of Mines and Technology', abbreviation: 'UMaT', type: UniversityType.PUBLIC, location: 'Tarkwa', region: 'Western', founded: 2001 },
-  { name: 'University of Health and Allied Sciences', abbreviation: 'UHAS', type: UniversityType.PUBLIC, location: 'Ho', region: 'Volta', founded: 2011 },
-  { name: 'University of Energy and Natural Resources', abbreviation: 'UENR', type: UniversityType.PUBLIC, location: 'Sunyani', region: 'Bono', founded: 2012 },
+  { name: 'University of Health and Allied Sciences', abbreviation: 'UHAS', type: UniversityType.PUBLIC, location: 'Ho', region: 'Volta', founded: 2011, emailDomain: 'uhas.edu.gh' },
+  { name: 'University of Energy and Natural Resources', abbreviation: 'UENR', type: UniversityType.PUBLIC, location: 'Sunyani', region: 'Bono', founded: 2012, emailDomain: 'uenr.edu.gh' },
   { name: 'University of Environment and Sustainable Development', abbreviation: 'UESD', type: UniversityType.PUBLIC, location: 'Somanya', region: 'Eastern', founded: 2020 },
   { name: 'C.K. Tedam University of Technology and Applied Sciences', abbreviation: 'CKT-UTAS', type: UniversityType.PUBLIC, location: 'Navrongo', region: 'Upper East', founded: 2020 },
   { name: 'Simon Diedong Dombo University of Business and Integrated Development Studies', abbreviation: 'SDD-UBIDS', type: UniversityType.PUBLIC, location: 'Wa', region: 'Upper West', founded: 2020 },
   { name: 'Akenten Appiah-Menka University of Skills Training and Entrepreneurial Development', abbreviation: 'AAMUSTED', type: UniversityType.PUBLIC, location: 'Kumasi', region: 'Ashanti', founded: 2020 },
   { name: 'Ghana Institute of Management and Public Administration', abbreviation: 'GIMPA', type: UniversityType.PUBLIC, location: 'Legon, Accra', region: 'Greater Accra' },
-  { name: 'Ghana Communication Technology University', abbreviation: 'GCTU', type: UniversityType.PUBLIC, location: 'Tesano, Accra', region: 'Greater Accra', founded: 2005 },
+  { name: 'Ghana Communication Technology University', abbreviation: 'GCTU', type: UniversityType.PUBLIC, location: 'Tesano, Accra', region: 'Greater Accra', founded: 2005, emailDomain: 'gctu.edu.gh' },
   { name: 'University of Media, Arts and Communication', abbreviation: 'UniMAC', type: UniversityType.PUBLIC, location: 'Accra', region: 'Greater Accra' },
 ];
 
@@ -82,7 +83,7 @@ export const REGIONAL_UNIVERSITIES: GhanaUniversity[] = [
 //  CHARTERED PRIVATE UNIVERSITIES (24)
 // ════════════════════════════════════════════════════════
 export const CHARTERED_PRIVATE_UNIVERSITIES: GhanaUniversity[] = [
-  { name: 'Ashesi University', abbreviation: 'Ashesi', type: UniversityType.CHARTERED_PRIVATE, location: 'Berekuso', region: 'Eastern', founded: 2002 },
+  { name: 'Ashesi University', abbreviation: 'Ashesi', type: UniversityType.CHARTERED_PRIVATE, location: 'Berekuso', region: 'Eastern', founded: 2002, emailDomain: 'ashesi.edu.gh' },
   { name: 'Valley View University', abbreviation: 'VVU', type: UniversityType.CHARTERED_PRIVATE, location: 'Oyibi, Accra', region: 'Greater Accra', founded: 1979 },
   { name: 'Central University', abbreviation: 'CU', type: UniversityType.CHARTERED_PRIVATE, location: 'Tema', region: 'Greater Accra', founded: 1998 },
   { name: 'Pentecost University', abbreviation: 'PU', type: UniversityType.CHARTERED_PRIVATE, location: 'Sowutuom, Accra', region: 'Greater Accra', founded: 2003 },
@@ -225,3 +226,78 @@ export const GHANA_REGIONS = [
   'North East',
   'Savannah',
 ] as const;
+
+// ════════════════════════════════════════════════════════
+//  EMAIL DOMAIN VALIDATION
+// ════════════════════════════════════════════════════════
+
+/** Known university email domains from our database */
+export const UNIVERSITY_EMAIL_DOMAINS = new Set(
+  GHANA_UNIVERSITIES.map((u) => u.emailDomain).filter(Boolean) as string[],
+);
+
+/** Public email providers blocked for student registration */
+export const BLOCKED_STUDENT_EMAIL_DOMAINS = new Set([
+  'gmail.com',
+  'outlook.com',
+  'hotmail.com',
+  'yahoo.com',
+  'yahoo.co.uk',
+  'aol.com',
+  'icloud.com',
+  'me.com',
+  'live.com',
+  'msn.com',
+  'protonmail.com',
+  'proton.me',
+  'zoho.com',
+  'mail.com',
+  'yandex.com',
+  'gmx.com',
+  'gmx.net',
+  'tutanota.com',
+  'rocketmail.com',
+]);
+
+/** Check if an email domain belongs to a known university */
+export function isKnownUniversityEmail(email: string): boolean {
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (!domain) return false;
+  return UNIVERSITY_EMAIL_DOMAINS.has(domain);
+}
+
+/** Check if an email uses a blocked public provider */
+export function isBlockedStudentEmail(email: string): boolean {
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (!domain) return false;
+  return BLOCKED_STUDENT_EMAIL_DOMAINS.has(domain);
+}
+
+/**
+ * Check if an email looks like a valid educational email.
+ * Accepts known university domains OR any .edu / .edu.gh domain.
+ */
+export function isEducationalEmail(email: string): boolean {
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (!domain) return false;
+  if (UNIVERSITY_EMAIL_DOMAINS.has(domain)) return true;
+  if (domain.endsWith('.edu.gh') || domain.endsWith('.edu')) return true;
+  return false;
+}
+
+// ════════════════════════════════════════════════════════
+//  GHANA CARD VALIDATION
+// ════════════════════════════════════════════════════════
+
+/** Ghana Card number format: GHA-XXXXXXXXX-X */
+export const GHANA_CARD_REGEX = /^GHA-\d{9}-\d$/;
+
+/** Validate Ghana Card number format */
+export function isValidGhanaCard(cardNumber: string): boolean {
+  return GHANA_CARD_REGEX.test(cardNumber.toUpperCase());
+}
+
+/** Normalize Ghana Card number to uppercase */
+export function normalizeGhanaCard(cardNumber: string): string {
+  return cardNumber.toUpperCase().trim();
+}
