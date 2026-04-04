@@ -125,8 +125,8 @@ export class UsersService {
   async create(data: { email?: string; ghanaCardNumber?: string; passwordHash: string; role: string }) {
     return this.prisma.user.create({
       data: {
-        email: data.email || undefined,
-        ghanaCardNumber: data.ghanaCardNumber || undefined,
+        email: data.email ?? null,
+        ghanaCardNumber: data.ghanaCardNumber ?? null,
         passwordHash: data.passwordHash,
         role: data.role as any,
       },

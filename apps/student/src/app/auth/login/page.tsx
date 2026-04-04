@@ -41,7 +41,7 @@ export default function StudentLoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[45%] bg-linear-to-br from-emerald-600 via-emerald-700 to-teal-800 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-64 h-64 bg-white rounded-full blur-3xl" />
           <div className="absolute bottom-20 right-10 w-80 h-80 bg-emerald-300 rounded-full blur-3xl" />
@@ -62,7 +62,7 @@ export default function StudentLoginPage() {
           <div className="mt-12 space-y-4">
             {['Gigs from real employers', 'Secure milestone payments', 'Showcase your work'].map((text) => (
               <div key={text} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </div>
                 <span className="text-emerald-50 text-sm">{text}</span>
