@@ -6,10 +6,10 @@ import { useAuth } from '@/context/auth';
 const ADMIN_PORTAL_URL = process.env.NEXT_PUBLIC_ADMIN_PORTAL_URL || 'https://admin.intemso.com';
 
 export default function AdminRedirect() {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (loading) return;
+    if (isLoading) return;
 
     if (!user || user.role !== 'ADMIN') {
       window.location.href = '/auth/login';
@@ -17,7 +17,7 @@ export default function AdminRedirect() {
     }
 
     window.location.href = ADMIN_PORTAL_URL;
-  }, [user, loading]);
+  }, [user, isLoading]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

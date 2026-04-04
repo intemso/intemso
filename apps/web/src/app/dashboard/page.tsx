@@ -10,10 +10,10 @@ const PORTAL_URLS: Record<string, string> = {
 };
 
 export default function DashboardRedirect() {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (loading) return;
+    if (isLoading) return;
 
     if (!user) {
       window.location.href = '/auth/login';
@@ -22,7 +22,7 @@ export default function DashboardRedirect() {
 
     const portalUrl = PORTAL_URLS[user.role] || PORTAL_URLS.STUDENT;
     window.location.href = portalUrl;
-  }, [user, loading]);
+  }, [user, isLoading]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
