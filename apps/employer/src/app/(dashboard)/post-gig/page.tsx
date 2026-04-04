@@ -77,7 +77,7 @@ export default function PostGigPage() {
   }, []);
 
   useEffect(() => {
-    if (!authLoading && (!isAuthenticated || user?.role !== 'EMPLOYER')) {
+    if (!authLoading && (!isAuthenticated || user?.role !== 'employer')) {
       router.replace('/auth/login');
     }
   }, [authLoading, isAuthenticated, user, router]);

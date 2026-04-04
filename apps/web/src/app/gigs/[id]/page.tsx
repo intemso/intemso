@@ -91,7 +91,7 @@ export default function GigDetailPage() {
 
   // Check if gig is saved (students only)
   useEffect(() => {
-    if (!gigId || !user || user.role !== 'STUDENT') return;
+    if (!gigId || !user || user.role !== 'student') return;
     savedGigsApi.list({ limit: 100 })
       .then((res) => {
         if (res.data.some((g: { id: string }) => g.id === gigId)) setSaved(true);

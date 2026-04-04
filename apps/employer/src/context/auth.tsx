@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((profile) => {
         const u = profile as User;
         // Enforce employer-only access
-        if (u.role !== 'EMPLOYER') {
+        if (u.role !== 'employer') {
           clearTokens();
           setUser(null);
           window.location.href = PUBLIC_SITE_URL + '/auth/login?error=wrong_portal';
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const u = profile as User;
 
     // Reject non-employer logins
-    if (u.role !== 'EMPLOYER') {
+    if (u.role !== 'employer') {
       clearTokens();
       throw new Error('This portal is for employers only. Please use the correct portal for your account.');
     }

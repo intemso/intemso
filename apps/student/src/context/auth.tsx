@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((profile) => {
         const u = profile as User;
         // Enforce student-only access
-        if (u.role !== 'STUDENT') {
+        if (u.role !== 'student') {
           clearTokens();
           setUser(null);
           window.location.href = PUBLIC_SITE_URL + '/auth/login?error=wrong_portal';
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const u = profile as User;
 
     // Reject non-student logins
-    if (u.role !== 'STUDENT') {
+    if (u.role !== 'student') {
       clearTokens();
       throw new Error('This portal is for students only. Please use the correct portal for your account.');
     }

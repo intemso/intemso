@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((profile) => {
         const u = profile as User;
         // Enforce admin-only access
-        if (u.role !== 'ADMIN') {
+        if (u.role !== 'admin') {
           clearTokens();
           setUser(null);
           return;
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const u = profile as User;
 
     // Reject non-admin logins
-    if (u.role !== 'ADMIN') {
+    if (u.role !== 'admin') {
       clearTokens();
       throw new Error('Access denied. Admin credentials required.');
     }

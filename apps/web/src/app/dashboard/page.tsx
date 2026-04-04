@@ -4,9 +4,9 @@ import { useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 
 const PORTAL_URLS: Record<string, string> = {
-  STUDENT: process.env.NEXT_PUBLIC_STUDENT_PORTAL_URL || 'https://jobs.intemso.com',
-  EMPLOYER: process.env.NEXT_PUBLIC_EMPLOYER_PORTAL_URL || 'https://hire.intemso.com',
-  ADMIN: process.env.NEXT_PUBLIC_ADMIN_PORTAL_URL || 'https://admin.intemso.com',
+  student: process.env.NEXT_PUBLIC_STUDENT_PORTAL_URL || 'https://jobs.intemso.com',
+  employer: process.env.NEXT_PUBLIC_EMPLOYER_PORTAL_URL || 'https://hire.intemso.com',
+  admin: process.env.NEXT_PUBLIC_ADMIN_PORTAL_URL || 'https://admin.intemso.com',
 };
 
 export default function DashboardRedirect() {

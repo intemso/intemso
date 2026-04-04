@@ -11,7 +11,7 @@ export default function AdminRedirect() {
   useEffect(() => {
     if (isLoading) return;
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || user.role !== 'admin') {
       window.location.href = '/auth/login';
       return;
     }
