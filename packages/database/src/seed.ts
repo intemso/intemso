@@ -47,7 +47,23 @@ const EMPLOYERS = [
 // MAIN SEED
 // ============================================================
 async function main() {
-  console.log('🌱 Starting comprehensive seed…\n');
+  // Prevent running seed in production — only seed categories
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Production mode — seeding categories only (no test data)\n');
+    const categoryMap: Record<string, string> = {};
+    for (let i = 0; i < GIG_CATEGORIES.length; i++) {
+      const cat = GIG_CATEGORIES[i];
+      await prisma.category.upsert({
+        where: { slug: cat.slug },
+        update: { name: cat.name, icon: cat.emoji, description: cat.description, sortOrder: i },
+        create: { name: cat.name, slug: cat.slug, icon: cat.emoji, description: cat.description, sortOrder: i, isActive: true },
+      });
+    }
+    console.log(`  ✅ ${GIG_CATEGORIES.length} categories upserted`);
+    return;
+  }
+
+  console.log('🌱 Starting development seed…\n');
 
   // ---- 1. Categories (from shared package) ----
   console.log('📁 Seeding categories…');

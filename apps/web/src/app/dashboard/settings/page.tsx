@@ -10,10 +10,13 @@ import {
   GlobeAltIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
+import { useAuth } from '@/context/auth';
 
 const TABS = ['Profile', 'Notifications', 'Security', 'Payments', 'Privacy'] as const;
 
 export default function SettingsPage() {
+  const { user } = useAuth();
+  const profile = user?.studentProfile ?? user?.employerProfile ?? {} as Record<string, unknown>;
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>('Profile');
   const [saved, setSaved] = useState(false);
 
@@ -63,23 +66,23 @@ export default function SettingsPage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                <input type="text" defaultValue="Jay" className="input-field" />
+                <input type="text" defaultValue={(profile?.firstName as string) ?? ''} className="input-field" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                <input type="text" defaultValue="Monty" className="input-field" />
+                <input type="text" defaultValue={(profile?.lastName as string) ?? ''} className="input-field" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" defaultValue="jay.monty@ug.edu.gh" className="input-field" disabled />
+                <input type="email" defaultValue={user?.email ?? ''} className="input-field" disabled />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input type="tel" defaultValue="+233 24 123 4567" className="input-field" />
+                <input type="tel" defaultValue={(profile?.phone as string) ?? ''} className="input-field" />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-                <textarea rows={3} className="input-field" defaultValue="Passionate full-stack developer..." />
+                <textarea rows={3} className="input-field" defaultValue={(profile?.bio as string) ?? ''} />
               </div>
             </div>
           </div>
@@ -89,19 +92,19 @@ export default function SettingsPage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">University</label>
-                <input type="text" defaultValue="University of Ghana" className="input-field" disabled />
+                <input type="text" defaultValue={(profile?.university as string) ?? ''} className="input-field" disabled />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Course</label>
-                <input type="text" defaultValue="Computer Science" className="input-field" />
+                <input type="text" defaultValue={(profile?.major as string) ?? ''} className="input-field" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                <input type="text" defaultValue="400 Level" className="input-field" />
+                <input type="text" defaultValue={(profile?.yearOfStudy as string) ?? ''} className="input-field" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Expected Graduation</label>
-                <input type="text" defaultValue="2027" className="input-field" />
+                <input type="text" defaultValue={(profile?.graduationYear as string) ?? ''} className="input-field" />
               </div>
             </div>
           </div>
@@ -177,8 +180,8 @@ export default function SettingsPage() {
                   <CreditCardIcon className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Fidelity Bank ****4521</p>
-                  <p className="text-xs text-gray-500">Primary withdrawal method</p>
+                  <p className="text-sm font-medium text-gray-900">No withdrawal method added</p>
+                  <p className="text-xs text-gray-500">Add a bank account or mobile money</p>
                 </div>
               </div>
               <button className="text-sm text-primary-600 font-medium hover:underline">Edit</button>
@@ -189,7 +192,7 @@ export default function SettingsPage() {
           </div>
           <div className="bg-white border border-gray-100 rounded-xl p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Connects</h2>
-            <p className="text-sm text-gray-500 mb-4">You have <span className="font-bold text-gray-900">8 connects</span> remaining</p>
+            <p className="text-sm text-gray-500 mb-4">Manage your connects balance from your dashboard</p>
             <button className="btn-secondary">Buy More Connects</button>
           </div>
         </div>

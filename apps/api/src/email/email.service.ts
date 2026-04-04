@@ -18,7 +18,7 @@ export class EmailService {
       this.logger.warn('RESEND_API_KEY not set — email sending disabled');
     }
     this.fromEmail = this.config.get('EMAIL_FROM', 'Intemso <onboarding@resend.dev>');
-    this.frontendUrl = this.config.get('FRONTEND_URL', 'http://localhost:3000');
+    this.frontendUrl = this.config.get('FRONTEND_URL') || (process.env.NODE_ENV === 'production' ? 'https://intemso.com' : 'http://localhost:3000');
   }
 
   async sendPasswordReset(email: string, resetToken: string): Promise<boolean> {

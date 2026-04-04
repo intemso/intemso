@@ -1,5 +1,6 @@
 ﻿'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ArrowTrendingUpIcon,
@@ -17,164 +18,90 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
+import { useAuth } from '@/context/auth';
+import { apiFetch } from '@/lib/api';
 
-const STATS = [
-  {
-    label: 'Active Contracts',
-    value: '2',
-    change: '+1 this week',
-    changeType: 'positive' as const,
-    icon: BriefcaseIcon,
-    color: 'bg-blue-50 text-blue-600',
-  },
-  {
-    label: 'Pending Proposals',
-    value: '5',
-    change: '2 viewed',
-    changeType: 'neutral' as const,
-    icon: DocumentTextIcon,
-    color: 'bg-amber-50 text-amber-600',
-  },
-  {
-    label: 'Earnings (This Month)',
-    value: 'GH₵680',
-    change: '+23% vs last month',
-    changeType: 'positive' as const,
-    icon: CurrencyDollarIcon,
-    color: 'bg-green-50 text-green-600',
-  },
-  {
-    label: 'Profile Views',
-    value: '47',
-    change: '+12 this week',
-    changeType: 'positive' as const,
-    icon: EyeIcon,
-    color: 'bg-purple-50 text-purple-600',
-  },
-];
+interface DashboardStats {
+  activeContracts: number;
+  pendingProposals: number;
+  monthlyEarnings: number;
+  profileViews: number;
+}
 
-const ACTIVE_CONTRACTS = [
-  {
-    id: 'c1',
-    title: 'Type Up 50 Pages of Lecture Notes',
-    client: 'Nana Agyeman',
-    budget: 'GH₵200',
-    milestone: 'Pages 26-50 - 50%',
-    dueDate: 'Mar 20, 2026',
-    status: 'in-progress',
-  },
-  {
-    id: 'c2',
-    title: 'Manage Instagram & TikTok for 1 Month',
-    client: 'CampusWear GH',
-    budget: 'GH₵500',
-    milestone: 'Week 2 Posts - 50%',
-    dueDate: 'Mar 31, 2026',
-    status: 'in-progress',
-  },
-  {
-    id: 'c3',
-    title: 'App Testing for QuickDrop Campus Delivery',
-    client: 'QuickDrop GH',
-    budget: 'GH₵60',
-    milestone: 'Feedback Submitted - 100%',
-    dueDate: 'Mar 11, 2026',
-    status: 'review',
-  },
-];
+interface Contract {
+  id: string;
+  title: string;
+  clientName: string;
+  budget: number;
+  status: string;
+  currentMilestone?: string;
+  dueDate?: string;
+  progress: number;
+}
 
-const RECENT_PROPOSALS = [
-  {
-    id: 'p1',
-    title: 'Conduct Campus Survey on Study Habits',
-    budget: 'GH₵350',
-    submitted: '2 days ago',
-    status: 'pending',
-  },
-  {
-    id: 'p2',
-    title: '3 Ushers for Wedding Reception Saturday',
-    budget: 'GH₵250',
-    submitted: '3 days ago',
-    status: 'viewed',
-  },
-  {
-    id: 'p3',
-    title: 'Distribute 500 Flyers Around Legon Campus',
-    budget: 'GH₵100',
-    submitted: '5 days ago',
-    status: 'shortlisted',
-  },
-  {
-    id: 'p4',
-    title: 'Beta Test a Study Group Matching App',
-    budget: 'GH₵70',
-    submitted: '1 week ago',
-    status: 'declined',
-  },
-];
-
-const RECOMMENDED_GIGS = [
-  {
-    id: 'r1',
-    title: '8 Students to Hand Out Flyers at KNUST',
-    budget: 'GH₵80 - GH₵120',
-    skills: ['Flyer Distribution', 'Physical Tasks'],
-    proposals: 4,
-    postedAt: '1 hour ago',
-  },
-  {
-    id: 'r2',
-    title: 'Tutor for Level 100 Maths This Weekend',
-    budget: 'GH₵150 - GH₵250',
-    skills: ['Maths Tutoring', 'Tutoring'],
-    proposals: 7,
-    postedAt: '3 hours ago',
-  },
-  {
-    id: 'r3',
-    title: 'Enter Survey Data Into Google Sheets (200 Responses)',
-    budget: 'GH₵100 - GH₵180',
-    skills: ['Data Entry', 'Google Sheets'],
-    proposals: 2,
-    postedAt: '5 hours ago',
-  },
-];
+interface Proposal {
+  id: string;
+  gigTitle: string;
+  budget: number;
+  status: string;
+  createdAt: string;
+}
 
 const statusStyles: Record<string, { bg: string; text: string; label: string }> = {
   pending: { bg: 'bg-gray-100', text: 'text-gray-600', label: 'Pending' },
   viewed: { bg: 'bg-blue-50', text: 'text-blue-600', label: 'Viewed' },
-  shortlisted: {
-    bg: 'bg-green-50',
-    text: 'text-green-700',
-    label: 'Shortlisted',
-  },
+  shortlisted: { bg: 'bg-green-50', text: 'text-green-700', label: 'Shortlisted' },
   declined: { bg: 'bg-red-50', text: 'text-red-600', label: 'Declined' },
-  'in-progress': {
-    bg: 'bg-blue-50',
-    text: 'text-blue-600',
-    label: 'In Progress',
-  },
-  review: {
-    bg: 'bg-amber-50',
-    text: 'text-amber-600',
-    label: 'In Review',
-  },
+  active: { bg: 'bg-blue-50', text: 'text-blue-600', label: 'In Progress' },
+  in_progress: { bg: 'bg-blue-50', text: 'text-blue-600', label: 'In Progress' },
+  review: { bg: 'bg-amber-50', text: 'text-amber-600', label: 'In Review' },
+  completed: { bg: 'bg-green-50', text: 'text-green-700', label: 'Completed' },
 };
 
-// Earnings chart data (simplified)
-const EARNINGS_MONTHS = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const EARNINGS_DATA = [45000, 78000, 62000, 120000, 155000, 185000];
-const maxEarning = Math.max(...EARNINGS_DATA);
-
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const [stats, setStats] = useState<DashboardStats>({ activeContracts: 0, pendingProposals: 0, monthlyEarnings: 0, profileViews: 0 });
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const firstName = (user?.studentProfile as any)?.firstName
+    ?? (user?.employerProfile as any)?.contactName?.split(' ')[0]
+    ?? 'there';
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [statsRes, contractsRes, proposalsRes] = await Promise.allSettled([
+          apiFetch('/dashboard/stats'),
+          apiFetch('/contracts?status=active&limit=3'),
+          apiFetch('/proposals?limit=4'),
+        ]);
+        if (statsRes.status === 'fulfilled') setStats(statsRes.value);
+        if (contractsRes.status === 'fulfilled') setContracts(contractsRes.value?.data ?? contractsRes.value ?? []);
+        if (proposalsRes.status === 'fulfilled') setProposals(proposalsRes.value?.data ?? proposalsRes.value ?? []);
+      } catch {
+        // silently fail — dashboard shows zeros
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const STATS_DISPLAY = [
+    { label: 'Active Contracts', value: String(stats.activeContracts), icon: BriefcaseIcon, color: 'bg-blue-50 text-blue-600' },
+    { label: 'Pending Proposals', value: String(stats.pendingProposals), icon: DocumentTextIcon, color: 'bg-amber-50 text-amber-600' },
+    { label: 'Earnings (This Month)', value: `GH₵${stats.monthlyEarnings.toLocaleString()}`, icon: CurrencyDollarIcon, color: 'bg-green-50 text-green-600' },
+    { label: 'Profile Views', value: String(stats.profileViews), icon: EyeIcon, color: 'bg-purple-50 text-purple-600' },
+  ];
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-            Welcome back, Jay! 👋
+            Welcome back, {firstName}!
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
             Here&apos;s what&apos;s happening with your work today.
@@ -191,7 +118,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {STATS.map((stat) => (
+        {STATS_DISPLAY.map((stat) => (
           <div
             key={stat.label}
             className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-3.5 sm:p-5 hover:shadow-card transition-shadow active:scale-[0.98]"
@@ -202,15 +129,6 @@ export default function DashboardPage() {
               >
                 <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              {stat.changeType === 'positive' && (
-                <span className="hidden sm:flex items-center gap-0.5 text-xs font-medium text-green-600">
-                  <ArrowTrendingUpIcon className="w-3 h-3" />
-                  {stat.change}
-                </span>
-              )}
-              {stat.changeType === 'neutral' && (
-                <span className="hidden sm:block text-xs text-gray-400">{stat.change}</span>
-              )}
             </div>
             <p className="text-lg sm:text-2xl font-bold text-gray-900">{stat.value}</p>
             <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1 truncate">{stat.label}</p>
@@ -234,8 +152,14 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="space-y-4">
-            {ACTIVE_CONTRACTS.map((contract) => {
-              const style = statusStyles[contract.status];
+            {contracts.length === 0 ? (
+              <div className="text-center py-8">
+                <BriefcaseIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">No active contracts yet</p>
+                <Link href="/gigs" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Browse gigs to get started</Link>
+              </div>
+            ) : contracts.map((contract) => {
+              const style = statusStyles[contract.status] ?? statusStyles.pending;
               return (
                 <Link
                   key={contract.id}
@@ -248,7 +172,7 @@ export default function DashboardPage() {
                         {contract.title}
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {contract.client} • {contract.budget}
+                        {contract.clientName} &bull; GH₵{contract.budget.toLocaleString()}
                       </p>
                     </div>
                     <span
@@ -257,35 +181,24 @@ export default function DashboardPage() {
                       {style.label}
                     </span>
                   </div>
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                      <span className="text-gray-500">
-                        {contract.milestone}
-                      </span>
-                      <span className="text-gray-400">
-                        Due {contract.dueDate}
-                      </span>
+                  {contract.currentMilestone && (
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between text-xs mb-1.5">
+                        <span className="text-gray-500">{contract.currentMilestone}</span>
+                        {contract.dueDate && <span className="text-gray-400">Due {new Date(contract.dueDate).toLocaleDateString()}</span>}
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-1.5">
+                        <div className="h-1.5 rounded-full bg-primary-500" style={{ width: `${contract.progress}%` }} />
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5">
-                      <div
-                        className={`h-1.5 rounded-full ${
-                          contract.status === 'review'
-                            ? 'bg-amber-400'
-                            : 'bg-primary-500'
-                        }`}
-                        style={{
-                          width: contract.milestone.match(/\d+/)?.[0] + '%',
-                        }}
-                      />
-                    </div>
-                  </div>
+                  )}
                 </Link>
               );
             })}
           </div>
         </div>
 
-        {/* Earnings Chart */}
+        {/* Earnings Overview */}
         <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-5">
             <h2 className="text-base sm:text-lg font-bold text-gray-900">Earnings</h2>
@@ -296,27 +209,10 @@ export default function DashboardPage() {
               Details
             </Link>
           </div>
-          <div className="text-center mb-4 sm:mb-6">
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900">GH₵645,000</p>
-            <p className="text-[10px] sm:text-xs text-gray-400 mt-1">Total earned</p>
-          </div>
-          {/* Simple bar chart */}
-          <div className="flex items-end gap-2 h-32">
-            {EARNINGS_DATA.map((val, idx) => (
-              <div key={idx} className="flex-1 flex flex-col items-center gap-1">
-                <div
-                  className={`w-full rounded-t-md transition-all ${
-                    idx === EARNINGS_DATA.length - 1
-                      ? 'bg-primary-500'
-                      : 'bg-primary-100'
-                  }`}
-                  style={{ height: `${(val / maxEarning) * 100}%` }}
-                />
-                <span className="text-[10px] text-gray-400">
-                  {EARNINGS_MONTHS[idx]}
-                </span>
-              </div>
-            ))}
+          <div className="text-center py-8">
+            <CurrencyDollarIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900">GH₵{stats.monthlyEarnings.toLocaleString()}</p>
+            <p className="text-[10px] sm:text-xs text-gray-400 mt-1">This month</p>
           </div>
         </div>
       </div>
@@ -337,8 +233,14 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="space-y-3">
-            {RECENT_PROPOSALS.map((proposal) => {
-              const style = statusStyles[proposal.status];
+            {proposals.length === 0 ? (
+              <div className="text-center py-8">
+                <DocumentTextIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">No proposals sent yet</p>
+                <Link href="/gigs" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Find gigs to apply</Link>
+              </div>
+            ) : proposals.map((proposal) => {
+              const style = statusStyles[proposal.status] ?? statusStyles.pending;
               return (
                 <div
                   key={proposal.id}
@@ -346,10 +248,10 @@ export default function DashboardPage() {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 truncate">
-                      {proposal.title}
+                      {proposal.gigTitle}
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      {proposal.budget} • {proposal.submitted}
+                      GH₵{proposal.budget.toLocaleString()} &bull; {new Date(proposal.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <span
@@ -363,11 +265,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recommended Gigs */}
+        {/* Browse Gigs */}
         <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-5">
             <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              Recommended for You
+              Find Work
             </h2>
             <Link
               href="/gigs"
@@ -377,37 +279,13 @@ export default function DashboardPage() {
               <ChevronRightIcon className="w-3 h-3" />
             </Link>
           </div>
-          <div className="space-y-3">
-            {RECOMMENDED_GIGS.map((gig) => (
-              <Link
-                key={gig.id}
-                href={`/gigs/${gig.id}`}
-                className="block p-3 rounded-xl hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800">
-                      {gig.title}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {gig.budget} • {gig.proposals} proposals •{' '}
-                      {gig.postedAt}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {gig.skills.map((s) => (
-                        <span
-                          key={s}
-                          className="px-2 py-0.5 bg-gray-50 text-gray-500 text-[10px] font-medium rounded-full"
-                        >
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <ChevronRightIcon className="w-4 h-4 text-gray-300 shrink-0 mt-1" />
-                </div>
-              </Link>
-            ))}
+          <div className="text-center py-8">
+            <ArrowUpRightIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm text-gray-500 mb-2">Explore available gigs and start earning</p>
+            <Link href="/gigs" className="btn-primary inline-flex items-center gap-2">
+              Browse Gigs
+              <ArrowUpRightIcon className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </div>

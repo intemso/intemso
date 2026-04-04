@@ -33,7 +33,9 @@ export class PaymentsService {
     private prisma: PrismaService,
     private config: ConfigService,
   ) {
-    this.paystackSecretKey = this.config.get<string>('PAYSTACK_SECRET_KEY', 'sk_test_placeholder');
+    const key = this.config.get<string>('PAYSTACK_SECRET_KEY');
+    if (!key) throw new Error('PAYSTACK_SECRET_KEY environment variable is required');
+    this.paystackSecretKey = key;
   }
 
   // ════════════════════════════════════════════════════════════
