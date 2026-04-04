@@ -33,8 +33,7 @@ export default function SystemPage() {
     setError('');
     const apiUrl =
       process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-    const baseUrl = apiUrl.replace(/\/api\/v1\/?$/, '');
-    fetch(`${baseUrl}/health`)
+    fetch(`${apiUrl}/health`)
       .then((r) => r.json())
       .then((data) => setHealth(data))
       .catch(() => setError('Failed to reach API server'))
