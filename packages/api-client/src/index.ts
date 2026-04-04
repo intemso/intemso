@@ -1518,6 +1518,18 @@ export interface AdminCategory {
   _count: { gigs: number };
 }
 
+export interface AuditLogEntry {
+  id: string;
+  userId: string;
+  action: string;
+  entity: string;
+  entityId: string | null;
+  details: Record<string, unknown> | null;
+  ipAddress: string | null;
+  createdAt: string;
+  user: { id: string; email: string; role: string };
+}
+
 export const adminApi = {
   // Users
   listUsers(params?: { search?: string; role?: string; status?: string; page?: number; limit?: number }) {
@@ -1618,6 +1630,11 @@ export const adminApi = {
 
   deleteCategory(id: string) {
     return apiFetch<void>(`/admin/categories/${id}`, { method: 'DELETE' });
+  },
+
+  // Audit Log
+  getAuditLog(limit = 100) {
+    return apiFetch<AuditLogEntry[]>(`/admin/audit-log?limit=${limit}`);
   },
 };
 

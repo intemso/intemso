@@ -14,6 +14,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AdminService } from './admin.service';
+import { AuditLogService } from '../common/audit-log.service';
 import { PaymentsService } from '../payments/payments.service';
 import {
   ListUsersDto,
@@ -30,6 +31,7 @@ import {
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
+    private readonly auditLogService: AuditLogService,
     private readonly paymentsService: PaymentsService,
   ) {}
 
@@ -158,5 +160,12 @@ export class AdminController {
   @Post('financial/reconciliation/trigger')
   triggerReconciliation() {
     return this.paymentsService.triggerManualReconciliation();
+  }
+
+  // ── Audit Log ──
+
+  @Get('audit-log')
+  getAuditLog(@Query('limit') limit?: string) {
+    return this.auditLogService.getRecent(limit ? parseInt(limit, 10) : 100);
   }
 }
