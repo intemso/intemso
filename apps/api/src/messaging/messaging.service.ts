@@ -134,11 +134,11 @@ export class MessagingService {
                 name:
                   otherUser.role === 'student'
                     ? `${otherUser.studentProfile?.firstName ?? ''} ${otherUser.studentProfile?.lastName ?? ''}`.trim()
-                    : otherUser.employerProfile?.businessName || otherUser.employerProfile?.contactPerson || otherUser.email,
+                    : otherUser.employerProfile?.businessName || otherUser.employerProfile?.contactPerson || otherUser.email || 'Unknown',
                 avatar:
                   otherUser.role === 'student'
                     ? `${(otherUser.studentProfile?.firstName?.[0] ?? '')}${(otherUser.studentProfile?.lastName?.[0] ?? '')}`
-                    : (otherUser.employerProfile?.businessName?.[0] ?? otherUser.email[0]).toUpperCase(),
+                    : (otherUser.employerProfile?.businessName?.[0] ?? otherUser.email?.[0] ?? 'U').toUpperCase(),
               }
             : null,
         };
