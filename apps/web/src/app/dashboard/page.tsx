@@ -73,13 +73,13 @@ export default function DashboardPage() {
     async function load() {
       try {
         const [statsRes, contractsRes, proposalsRes] = await Promise.allSettled([
-          apiFetch('/dashboard/stats'),
-          apiFetch('/contracts?status=active&limit=3'),
-          apiFetch('/proposals?limit=4'),
+          apiFetch<DashboardStats>('/dashboard/stats'),
+          apiFetch<{ data?: Contract[] }>('/contracts?status=active&limit=3'),
+          apiFetch<{ data?: Proposal[] }>('/proposals?limit=4'),
         ]);
         if (statsRes.status === 'fulfilled') setStats(statsRes.value);
-        if (contractsRes.status === 'fulfilled') setContracts(contractsRes.value?.data ?? contractsRes.value ?? []);
-        if (proposalsRes.status === 'fulfilled') setProposals(proposalsRes.value?.data ?? proposalsRes.value ?? []);
+        if (contractsRes.status === 'fulfilled') setContracts(contractsRes.value?.data ?? []);
+        if (proposalsRes.status === 'fulfilled') setProposals(proposalsRes.value?.data ?? []);
       } catch {
         // silently fail — dashboard shows zeros
       } finally {
