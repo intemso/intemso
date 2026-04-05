@@ -28,7 +28,17 @@ const footerLinks = {
     { name: 'Careers', href: '/careers' },
     { name: 'Press', href: '/press' },
     { name: 'Contact', href: '/contact' },
+  ],
+  Legal: [
+    { name: 'Terms of Service', href: '/terms' },
     { name: 'Privacy Policy', href: '/privacy' },
+    { name: 'Cookie Policy', href: '/cookies' },
+    { name: 'Acceptable Use', href: '/acceptable-use' },
+    { name: 'Escrow & Payments', href: '/escrow-terms' },
+    { name: 'Dispute Resolution', href: '/dispute-resolution' },
+    { name: 'Intellectual Property', href: '/intellectual-property' },
+    { name: 'Refund Policy', href: '/refund-policy' },
+    { name: 'Community Guidelines', href: '/community-guidelines' },
   ],
 };
 
@@ -37,7 +47,7 @@ export default function Footer() {
     <footer className="bg-gray-900 text-gray-300">
       {/* Main footer */}
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8 lg:gap-12">
           {/* Brand column */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1 mb-2 sm:mb-4 lg:mb-0">
             <Link href="/" className="flex items-center gap-2 mb-3 sm:mb-4">
@@ -91,7 +101,7 @@ export default function Footer() {
             <p className="text-[11px] sm:text-xs text-gray-500">
               &copy; {new Date().getFullYear()} Intemso. All rights reserved.
             </p>
-            <div className="flex items-center gap-4 sm:gap-6">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-4 sm:gap-6">
               <Link
                 href="/terms"
                 className="text-[11px] sm:text-xs text-gray-500 hover:text-gray-300 transition-colors"
@@ -109,6 +119,12 @@ export default function Footer() {
                 className="text-[11px] sm:text-xs text-gray-500 hover:text-gray-300 transition-colors"
               >
                 Cookies
+              </Link>
+              <Link
+                href="/acceptable-use"
+                className="text-[11px] sm:text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                Acceptable Use
               </Link>
             </div>
           </div>
