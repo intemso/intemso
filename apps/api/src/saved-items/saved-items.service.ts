@@ -59,7 +59,7 @@ export class SavedItemsService {
                   ratingAvg: true,
                 },
               },
-              _count: { select: { proposals: true } },
+              _count: { select: { applications: true } },
             },
           },
         },
