@@ -22,7 +22,7 @@ import { useAuth } from '@/context/auth';
 
 function formatBudget(min: string | null, max: string | null) {
   const f = (n: number) =>
-    n >= 1000 ? `GHÃ¢â€šÂµ${(n / 1000).toFixed(1)}k` : `GHÃ¢â€šÂµ${n}`;
+    n >= 1000 ? `GH₵${(n / 1000).toFixed(1)}k` : `GH₵${n}`;
   const minN = min ? parseFloat(min) : 0;
   const maxN = max ? parseFloat(max) : 0;
   if (minN && maxN) return `${f(minN)} - ${f(maxN)}`;
