@@ -93,13 +93,13 @@ export default function DashboardPage() {
             Here&apos;s what&apos;s happening with your work today.
           </p>
         </div>
-        <a
-          href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}
+        <Link
+          href="/gigs"
           className="hidden sm:flex items-center gap-2 btn-primary"
         >
           Find New Gigs
           <ArrowUpRightIcon className="w-4 h-4" />
-        </a>
+        </Link>
       </div>
 
       {/* Stats Grid */}
@@ -142,7 +142,7 @@ export default function DashboardPage() {
               <div className="text-center py-8">
                 <BriefcaseIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                 <p className="text-sm text-gray-500">No active contracts yet</p>
-                <a href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'} className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Browse gigs to get started</a>
+                <Link href="/gigs" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Browse gigs to get started</Link>
               </div>
             ) : contracts.map((contract) => {
               const style = statusStyles[contract.status] ?? statusStyles.pending;
@@ -212,7 +212,7 @@ export default function DashboardPage() {
               <div className="text-center py-8">
                 <DocumentTextIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                 <p className="text-sm text-gray-500">No applications yet</p>
-                <a href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'} className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Find gigs to apply</a>
+                <Link href="/gigs" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Find gigs to apply</Link>
               </div>
             ) : applications.map((application) => {
               const style = statusStyles[application.status] ?? statusStyles.applied;
@@ -246,21 +246,21 @@ export default function DashboardPage() {
             <h2 className="text-base sm:text-lg font-bold text-gray-900">
               Find Work
             </h2>
-            <a
-              href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}
+            <Link
+              href="/gigs"
               className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
             >
               Browse All
               <ChevronRightIcon className="w-3 h-3" />
-            </a>
+            </Link>
           </div>
           <div className="text-center py-8">
             <ArrowUpRightIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
             <p className="text-sm text-gray-500 mb-2">Explore available gigs and start earning</p>
-            <a href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'} className="btn-primary inline-flex items-center gap-2">
+            <Link href="/gigs" className="btn-primary inline-flex items-center gap-2">
               Browse Gigs
               <ArrowUpRightIcon className="w-4 h-4" />
-            </a>
+            </Link>
           </div>
         </div>
       </div>
