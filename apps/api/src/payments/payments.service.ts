@@ -1400,9 +1400,11 @@ export class PaymentsService {
 
     const lifetime = relationship ? Number(relationship.lifetimeBillings) : 0;
 
-    if (lifetime >= 2000) return 0.05;
-    if (lifetime >= 500) return 0.10;
-    return 0.20;
+    // FEE_TIER_LIST thresholds are ceilings: [{500, 0.20}, {2000, 0.10}, {Inf, 0.05}]
+    for (const tier of FEE_TIER_LIST) {
+      if (lifetime < tier.threshold) return tier.rate;
+    }
+    return FEE_TIER_LIST[FEE_TIER_LIST.length - 1].rate;
   }
 
   private async updateClientRelationship(tx: any, studentId: string, employerId: string, amount: number) {

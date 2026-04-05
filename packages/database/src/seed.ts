@@ -134,7 +134,7 @@ async function main() {
     await prisma.connectBalance.upsert({
       where: { studentId: profile.id },
       update: {},
-      create: { studentId: profile.id, freeConnects: 10 + Math.floor(Math.random() * 20), purchasedConnects: Math.floor(Math.random() * 40) },
+      create: { studentId: profile.id, freeConnects: 15 + Math.floor(Math.random() * 20), purchasedConnects: Math.floor(Math.random() * 40) },
     });
     studentUsers.push({ userId: user.id, profileId: profile.id, data: s });
     console.log(`  ✅ ${s.firstName} ${s.lastName} (${s.uni})`);

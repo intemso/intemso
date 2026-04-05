@@ -334,7 +334,7 @@ export default function GigDetailPage() {
                     <p className="text-xs text-amber-700">
                       You need {gig.connectsRequired} connects to apply.{' '}
                       <a
-                        href={`${process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}/pricing`}
+                        href="/connects"
                         className="font-medium underline"
                       >
                         Get more connects
