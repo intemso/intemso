@@ -19,13 +19,9 @@ const footerLinks = {
     { name: 'Help Center', href: '/help' },
     { name: 'Blog', href: '/blog' },
     { name: 'Community', href: '/community' },
-    { name: 'Affiliate Program', href: '/affiliates' },
-    { name: 'API Documentation', href: '/docs' },
   ],
   Company: [
     { name: 'About Us', href: '/about' },
-    { name: 'Careers', href: '/careers' },
-    { name: 'Press', href: '/press' },
     { name: 'Contact', href: '/contact' },
   ],
   Legal: [
