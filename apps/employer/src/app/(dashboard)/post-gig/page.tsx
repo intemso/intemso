@@ -150,7 +150,7 @@ export default function PostGigPage() {
         communityApi.crossPostGig(created.id).catch(() => {});
       }
 
-      router.push(`/gigs/${created.id}`);
+      router.push('/gigs');
     } catch (err: unknown) {
       const apiErr = err as { message?: string | string[] };
       const msg = apiErr?.message
