@@ -17,14 +17,14 @@ export class ConnectsController {
 
   /** Get connect balance */
   @Get('balance')
-  @Roles('STUDENT')
+  @Roles('student')
   getBalance(@CurrentUser('id') userId: string) {
     return this.connectsService.getBalance(userId);
   }
 
   /** Connect transaction history */
   @Get('transactions')
-  @Roles('STUDENT')
+  @Roles('student')
   transactions(
     @CurrentUser('id') userId: string,
     @Query('page') page?: string,

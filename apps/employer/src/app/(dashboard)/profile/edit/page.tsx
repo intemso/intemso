@@ -125,7 +125,10 @@ export default function EditProfilePage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to save profile';
+      const apiErr = err as { message?: string | string[] };
+      const msg = apiErr?.message
+        ? Array.isArray(apiErr.message) ? apiErr.message.join(', ') : String(apiErr.message)
+        : 'Failed to save profile';
       setError(msg);
     } finally {
       setSaving(false);

@@ -152,7 +152,10 @@ export default function PostGigPage() {
 
       router.push(`/gigs/${created.id}`);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to post gig';
+      const apiErr = err as { message?: string | string[] };
+      const msg = apiErr?.message
+        ? Array.isArray(apiErr.message) ? apiErr.message.join(', ') : String(apiErr.message)
+        : 'Failed to post gig';
       setSubmitError(msg);
     } finally {
       setSubmitting(false);
@@ -689,7 +692,15 @@ export default function PostGigPage() {
             )}
             {step < totalSteps ? (
               <button
-                onClick={() => setStep((s) => (s + 1) as 1 | 2 | 3 | 4)}
+                onClick={() => {
+                  if (step === 1) {
+                    if (form.title.length < 10) { setSubmitError('Title must be at least 10 characters'); return; }
+                    if (form.description.length < 50) { setSubmitError('Description must be at least 50 characters'); return; }
+                    if (!form.categoryId) { setSubmitError('Please select a category'); return; }
+                    setSubmitError('');
+                  }
+                  setStep((s) => (s + 1) as 1 | 2 | 3 | 4);
+                }}
                 className="btn-primary flex items-center gap-2"
               >
                 Continue

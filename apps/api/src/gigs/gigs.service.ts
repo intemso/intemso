@@ -118,6 +118,7 @@ export class GigsService {
         ...data,
         employerId,
         status: 'open',
+        publishedAt: new Date(),
       },
     });
   }

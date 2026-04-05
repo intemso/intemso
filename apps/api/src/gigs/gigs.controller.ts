@@ -40,7 +40,7 @@ export class GigsController {
 
   @Get('mine')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('EMPLOYER')
+  @Roles('employer')
   findMine(
     @CurrentUser('id') userId: string,
     @Query('page') page?: string,
@@ -61,14 +61,14 @@ export class GigsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('EMPLOYER')
+  @Roles('employer')
   create(@CurrentUser('id') userId: string, @Body() body: CreateGigDto) {
     return this.gigsService.create(userId, body);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('EMPLOYER')
+  @Roles('employer')
   update(
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
@@ -79,7 +79,7 @@ export class GigsController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('EMPLOYER')
+  @Roles('employer')
   remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.gigsService.remove(id, userId);
   }

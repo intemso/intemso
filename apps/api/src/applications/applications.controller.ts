@@ -24,7 +24,7 @@ export class ApplicationsController {
   /** Student applies for a gig (Easy Apply) */
   @Post('gigs/:gigId/applications')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('STUDENT')
+  @Roles('student')
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   create(
     @CurrentUser('id') userId: string,
@@ -37,7 +37,7 @@ export class ApplicationsController {
   /** Employer views applications for their gig */
   @Get('gigs/:gigId/applications')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('EMPLOYER')
+  @Roles('employer')
   findByGig(
     @CurrentUser('id') userId: string,
     @Param('gigId') gigId: string,
@@ -55,7 +55,7 @@ export class ApplicationsController {
   /** Student views their own applications */
   @Get('applications/me')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('STUDENT')
+  @Roles('student')
   findMine(
     @CurrentUser('id') userId: string,
     @Query('page') page?: string,
@@ -83,7 +83,7 @@ export class ApplicationsController {
   /** Employer updates application status (review, hire, decline) */
   @Patch('applications/:id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('EMPLOYER')
+  @Roles('employer')
   updateStatus(
     @CurrentUser('id') userId: string,
     @Param('id') id: string,
@@ -95,7 +95,7 @@ export class ApplicationsController {
   /** Student withdraws their application */
   @Patch('applications/:id/withdraw')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('STUDENT')
+  @Roles('student')
   withdraw(
     @CurrentUser('id') userId: string,
     @Param('id') id: string,

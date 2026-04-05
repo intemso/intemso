@@ -23,7 +23,7 @@ export class ContractsController {
   /** Employer creates a direct contract */
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('EMPLOYER')
+  @Roles('employer')
   create(@CurrentUser('id') userId: string, @Body() dto: CreateContractDto) {
     return this.contractsService.create(userId, dto);
   }
