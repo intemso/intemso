@@ -323,7 +323,7 @@ export class ApplicationsService {
     if (dto.status === 'hired') {
       // Guard against rate=0: require at least one non-zero rate source
       const agreedRate = application.suggestedRate ?? application.gig.budgetMin ?? application.student.hourlyRate;
-      if (!agreedRate || agreedRate <= 0) {
+      if (!agreedRate || Number(agreedRate) <= 0) {
         throw new BadRequestException(
           'Cannot hire: no valid agreed rate. The student must set an hourly rate or suggest a rate.',
         );
