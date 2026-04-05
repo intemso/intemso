@@ -64,6 +64,9 @@ model User {
   // Post views
   postViews CommunityPostView[]
 
+  // Blog
+  blogPosts BlogPost[]
+
   @@map("users")
 }
 
@@ -1362,4 +1365,50 @@ model CommunityPostView {
   @@index([userId])
   @@index([postId])
   @@map("community_post_views")
+}
+
+// ============================================================
+// BLOG
+// ============================================================
+
+enum BlogStatus {
+  draft
+  published
+  archived
+}
+
+model BlogPost {
+  id              String     @id @default(uuid()) @db.Uuid
+  authorId        String     @map("author_id") @db.Uuid
+  title           String     @db.VarChar(300)
+  slug            String     @unique @db.VarChar(350)
+  excerpt         String?    @db.VarChar(500)
+  content         String
+  featuredImage   String?    @map("featured_image")
+  featuredImageAlt String?   @map("featured_image_alt") @db.VarChar(300)
+  category        String?    @db.VarChar(100)
+  tags            String[]   @default([])
+  status          BlogStatus @default(draft)
+  readingTimeMin  Int        @default(1) @map("reading_time_min")
+  viewCount       Int        @default(0) @map("view_count")
+
+  // SEO fields
+  metaTitle       String?   @map("meta_title") @db.VarChar(70)
+  metaDescription String?   @map("meta_description") @db.VarChar(160)
+  canonicalUrl    String?   @map("canonical_url")
+  ogImage         String?   @map("og_image")
+  noIndex         Boolean   @default(false) @map("no_index")
+  focusKeyword    String?   @map("focus_keyword") @db.VarChar(100)
+  structuredData  Json?     @map("structured_data")
+
+  publishedAt     DateTime? @map("published_at") @db.Timestamptz
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([category])
+  @@index([authorId])
+  @@map("blog_posts")
 }

@@ -24,6 +24,7 @@ const navigation = [
   { name: 'Find Talent', href: '/talent' },
   { name: 'Community', href: '/community' },
   { name: 'Showcase', href: '/showcase' },
+  { name: 'Blog', href: '/blog' },
   { name: 'Why Intemso', href: '/about' },
 ];
 

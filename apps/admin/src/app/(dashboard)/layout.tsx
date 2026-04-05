@@ -21,6 +21,7 @@ import {
   AcademicCapIcon,
   BellAlertIcon,
   ServerIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/context/auth';
@@ -34,6 +35,7 @@ const navigation = [
   { name: 'Community', href: '/moderation', icon: ChatBubbleLeftRightIcon },
   { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
   { name: 'Categories', href: '/categories', icon: TagIcon },
+  { name: 'Blog', href: '/blog', icon: DocumentTextIcon },
   { name: 'Financials', href: '/financials', icon: CurrencyDollarIcon },
   { name: 'Audit Log', href: '/audit-log', icon: ClipboardDocumentListIcon },
   { name: 'Universities', href: '/universities', icon: AcademicCapIcon },

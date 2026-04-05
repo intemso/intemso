@@ -1996,3 +1996,81 @@ export const communityApi = {
     return apiFetch<CommunityAnalytics>('/community/analytics');
   },
 };
+
+// ── Blog types ──
+
+export interface BlogPostSummary {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  featuredImage: string | null;
+  featuredImageAlt: string | null;
+  category: string | null;
+  tags: string[];
+  readingTimeMin: number;
+  viewCount: number;
+  publishedAt: string | null;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string;
+  featuredImage: string | null;
+  featuredImageAlt: string | null;
+  category: string | null;
+  tags: string[];
+  readingTimeMin: number;
+  viewCount: number;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  canonicalUrl: string | null;
+  ogImage: string | null;
+  noIndex: boolean;
+  focusKeyword: string | null;
+  structuredData: Record<string, unknown> | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  author: { id: string; firstName: string; lastName: string; avatarUrl: string | null };
+}
+
+export interface BlogFeed {
+  data: BlogPostSummary[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}
+
+export interface BlogCategory {
+  name: string;
+  count: number;
+}
+
+// ── Blog API ──
+
+export const blogApi = {
+  list(params?: { search?: string; category?: string; tag?: string; page?: number; limit?: number }) {
+    const sp = new URLSearchParams();
+    if (params?.search) sp.set('search', params.search);
+    if (params?.category) sp.set('category', params.category);
+    if (params?.tag) sp.set('tag', params.tag);
+    if (params?.page) sp.set('page', String(params.page));
+    if (params?.limit) sp.set('limit', String(params.limit));
+    const qs = sp.toString();
+    return apiFetch<BlogFeed>(`/blog${qs ? `?${qs}` : ''}`);
+  },
+
+  getBySlug(slug: string) {
+    return apiFetch<BlogPost>(`/blog/slug/${slug}`);
+  },
+
+  getRelated(slug: string) {
+    return apiFetch<BlogPostSummary[]>(`/blog/slug/${slug}/related`);
+  },
+
+  getCategories() {
+    return apiFetch<BlogCategory[]>('/blog/categories');
+  },
+};

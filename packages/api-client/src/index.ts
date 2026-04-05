@@ -2015,3 +2015,141 @@ export const communityApi = {
     return apiFetch<CommunityAnalytics>('/community/analytics');
   },
 };
+
+// ── Blog API ──
+
+export interface BlogPostSummary {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  featuredImage: string | null;
+  featuredImageAlt: string | null;
+  category: string | null;
+  tags: string[];
+  readingTimeMin: number;
+  viewCount: number;
+  publishedAt: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  author: { id: string; avatarUrl: string | null };
+}
+
+export interface BlogPost extends BlogPostSummary {
+  content: string;
+  status: 'draft' | 'published' | 'archived';
+  canonicalUrl: string | null;
+  ogImage: string | null;
+  noIndex: boolean;
+  focusKeyword: string | null;
+  structuredData: object | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogPostFeed {
+  data: BlogPostSummary[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}
+
+export interface BlogPostAdminFeed {
+  data: BlogPost[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}
+
+export interface BlogCategory { name: string; count: number; }
+export interface BlogTag { name: string; count: number; }
+
+export const blogApi = {
+  // Public
+  list(params?: { category?: string; tag?: string; search?: string; page?: number; limit?: number }) {
+    const sp = new URLSearchParams();
+    if (params?.category) sp.set('category', params.category);
+    if (params?.tag) sp.set('tag', params.tag);
+    if (params?.search) sp.set('search', params.search);
+    if (params?.page) sp.set('page', String(params.page));
+    if (params?.limit) sp.set('limit', String(params.limit));
+    const qs = sp.toString();
+    return apiFetch<BlogPostFeed>(`/blog${qs ? `?${qs}` : ''}`);
+  },
+
+  getBySlug(slug: string) {
+    return apiFetch<BlogPost>(`/blog/slug/${slug}`);
+  },
+
+  getRelated(slug: string, limit = 3) {
+    return apiFetch<BlogPostSummary[]>(`/blog/slug/${slug}/related?limit=${limit}`);
+  },
+
+  getCategories() {
+    return apiFetch<BlogCategory[]>('/blog/categories');
+  },
+
+  getTags() {
+    return apiFetch<BlogTag[]>('/blog/tags');
+  },
+
+  // Admin
+  adminList(params?: { status?: string; category?: string; search?: string; page?: number; limit?: number }) {
+    const sp = new URLSearchParams();
+    if (params?.status) sp.set('status', params.status);
+    if (params?.category) sp.set('category', params.category);
+    if (params?.search) sp.set('search', params.search);
+    if (params?.page) sp.set('page', String(params.page));
+    if (params?.limit) sp.set('limit', String(params.limit));
+    const qs = sp.toString();
+    return apiFetch<BlogPostAdminFeed>(`/blog/admin${qs ? `?${qs}` : ''}`);
+  },
+
+  adminGet(id: string) {
+    return apiFetch<BlogPost>(`/blog/admin/${id}`);
+  },
+
+  adminCreate(data: {
+    title: string;
+    slug: string;
+    content: string;
+    excerpt?: string;
+    featuredImage?: string;
+    featuredImageAlt?: string;
+    category?: string;
+    tags?: string[];
+    status?: 'draft' | 'published' | 'archived';
+    metaTitle?: string;
+    metaDescription?: string;
+    canonicalUrl?: string;
+    ogImage?: string;
+    noIndex?: boolean;
+    focusKeyword?: string;
+  }) {
+    return apiFetch<BlogPost>('/blog/admin', { method: 'POST', body: JSON.stringify(data) });
+  },
+
+  adminUpdate(id: string, data: {
+    title?: string;
+    slug?: string;
+    content?: string;
+    excerpt?: string;
+    featuredImage?: string;
+    featuredImageAlt?: string;
+    category?: string;
+    tags?: string[];
+    status?: 'draft' | 'published' | 'archived';
+    metaTitle?: string;
+    metaDescription?: string;
+    canonicalUrl?: string;
+    ogImage?: string;
+    noIndex?: boolean;
+    focusKeyword?: string;
+  }) {
+    return apiFetch<BlogPost>(`/blog/admin/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+  },
+
+  adminDelete(id: string) {
+    return apiFetch<{ message: string }>(`/blog/admin/${id}`, { method: 'DELETE' });
+  },
+
+  adminUploadImage(file: File) {
+    return uploadFiles('/blog/admin/upload-image', [file]).then((r) => r[0]);
+  },
+};

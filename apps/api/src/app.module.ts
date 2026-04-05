@@ -30,6 +30,7 @@ import { HealthModule } from './health/health.module';
 import { CommunityModule } from './community/community.module';
 import { ShowcaseModule } from './showcase/showcase.module';
 import { DisputesModule } from './disputes/disputes.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { DisputesModule } from './disputes/disputes.module';
     CommunityModule,
     ShowcaseModule,
     DisputesModule,
+    BlogModule,
   ],
 })
 export class AppModule {}

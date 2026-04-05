@@ -95,6 +95,13 @@ export class UploadsService implements OnModuleInit {
     return this.uploadToCloudinary(file, 'intemso/attachments');
   }
 
+  async uploadBlogImage(file: Express.Multer.File): Promise<UploadedFile> {
+    this.validateFile(file, ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE);
+    return this.uploadToCloudinary(file, 'intemso/blog', {
+      transformation: [{ width: 1200, crop: 'limit', quality: 'auto:good' }],
+    });
+  }
+
   async deleteFile(publicId: string): Promise<void> {
     try {
       await cloudinary.uploader.destroy(publicId);
