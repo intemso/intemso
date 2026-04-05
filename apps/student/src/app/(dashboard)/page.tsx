@@ -19,32 +19,13 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/context/auth';
-import { apiFetch } from '@/lib/api';
+import { contractsApi, applicationsApi, type ContractListItem, type ApplicationListItem } from '@/lib/api';
 
 interface DashboardStats {
   activeContracts: number;
   pendingApplications: number;
   monthlyEarnings: number;
   profileViews: number;
-}
-
-interface Contract {
-  id: string;
-  title: string;
-  clientName: string;
-  budget: number;
-  status: string;
-  currentMilestone?: string;
-  dueDate?: string;
-  progress: number;
-}
-
-interface Application {
-  id: string;
-  gigTitle: string;
-  budget: number;
-  status: string;
-  createdAt: string;
 }
 
 const statusStyles: Record<string, { bg: string; text: string; label: string }> = {
@@ -62,8 +43,8 @@ const statusStyles: Record<string, { bg: string; text: string; label: string }> 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({ activeContracts: 0, pendingApplications: 0, monthlyEarnings: 0, profileViews: 0 });
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [contracts, setContracts] = useState<ContractListItem[]>([]);
+  const [applications, setApplications] = useState<ApplicationListItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const firstName = (user?.studentProfile as any)?.firstName
@@ -73,14 +54,18 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [statsRes, contractsRes, appsRes] = await Promise.allSettled([
-          apiFetch<DashboardStats>('/stats'),
-          apiFetch<{ data?: Contract[] }>('/contracts?status=active&limit=3'),
-          apiFetch<{ data?: Application[] }>('/applications?limit=4'),
+        const [contractsRes, appsRes] = await Promise.allSettled([
+          contractsApi.listMine({ status: 'active', limit: 3 }),
+          applicationsApi.listMine({ limit: 4 }),
         ]);
-        if (statsRes.status === 'fulfilled') setStats(statsRes.value);
-        if (contractsRes.status === 'fulfilled') setContracts(contractsRes.value?.data ?? []);
-        if (appsRes.status === 'fulfilled') setApplications(appsRes.value?.data ?? []);
+        if (contractsRes.status === 'fulfilled') {
+          setContracts(contractsRes.value?.data ?? []);
+          setStats(prev => ({ ...prev, activeContracts: contractsRes.value?.meta?.total ?? 0 }));
+        }
+        if (appsRes.status === 'fulfilled') {
+          setApplications(appsRes.value?.data ?? []);
+          setStats(prev => ({ ...prev, pendingApplications: appsRes.value?.meta?.total ?? 0 }));
+        }
       } catch {
         // silently fail — dashboard shows zeros
       } finally {
@@ -93,8 +78,8 @@ export default function DashboardPage() {
   const STATS_DISPLAY = [
     { label: 'Active Contracts', value: String(stats.activeContracts), icon: BriefcaseIcon, color: 'bg-blue-50 text-blue-600' },
     { label: 'Pending Applications', value: String(stats.pendingApplications), icon: DocumentTextIcon, color: 'bg-amber-50 text-amber-600' },
-    { label: 'Earnings (This Month)', value: `GH?${stats.monthlyEarnings.toLocaleString()}`, icon: CurrencyDollarIcon, color: 'bg-green-50 text-green-600' },
-    { label: 'Profile Views', value: String(stats.profileViews), icon: EyeIcon, color: 'bg-purple-50 text-purple-600' },
+    { label: 'Earnings (This Month)', value: `GH₵${stats.monthlyEarnings.toLocaleString()}`, icon: CurrencyDollarIcon, color: 'bg-green-50 text-green-600' },
+    { label: 'Profile Views', value: '--', icon: EyeIcon, color: 'bg-purple-50 text-purple-600' },
   ];
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -108,13 +93,13 @@ export default function DashboardPage() {
             Here&apos;s what&apos;s happening with your work today.
           </p>
         </div>
-        <Link
-          href="/gigs"
+        <a
+          href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}
           className="hidden sm:flex items-center gap-2 btn-primary"
         >
           Find New Gigs
           <ArrowUpRightIcon className="w-4 h-4" />
-        </Link>
+        </a>
       </div>
 
       {/* Stats Grid */}
@@ -157,7 +142,7 @@ export default function DashboardPage() {
               <div className="text-center py-8">
                 <BriefcaseIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                 <p className="text-sm text-gray-500">No active contracts yet</p>
-                <Link href="/gigs" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Browse gigs to get started</Link>
+                <a href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'} className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Browse gigs to get started</a>
               </div>
             ) : contracts.map((contract) => {
               const style = statusStyles[contract.status] ?? statusStyles.pending;
@@ -173,7 +158,7 @@ export default function DashboardPage() {
                         {contract.title}
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {contract.clientName} &bull; GH?{contract.budget.toLocaleString()}
+                        {contract.employer?.businessName} &bull; GH₵{parseFloat(contract.agreedRate).toLocaleString()}
                       </p>
                     </div>
                     <span
@@ -182,17 +167,6 @@ export default function DashboardPage() {
                       {style.label}
                     </span>
                   </div>
-                  {contract.currentMilestone && (
-                    <div className="mt-3">
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="text-gray-500">{contract.currentMilestone}</span>
-                        {contract.dueDate && <span className="text-gray-400">Due {new Date(contract.dueDate).toLocaleDateString()}</span>}
-                      </div>
-                      <div className="w-full bg-gray-100 rounded-full h-1.5">
-                        <div className="h-1.5 rounded-full bg-primary-500" style={{ width: `${contract.progress}%` }} />
-                      </div>
-                    </div>
-                  )}
                 </Link>
               );
             })}
@@ -212,7 +186,7 @@ export default function DashboardPage() {
           </div>
           <div className="text-center py-8">
             <CurrencyDollarIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900">GH?{stats.monthlyEarnings.toLocaleString()}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900">GH₵{stats.monthlyEarnings.toLocaleString()}</p>
             <p className="text-[10px] sm:text-xs text-gray-400 mt-1">This month</p>
           </div>
         </div>
@@ -238,7 +212,7 @@ export default function DashboardPage() {
               <div className="text-center py-8">
                 <DocumentTextIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                 <p className="text-sm text-gray-500">No applications yet</p>
-                <Link href="/gigs" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Find gigs to apply</Link>
+                <a href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'} className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Find gigs to apply</a>
               </div>
             ) : applications.map((application) => {
               const style = statusStyles[application.status] ?? statusStyles.applied;
@@ -249,10 +223,10 @@ export default function DashboardPage() {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 truncate">
-                      {application.gigTitle}
+                      {application.gig?.title ?? 'Untitled Gig'}
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      GH?{application.budget.toLocaleString()} &bull; {new Date(application.createdAt).toLocaleDateString()}
+                      {application.gig?.budgetMin ? `GH₵${parseFloat(application.gig.budgetMin).toLocaleString()}` : 'Negotiable'} &bull; {new Date(application.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <span
@@ -272,21 +246,21 @@ export default function DashboardPage() {
             <h2 className="text-base sm:text-lg font-bold text-gray-900">
               Find Work
             </h2>
-            <Link
-              href="/gigs"
+            <a
+              href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}
               className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
             >
               Browse All
               <ChevronRightIcon className="w-3 h-3" />
-            </Link>
+            </a>
           </div>
           <div className="text-center py-8">
             <ArrowUpRightIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
             <p className="text-sm text-gray-500 mb-2">Explore available gigs and start earning</p>
-            <Link href="/gigs" className="btn-primary inline-flex items-center gap-2">
+            <a href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'} className="btn-primary inline-flex items-center gap-2">
               Browse Gigs
               <ArrowUpRightIcon className="w-4 h-4" />
-            </Link>
+            </a>
           </div>
         </div>
       </div>
@@ -298,13 +272,13 @@ export default function DashboardPage() {
             <UserGroupIcon className="w-5 h-5 text-primary-600" />
             <h2 className="text-base sm:text-lg font-bold text-gray-900">Community Activity</h2>
           </div>
-          <Link
-            href="/community"
+          <a
+            href={`${process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}/community`}
             className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
           >
             View Community
             <ChevronRightIcon className="w-3 h-3" />
-          </Link>
+          </a>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
           <div className="text-center p-4 bg-primary-50/50 rounded-xl">
