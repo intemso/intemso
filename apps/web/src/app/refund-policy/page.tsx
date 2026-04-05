@@ -108,20 +108,20 @@ export default function RefundPolicyPage() {
 
           <h3 className="text-lg font-semibold text-gray-800 mt-6 mb-3">4.2 Connects Restoration</h3>
           <p className="text-gray-600 mb-4">
-            In the following limited circumstances, Connects that were used to submit a proposal may be restored to the Student&apos;s Account:
+            In the following limited circumstances, Connects that were used to apply to a gig may be restored to the Student's Account:
           </p>
           <ul className="list-disc pl-6 text-gray-600 space-y-2 mb-6">
-            <li>The gig to which the proposal was submitted is cancelled, withdrawn, or removed by the Employer or by Intemso before the Employer has reviewed or acted on the proposal.</li>
+            <li>The gig to which the application was submitted is cancelled, withdrawn, or removed by the Employer or by Intemso before the Employer has reviewed or acted on the application.</li>
             <li>The gig posting is determined to be fraudulent, in violation of the <Link href="/acceptable-use" className="text-primary-600 hover:text-primary-700 underline">Acceptable Use Policy</Link>, or otherwise illegitimate.</li>
             <li>A technical error or Platform malfunction caused the Connects to be deducted incorrectly.</li>
           </ul>
           <p className="text-gray-600 mb-4">
-            Connects are not restored for proposals that are not accepted by the Employer, as this is a normal and expected part of the competitive proposal process.
+            Connects are not restored for applications that are declined by the Employer, as this is a normal and expected part of the application process.
           </p>
 
           <h3 className="text-lg font-semibold text-gray-800 mt-6 mb-3">4.3 Free Monthly Connects</h3>
           <p className="text-gray-600 mb-4">
-            The fifteen (15) free Connects allocated to each Student at the beginning of each calendar month are non refundable and have no cash value. Unused free Connects do not roll over to the following month and are forfeited at the end of each calendar month. Free Connects are used before purchased Connects when a Student submits a proposal.
+            The fifteen (15) free Connects allocated to each Student at the beginning of each calendar month are non refundable and have no cash value. Unused free Connects do not roll over to the following month and are forfeited at the end of each calendar month. Free Connects are used before purchased Connects when a Student applies to a gig.
           </p>
 
           <h2 className="text-xl font-bold text-gray-900 mt-10 mb-4">5. Service Fee Refunds</h2>

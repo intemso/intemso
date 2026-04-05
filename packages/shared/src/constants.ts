@@ -6,7 +6,7 @@ export const DEFAULT_CURRENCY = 'GHS';
 // ── Connects ──
 export const FREE_MONTHLY_CONNECTS = 10;
 export const MAX_ROLLOVER_CONNECTS = 80;
-export const DEFAULT_CONNECTS_PER_PROPOSAL = 2;
+export const DEFAULT_CONNECTS_PER_APPLICATION = 1;
 
 export const CONNECT_PACKS = [
   { size: 10, price: 5 },

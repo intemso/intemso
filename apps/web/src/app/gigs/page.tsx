@@ -186,7 +186,7 @@ export default function BrowseGigsPage() {
                 <option value="newest">Newest</option>
                 <option value="budget-high">Highest Budget</option>
                 <option value="budget-low">Lowest Budget</option>
-                <option value="proposals">Fewest Proposals</option>
+                <option value="proposals">Fewest Applications</option>
               </select>
             </div>
             <span className="hidden sm:inline text-xs sm:text-sm text-gray-400">
@@ -230,7 +230,7 @@ export default function BrowseGigsPage() {
                   <option value="newest">Newest</option>
                   <option value="budget-high">Highest Budget</option>
                   <option value="budget-low">Lowest Budget</option>
-                  <option value="proposals">Fewest Proposals</option>
+                  <option value="proposals">Fewest Applications</option>
                 </select>
               </div>
               {/* Reuse the same filter content */}
@@ -616,7 +616,7 @@ export default function BrowseGigsPage() {
                       </div>
                     </div>
                     <span className="text-xs text-gray-400">
-                      {gig.proposalsCount} proposals
+                      {gig.applicationsCount} applications
                     </span>
                   </div>
                 </button>
@@ -675,9 +675,9 @@ export default function BrowseGigsPage() {
                   </p>
                 </div>
                 <div className="bg-purple-50 rounded-xl p-3 text-center">
-                  <p className="text-xs text-purple-600 font-medium">Proposals</p>
+                  <p className="text-xs text-purple-600 font-medium">Applications</p>
                   <p className="text-sm font-bold text-purple-700 mt-0.5">
-                    {selectedGig.proposalsCount}
+                    {selectedGig.applicationsCount}
                   </p>
                 </div>
                 <div className="bg-amber-50 rounded-xl p-3 text-center">

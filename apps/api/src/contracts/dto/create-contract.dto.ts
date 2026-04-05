@@ -13,7 +13,7 @@ export class CreateContractDto {
 
   @IsString()
   @IsOptional()
-  proposalId?: string;
+  applicationId?: string;
 
   @IsString()
   studentId!: string;

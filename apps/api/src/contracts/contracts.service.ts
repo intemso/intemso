@@ -21,8 +21,8 @@ export class ContractsService {
   ) {}
 
   /**
-   * Employer creates a contract (direct hire or from proposal).
-   * Note: Hiring via proposal status update also creates contracts automatically in ProposalsService.
+   * Employer creates a contract (direct hire or from application).
+   * Note: Hiring via application status update also creates contracts automatically in ApplicationsService.
    */
   async create(employerUserId: string, dto: CreateContractDto) {
     const employer = await this.prisma.employerProfile.findUnique({
@@ -46,7 +46,7 @@ export class ContractsService {
     const contract = await this.prisma.contract.create({
       data: {
         gigId: dto.gigId,
-        proposalId: dto.proposalId,
+        applicationId: dto.applicationId,
         studentId: dto.studentId,
         employerId: employer.id,
         contractType: dto.contractType,
@@ -54,7 +54,7 @@ export class ContractsService {
         description: dto.description,
         agreedRate: dto.agreedRate,
         weeklyLimit: dto.weeklyLimit,
-        isDirect: dto.isDirect ?? !dto.proposalId,
+        isDirect: dto.isDirect ?? !dto.applicationId,
       },
       include: {
         student: { select: { id: true, firstName: true, lastName: true, userId: true } },
@@ -154,7 +154,7 @@ export class ContractsService {
         milestones: {
           orderBy: { sortOrder: 'asc' },
         },
-        proposal: { select: { id: true, coverLetter: true, proposedRate: true } },
+        application: { select: { id: true, note: true, suggestedRate: true } },
       },
     });
 

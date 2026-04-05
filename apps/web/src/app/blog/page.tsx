@@ -3,7 +3,7 @@ export default function BlogPage() {
     { title: 'Top 10 Skills Employers Look for in Student Freelancers', category: 'Career Tips', date: 'Mar 20, 2026', readTime: '5 min', excerpt: 'Discover the most in-demand skills on Intemso and how to develop them while still in university.' },
     { title: 'How to Build a Portfolio That Gets You Hired', category: 'Student Guide', date: 'Mar 15, 2026', readTime: '7 min', excerpt: 'A step-by-step guide to showcasing your work and attracting high-quality clients on Intemso.' },
     { title: 'The Rise of Student Freelancing in Ghana', category: 'Industry Trends', date: 'Mar 10, 2026', readTime: '6 min', excerpt: 'How Ghanaian university students are leveraging digital platforms to earn while they learn.' },
-    { title: '5 Mistakes to Avoid When Writing Proposals', category: 'Career Tips', date: 'Mar 5, 2026', readTime: '4 min', excerpt: 'Common pitfalls that cost students gigs — and how to write proposals that win.' },
+    { title: '5 Tips to Stand Out When Applying for Gigs', category: 'Career Tips', date: 'Mar 5, 2026', readTime: '4 min', excerpt: 'Common mistakes that cost students gigs — and how to make your applications stand out.' },
     { title: 'Balancing Freelancing and Studies: A Student Guide', category: 'Student Guide', date: 'Feb 28, 2026', readTime: '8 min', excerpt: 'Practical time management tips for students juggling academic work and freelance gigs.' },
     { title: 'Why Businesses Are Hiring University Students', category: 'Employer Insights', date: 'Feb 20, 2026', readTime: '5 min', excerpt: 'The business case for tapping into the university talent pool for your next project.' },
   ];

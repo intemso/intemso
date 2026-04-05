@@ -4,7 +4,7 @@ import '@/app/globals.css';
 
 export const metadata: Metadata = {
   title: 'Intemso Student Portal',
-  description: 'Student dashboard — manage your gigs, proposals, earnings and more.',
+  description: 'Student dashboard — manage your gigs, applications, earnings and more.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

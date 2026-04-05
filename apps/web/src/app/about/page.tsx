@@ -290,7 +290,7 @@ export default function AboutPage() {
                 {[
                   { num: '01', title: 'Sign up free', desc: 'University email + basic info. That\'s it. Under 2 minutes. No CV, no links, no uploads.' },
                   { num: '02', title: 'Find gigs that fit', desc: 'Browse by category, location, budget. Ushering this weekend? Typing tonight? App testing tomorrow? Pick what works.' },
-                  { num: '03', title: 'Apply & get hired', desc: 'Send a quick proposal. Employers review profiles and hire — often within hours, sometimes minutes.' },
+                  { num: '03', title: 'Apply & get hired', desc: 'Apply with one click. Employers review profiles and hire — often within hours, sometimes minutes.' },
                   { num: '04', title: 'Work. Get paid.', desc: 'Do the task. Submit through the platform. Money hits your wallet. Withdraw to any Ghanaian bank or MoMo.' },
                 ].map((step) => (
                   <div key={step.num} className="relative">

@@ -23,7 +23,7 @@ import { apiFetch } from '@/lib/api';
 
 interface DashboardStats {
   activeContracts: number;
-  pendingProposals: number;
+  pendingApplications: number;
   monthlyEarnings: number;
   profileViews: number;
 }
@@ -39,7 +39,7 @@ interface Contract {
   progress: number;
 }
 
-interface Proposal {
+interface Application {
   id: string;
   gigTitle: string;
   budget: number;
@@ -48,10 +48,11 @@ interface Proposal {
 }
 
 const statusStyles: Record<string, { bg: string; text: string; label: string }> = {
-  pending: { bg: 'bg-gray-100', text: 'text-gray-600', label: 'Pending' },
-  viewed: { bg: 'bg-blue-50', text: 'text-blue-600', label: 'Viewed' },
-  shortlisted: { bg: 'bg-green-50', text: 'text-green-700', label: 'Shortlisted' },
+  applied: { bg: 'bg-blue-50', text: 'text-blue-600', label: 'Applied' },
+  reviewed: { bg: 'bg-amber-50', text: 'text-amber-600', label: 'Under Review' },
+  hired: { bg: 'bg-green-50', text: 'text-green-700', label: 'Hired' },
   declined: { bg: 'bg-red-50', text: 'text-red-600', label: 'Declined' },
+  withdrawn: { bg: 'bg-gray-100', text: 'text-gray-500', label: 'Withdrawn' },
   active: { bg: 'bg-blue-50', text: 'text-blue-600', label: 'In Progress' },
   in_progress: { bg: 'bg-blue-50', text: 'text-blue-600', label: 'In Progress' },
   review: { bg: 'bg-amber-50', text: 'text-amber-600', label: 'In Review' },
@@ -60,9 +61,9 @@ const statusStyles: Record<string, { bg: string; text: string; label: string }> 
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<DashboardStats>({ activeContracts: 0, pendingProposals: 0, monthlyEarnings: 0, profileViews: 0 });
+  const [stats, setStats] = useState<DashboardStats>({ activeContracts: 0, pendingApplications: 0, monthlyEarnings: 0, profileViews: 0 });
   const [contracts, setContracts] = useState<Contract[]>([]);
-  const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
 
   const firstName = (user?.studentProfile as any)?.firstName
@@ -72,14 +73,14 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [statsRes, contractsRes, proposalsRes] = await Promise.allSettled([
+        const [statsRes, contractsRes, appsRes] = await Promise.allSettled([
           apiFetch<DashboardStats>('/stats'),
           apiFetch<{ data?: Contract[] }>('/contracts?status=active&limit=3'),
-          apiFetch<{ data?: Proposal[] }>('/proposals?limit=4'),
+          apiFetch<{ data?: Application[] }>('/applications?limit=4'),
         ]);
         if (statsRes.status === 'fulfilled') setStats(statsRes.value);
         if (contractsRes.status === 'fulfilled') setContracts(contractsRes.value?.data ?? []);
-        if (proposalsRes.status === 'fulfilled') setProposals(proposalsRes.value?.data ?? []);
+        if (appsRes.status === 'fulfilled') setApplications(appsRes.value?.data ?? []);
       } catch {
         // silently fail — dashboard shows zeros
       } finally {
@@ -91,7 +92,7 @@ export default function DashboardPage() {
 
   const STATS_DISPLAY = [
     { label: 'Active Contracts', value: String(stats.activeContracts), icon: BriefcaseIcon, color: 'bg-blue-50 text-blue-600' },
-    { label: 'Pending Proposals', value: String(stats.pendingProposals), icon: DocumentTextIcon, color: 'bg-amber-50 text-amber-600' },
+    { label: 'Pending Applications', value: String(stats.pendingApplications), icon: DocumentTextIcon, color: 'bg-amber-50 text-amber-600' },
     { label: 'Earnings (This Month)', value: `GH?${stats.monthlyEarnings.toLocaleString()}`, icon: CurrencyDollarIcon, color: 'bg-green-50 text-green-600' },
     { label: 'Profile Views', value: String(stats.profileViews), icon: EyeIcon, color: 'bg-purple-50 text-purple-600' },
   ];
@@ -218,14 +219,14 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Recent Proposals */}
+        {/* Recent Applications */}
         <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-5">
             <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              Recent Proposals
+              Recent Applications
             </h2>
             <Link
-              href="/proposals"
+              href="/applications"
               className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
             >
               View All
@@ -233,25 +234,25 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="space-y-3">
-            {proposals.length === 0 ? (
+            {applications.length === 0 ? (
               <div className="text-center py-8">
                 <DocumentTextIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No proposals sent yet</p>
+                <p className="text-sm text-gray-500">No applications yet</p>
                 <Link href="/gigs" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Find gigs to apply</Link>
               </div>
-            ) : proposals.map((proposal) => {
-              const style = statusStyles[proposal.status] ?? statusStyles.pending;
+            ) : applications.map((application) => {
+              const style = statusStyles[application.status] ?? statusStyles.applied;
               return (
                 <div
-                  key={proposal.id}
+                  key={application.id}
                   className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 truncate">
-                      {proposal.gigTitle}
+                      {application.gigTitle}
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      GH?{proposal.budget.toLocaleString()} &bull; {new Date(proposal.createdAt).toLocaleDateString()}
+                      GH?{application.budget.toLocaleString()} &bull; {new Date(application.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <span

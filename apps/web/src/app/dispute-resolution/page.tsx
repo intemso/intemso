@@ -85,7 +85,7 @@ export default function DisputeResolutionPage() {
           </p>
           <ul className="list-disc pl-6 text-gray-600 space-y-2 mb-6">
             <li>The original gig posting, including the scope of work, requirements, and specifications.</li>
-            <li>The Student&apos;s proposal, including any promises, representations, or timelines stated therein.</li>
+            <li>The Student&apos;s application, including any notes, representations, or timelines stated therein.</li>
             <li>The Contract terms as documented on the Platform, including Milestone descriptions and agreed Deliverables.</li>
             <li>Messages exchanged between the parties through the Platform&apos;s messaging system.</li>
             <li>Submitted Deliverables and work product.</li>

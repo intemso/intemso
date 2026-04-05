@@ -28,7 +28,7 @@ import { connectsApi, walletApi, notificationsApi, apiFetch } from '@/lib/api';
 
 const navigation = [
   { name: 'Overview', href: '/', icon: HomeIcon },
-  { name: 'My Proposals', href: '/proposals', icon: DocumentTextIcon },
+  { name: 'My Applications', href: '/applications', icon: DocumentTextIcon },
   { name: 'Active Contracts', href: '/contracts', icon: BriefcaseIcon },
   { name: 'My Portfolio', href: '/showcase', icon: RectangleStackIcon },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },

@@ -4,36 +4,27 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ClockIcon,
-  ChatBubbleLeftRightIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
-import { proposalsApi, type ProposalListItem } from '@/lib/api';
+import { applicationsApi, type ApplicationListItem } from '@/lib/api';
 
-const TABS = ['Active', 'Submitted', 'Archived'] as const;
+const TABS = ['Active', 'Applied', 'Archived'] as const;
 
 const statusStyles: Record<string, string> = {
-  submitted: 'bg-gray-100 text-gray-700',
-  viewed: 'bg-blue-50 text-blue-700',
-  shortlisted: 'bg-amber-50 text-amber-700',
-  interview: 'bg-green-50 text-green-700',
-  offer_sent: 'bg-purple-50 text-purple-700',
+  applied: 'bg-blue-50 text-blue-700',
+  reviewed: 'bg-amber-50 text-amber-700',
   hired: 'bg-green-100 text-green-800',
   declined: 'bg-red-50 text-red-600',
   withdrawn: 'bg-gray-100 text-gray-500',
-  archived: 'bg-gray-50 text-gray-500',
 };
 
 const statusLabels: Record<string, string> = {
-  submitted: 'Pending review',
-  viewed: 'Reviewed by client',
-  shortlisted: 'Shortlisted',
-  interview: 'Interview scheduled',
-  offer_sent: 'Offer sent',
+  applied: 'Applied',
+  reviewed: 'Under Review',
   hired: 'Hired!',
   declined: 'Not selected',
   withdrawn: 'Withdrawn',
-  archived: 'Archived',
 };
 
 function formatBudget(min: string | null, max: string | null) {
@@ -58,9 +49,9 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-export default function ProposalsPage() {
+export default function ApplicationsPage() {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>('Active');
-  const [proposals, setProposals] = useState<ProposalListItem[]>([]);
+  const [applications, setApplications] = useState<ApplicationListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [withdrawingId, setWithdrawingId] = useState<string | null>(null);
@@ -68,31 +59,31 @@ export default function ProposalsPage() {
   useEffect(() => {
     setLoading(true);
     setError('');
-    proposalsApi
+    applicationsApi
       .listMine()
-      .then((res) => setProposals(res.data))
-      .catch(() => setError('Failed to load proposals'))
+      .then((res) => setApplications(res.data))
+      .catch(() => setError('Failed to load applications'))
       .finally(() => setLoading(false));
   }, []);
 
-  const archivedStatuses = ['declined', 'withdrawn', 'archived'];
-  const activeProposals = proposals.filter((p) => !archivedStatuses.includes(p.status));
-  const submittedProposals = proposals.filter((p) => p.status === 'submitted');
-  const archivedProposals = proposals.filter((p) => archivedStatuses.includes(p.status));
+  const archivedStatuses = ['declined', 'withdrawn'];
+  const activeApplications = applications.filter((a) => !archivedStatuses.includes(a.status));
+  const appliedApplications = applications.filter((a) => a.status === 'applied');
+  const archivedApplications = applications.filter((a) => archivedStatuses.includes(a.status));
 
   const displayed =
     activeTab === 'Archived'
-      ? archivedProposals
-      : activeTab === 'Submitted'
-        ? submittedProposals
-        : activeProposals;
+      ? archivedApplications
+      : activeTab === 'Applied'
+        ? appliedApplications
+        : activeApplications;
 
-  const handleWithdraw = async (proposalId: string) => {
-    setWithdrawingId(proposalId);
+  const handleWithdraw = async (applicationId: string) => {
+    setWithdrawingId(applicationId);
     try {
-      await proposalsApi.withdraw(proposalId);
-      setProposals((prev) =>
-        prev.map((p) => (p.id === proposalId ? { ...p, status: 'withdrawn' } : p)),
+      await applicationsApi.withdraw(applicationId);
+      setApplications((prev) =>
+        prev.map((a) => (a.id === applicationId ? { ...a, status: 'withdrawn' } : a)),
       );
     } catch {
       // ignore
@@ -105,8 +96,8 @@ export default function ProposalsPage() {
     <div className="p-6 lg:p-8 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Proposals</h1>
-          <p className="text-sm text-gray-500 mt-1">Track and manage your submitted proposals</p>
+          <h1 className="text-2xl font-bold text-gray-900">My Applications</h1>
+          <p className="text-sm text-gray-500 mt-1">Track your gig applications</p>
         </div>
       </div>
 
@@ -125,10 +116,10 @@ export default function ProposalsPage() {
             {tab}
             <span className="ml-1.5 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full">
               {tab === 'Archived'
-                ? archivedProposals.length
-                : tab === 'Submitted'
-                  ? submittedProposals.length
-                  : activeProposals.length}
+                ? archivedApplications.length
+                : tab === 'Applied'
+                  ? appliedApplications.length
+                  : activeApplications.length}
             </span>
           </button>
         ))}
@@ -146,78 +137,73 @@ export default function ProposalsPage() {
         </div>
       )}
 
-      {/* Proposals list */}
+      {/* Applications list */}
       {!loading && !error && (
         <div className="space-y-4">
-          {displayed.map((proposal) => (
+          {displayed.map((application) => (
             <div
-              key={proposal.id}
+              key={application.id}
               className="bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-all"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
                   <Link
-                    href={`/gigs/${proposal.gigId}`}
+                    href={`/gigs/${application.gigId}`}
                     className="text-base font-semibold text-gray-900 hover:text-primary-600 transition-colors line-clamp-1"
                   >
-                    {proposal.gig?.title || 'Gig'}
+                    {application.gig?.title || 'Gig'}
                   </Link>
                   <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                    <span>{proposal.gig?.employer?.businessName || 'Employer'}</span>
-                    {proposal.gig?.employer?.ratingAvg && (
+                    <span>{application.gig?.employer?.businessName || 'Employer'}</span>
+                    {application.gig?.employer?.ratingAvg && (
                       <span className="flex items-center gap-0.5">
                         <StarIcon className="w-3.5 h-3.5 text-amber-400" />
-                        {parseFloat(proposal.gig.employer.ratingAvg).toFixed(1)}
+                        {parseFloat(application.gig.employer.ratingAvg).toFixed(1)}
                       </span>
                     )}
                   </div>
                 </div>
                 <span
-                  className={`px-2.5 py-1 text-xs font-medium rounded-full ${statusStyles[proposal.status] || 'bg-gray-100 text-gray-700'}`}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-full ${statusStyles[application.status] || 'bg-gray-100 text-gray-700'}`}
                 >
-                  {statusLabels[proposal.status] || proposal.status}
+                  {statusLabels[application.status] || application.status}
                 </span>
               </div>
 
-              <p className="text-sm text-gray-600 line-clamp-2 mb-3">{proposal.coverLetter}</p>
+              {application.note && (
+                <p className="text-sm text-gray-600 line-clamp-2 mb-3">{application.note}</p>
+              )}
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span>
                     Budget:{' '}
                     <span className="font-medium text-gray-900">
-                      {proposal.gig ? formatBudget(proposal.gig.budgetMin, proposal.gig.budgetMax) : '—'}
+                      {application.gig ? formatBudget(application.gig.budgetMin, application.gig.budgetMax) : '—'}
                     </span>
                   </span>
-                  <span>
-                    Your Bid:{' '}
-                    <span className="font-semibold text-green-600">
-                      GH₵{parseFloat(proposal.proposedRate).toFixed(0)}
+                  {application.suggestedRate && (
+                    <span>
+                      Your Rate:{' '}
+                      <span className="font-semibold text-green-600">
+                        GH₵{parseFloat(application.suggestedRate).toFixed(0)}
+                      </span>
                     </span>
-                  </span>
+                  )}
                   <span className="flex items-center gap-1">
                     <ClockIcon className="w-3.5 h-3.5" />
-                    {timeAgo(proposal.createdAt)}
+                    {timeAgo(application.createdAt)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {proposal.status === 'interview' && (
-                    <Link
-                      href="/messages"
-                      className="text-sm text-primary-600 font-medium hover:underline flex items-center gap-1"
-                    >
-                      <ChatBubbleLeftRightIcon className="w-4 h-4" />
-                      Open Chat
-                    </Link>
-                  )}
-                  {!archivedStatuses.includes(proposal.status) && proposal.status !== 'hired' && (
+                  {!archivedStatuses.includes(application.status) && application.status !== 'hired' && (
                     <button
-                      onClick={() => handleWithdraw(proposal.id)}
-                      disabled={withdrawingId === proposal.id}
+                      onClick={() => handleWithdraw(application.id)}
+                      disabled={withdrawingId === application.id}
                       className="text-sm text-red-500 hover:text-red-700 font-medium flex items-center gap-1 disabled:opacity-50"
                     >
                       <XMarkIcon className="w-4 h-4" />
-                      {withdrawingId === proposal.id ? 'Withdrawing...' : 'Withdraw'}
+                      {withdrawingId === application.id ? 'Withdrawing...' : 'Withdraw'}
                     </button>
                   )}
                 </div>
@@ -229,7 +215,7 @@ export default function ProposalsPage() {
 
       {!loading && !error && displayed.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-gray-500">No proposals in this category</p>
+          <p className="text-gray-500">No applications in this category</p>
           <Link
             href="/gigs"
             className="text-primary-600 text-sm font-medium mt-2 inline-block hover:underline"

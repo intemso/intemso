@@ -193,14 +193,14 @@ function UniversityMarquee() {
 function HowItWorks() {
   const studentSteps = [
     { num: '01', title: 'Create Your Profile', desc: 'Sign up with your university email, set your interests, and you\'re in. No portfolio. No CV. Under 2 minutes.', icon: UserGroupIcon, color: 'from-primary-500 to-blue-500' },
-    { num: '02', title: 'Browse & Apply', desc: 'Browse gigs like typing, ushering, app testing, campus errands. Submit proposals with your bid and a short message.', icon: MagnifyingGlassIcon, color: 'from-violet-500 to-purple-500' },
+    { num: '02', title: 'Browse & Apply', desc: 'Browse gigs like typing, ushering, app testing, campus errands. Apply with one click and an optional short note.', icon: MagnifyingGlassIcon, color: 'from-violet-500 to-purple-500' },
     { num: '03', title: 'Get Hired & Work', desc: 'Once accepted, work through milestones with secure escrow protection. Communicate directly with your employer.', icon: DocumentCheckIcon, color: 'from-amber-500 to-orange-500' },
     { num: '04', title: 'Get Paid Securely', desc: 'Receive payments via Paystack. Withdraw to your bank account or mobile money. Build your reputation with reviews.', icon: CurrencyDollarIcon, color: 'from-green-500 to-emerald-500' },
   ];
 
   const employerSteps = [
     { num: '01', title: 'Post a Gig', desc: 'Describe what you need — ushers, typists, testers, errand runners. Set your budget and timeline.', icon: BriefcaseIcon, color: 'from-amber-500 to-orange-500' },
-    { num: '02', title: 'Review Proposals', desc: 'Get proposals from eager students. Review profiles, ratings, and pick the best match for your task.', icon: UserGroupIcon, color: 'from-primary-500 to-blue-500' },
+    { num: '02', title: 'Review Applications', desc: 'Get applications from eager students. Review profiles, ratings, and pick the best match for your task.', icon: UserGroupIcon, color: 'from-primary-500 to-blue-500' },
     { num: '03', title: 'Track & Approve', desc: 'Monitor progress through milestones. Approve deliverables and release escrow payments securely.', icon: ShieldCheckIcon, color: 'from-green-500 to-emerald-500' },
   ];
 

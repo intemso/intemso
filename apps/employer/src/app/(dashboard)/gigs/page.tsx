@@ -87,7 +87,7 @@ export default function MyGigsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Gigs</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage your posted gigs and track proposals</p>
+          <p className="text-sm text-gray-500 mt-1">Manage your posted gigs and track applications</p>
         </div>
         <Link href="/post-gig" className="btn-primary flex items-center gap-2">
           <PlusIcon className="w-4 h-4" />
@@ -158,7 +158,7 @@ export default function MyGigsPage() {
                   <div className="flex items-center gap-4 text-gray-500">
                     <span>Budget: <span className="font-medium text-gray-900">{formatBudget(gig.budgetMin, gig.budgetMax)}</span></span>
                     <span>
-                      Proposals: <span className="font-medium text-gray-900">{gig.proposalsCount}</span>
+                      Applications: <span className="font-medium text-gray-900">{gig.applicationsCount}</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <EyeIcon className="w-3.5 h-3.5" />
@@ -168,10 +168,10 @@ export default function MyGigsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Link
-                      href={`/gigs/${gig.id}/proposals`}
+                      href={`/gigs/${gig.id}/applications`}
                       className="text-sm text-primary-600 font-medium hover:underline"
                     >
-                      Proposals ({gig.proposalsCount})
+                      Applications ({gig.applicationsCount})
                     </Link>
                     <Link
                       href={`/gigs/${gig.id}`}

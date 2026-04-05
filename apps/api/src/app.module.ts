@@ -10,7 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { GigsModule } from './gigs/gigs.module';
 import { CategoriesModule } from './categories/categories.module';
-import { ProposalsModule } from './proposals/proposals.module';
+import { ApplicationsModule } from './applications/applications.module';
 import { ContractsModule } from './contracts/contracts.module';
 import { MilestonesModule } from './milestones/milestones.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -58,7 +58,7 @@ import { DisputesModule } from './disputes/disputes.module';
     UsersModule,
     GigsModule,
     CategoriesModule,
-    ProposalsModule,
+    ApplicationsModule,
     ContractsModule,
     MilestonesModule,
     PaymentsModule,

@@ -93,10 +93,10 @@ export default function HowItWorksPage() {
               {
                 num: '02',
                 title: 'Browse & Apply',
-                desc: 'Browse gigs like typing, ushering, app testing, campus errands, and more. Use connects to submit proposals with your bid and a short message. Filter by category, budget, or location.',
+                desc: 'Browse gigs like typing, ushering, app testing, campus errands, and more. Apply with one click using connects. Add an optional note or suggest your rate.',
                 icon: MagnifyingGlassIcon,
                 color: 'bg-blue-500',
-                details: ['Search by category, budget, location', 'Submit proposals with connects', 'Stand out with a short message'],
+                details: ['Search by category, budget, location', 'Apply with 1 connect per gig', 'Add an optional note to stand out'],
               },
               {
                 num: '03',
@@ -187,8 +187,8 @@ export default function HowItWorksPage() {
               },
               {
                 num: '02',
-                title: 'Review Proposals',
-                desc: 'Get proposals from motivated students. Browse profiles, ratings, and availability to find the right person for your task.',
+                title: 'Review Applications',
+                desc: 'Get applications from motivated students. Browse profiles, ratings, and availability to find the right person for your task.',
               },
               {
                 num: '03',

@@ -29,7 +29,7 @@ import { notificationsApi, apiFetch } from '@/lib/api';
 const navigation = [
   { name: 'Overview', href: '/', icon: HomeIcon },
   { name: 'My Gigs', href: '/gigs', icon: BriefcaseIcon },
-  { name: 'Proposals', href: '/proposals', icon: DocumentTextIcon },
+  { name: 'Applications', href: '/applications', icon: DocumentTextIcon },
   { name: 'Contracts', href: '/contracts', icon: BriefcaseIcon },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
   { name: 'Find Talent', href: '/talent', icon: MagnifyingGlassIcon },

@@ -97,7 +97,7 @@ export class GigsService {
           select: { id: true, businessName: true, contactPerson: true, logoUrl: true },
         },
         category: { select: { id: true, name: true } },
-        proposals: { select: { id: true, status: true, proposedRate: true } },
+        applications: { select: { id: true, status: true, suggestedRate: true } },
       },
     });
   }

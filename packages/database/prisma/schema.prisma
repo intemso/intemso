@@ -99,7 +99,7 @@ model StudentProfile {
   updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  proposals         Proposal[]
+  applications      Application[]
   contracts         Contract[]         @relation("ContractStudent")
   timeEntries       TimeEntry[]
   connectBalance    ConnectBalance?
@@ -216,22 +216,22 @@ model Gig {
   urgency             Urgency      @default(flexible)
   durationHours       Int?         @map("duration_hours")
   deadline            DateTime?    @db.Timestamptz
-  maxProposals        Int          @default(50) @map("max_proposals")
+  maxApplications     Int          @default(50) @map("max_proposals")
   visibility          GigVisibility @default(public)
   screeningQuestions  Json         @default("[]") @map("screening_questions")
   preferredQuals      Json         @default("{}") @map("preferred_quals")
-  connectsRequired    Int          @default(2) @map("connects_required")
+  connectsRequired    Int          @default(1) @map("connects_required")
   status              GigStatus    @default(draft)
   attachments         Json         @default("[]")
   viewsCount          Int          @default(0) @map("views_count")
-  proposalsCount      Int          @default(0) @map("proposals_count")
+  applicationsCount   Int          @default(0) @map("proposals_count")
   publishedAt         DateTime?    @map("published_at") @db.Timestamptz
   createdAt           DateTime     @default(now()) @map("created_at") @db.Timestamptz
   updatedAt           DateTime     @updatedAt @map("updated_at") @db.Timestamptz
 
   employer        EmployerProfile @relation(fields: [employerId], references: [id])
   category        Category?       @relation(fields: [categoryId], references: [id])
-  proposals       Proposal[]
+  applications    Application[]
   contracts       Contract[]
   conversations   Conversation[]
   savedBy         SavedGig[]
@@ -245,25 +245,21 @@ model Gig {
 }
 
 // ============================================================
-// PROPOSALS
+// APPLICATIONS (Easy Apply)
 // ============================================================
 
-model Proposal {
-  id                 String         @id @default(uuid()) @db.Uuid
-  gigId              String         @map("gig_id") @db.Uuid
-  studentId          String         @map("student_id") @db.Uuid
-  coverLetter        String         @map("cover_letter")
-  proposedRate       Decimal        @map("proposed_rate") @db.Decimal(10, 2)
-  estimatedDuration  String?        @map("estimated_duration") @db.VarChar(100)
-  proposedMilestones Json           @default("[]") @map("proposed_milestones")
-  screeningAnswers   Json           @default("[]") @map("screening_answers")
-  connectsSpent      Int            @default(2) @map("connects_spent")
-  isBoosted          Boolean        @default(false) @map("is_boosted")
-  boostConnects      Int            @default(0) @map("boost_connects")
-  status             ProposalStatus @default(submitted)
-  employerNotes      String?        @map("employer_notes")
-  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+model Application {
+  id                 String            @id @default(uuid()) @db.Uuid
+  gigId              String            @map("gig_id") @db.Uuid
+  studentId          String            @map("student_id") @db.Uuid
+  note               String?           @db.VarChar(280)
+  suggestedRate      Decimal?          @map("proposed_rate") @db.Decimal(10, 2)
+  screeningAnswers   Json              @default("[]") @map("screening_answers")
+  connectsSpent      Int               @default(1) @map("connects_spent")
+  status             ApplicationStatus @default(applied)
+  employerNotes      String?           @map("employer_notes")
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz
 
   gig      Gig            @relation(fields: [gigId], references: [id])
   student  StudentProfile @relation(fields: [studentId], references: [id])
@@ -282,7 +278,7 @@ model Proposal {
 model Contract {
   id                String         @id @default(uuid()) @db.Uuid
   gigId             String?        @map("gig_id") @db.Uuid
-  proposalId        String?        @unique @map("proposal_id") @db.Uuid
+  applicationId     String?        @unique @map("proposal_id") @db.Uuid
   studentId         String         @map("student_id") @db.Uuid
   employerId        String         @map("employer_id") @db.Uuid
   contractType      ContractType   @map("contract_type")
@@ -304,7 +300,7 @@ model Contract {
   updatedAt         DateTime       @updatedAt @map("updated_at") @db.Timestamptz
 
   gig            Gig?            @relation(fields: [gigId], references: [id])
-  proposal       Proposal?       @relation(fields: [proposalId], references: [id])
+  application    Application?    @relation(fields: [applicationId], references: [id])
   student        StudentProfile  @relation("ContractStudent", fields: [studentId], references: [id])
   employer       EmployerProfile @relation("ContractEmployer", fields: [employerId], references: [id])
   endedBy        User?           @relation("ContractEndedBy", fields: [endedById], references: [id])
@@ -1066,16 +1062,12 @@ enum GigStatus {
   cancelled
 }
 
-enum ProposalStatus {
-  submitted
-  viewed
-  shortlisted
-  interview
-  offer_sent
+enum ApplicationStatus {
+  applied
+  reviewed
   hired
   declined
   withdrawn
-  archived
 }
 
 enum ContractType {

@@ -390,7 +390,7 @@ export interface GigListItem {
   deadline: string | null;
   status: string;
   viewsCount: number;
-  proposalsCount: number;
+  applicationsCount: number;
   requiredSkills: string[];
   connectsRequired: number;
   createdAt: string;
@@ -442,7 +442,7 @@ export const gigsApi = {
   },
 
   getById(id: string) {
-    return apiFetch<GigListItem & { proposals: { id: string; status: string; proposedRate: string }[] }>(
+    return apiFetch<GigListItem & { applications: { id: string; status: string; suggestedRate: string | null }[] }>(
       `/gigs/${encodeURIComponent(id)}`,
     );
   },
@@ -484,16 +484,14 @@ export const gigsApi = {
   },
 };
 
-// ── Proposals API ──
+// ── Applications API (Easy Apply) ──
 
-export interface ProposalListItem {
+export interface ApplicationListItem {
   id: string;
   gigId: string;
   studentId: string;
-  coverLetter: string;
-  proposedRate: string;
-  estimatedDuration: string | null;
-  proposedMilestones: { title: string; amount: number }[];
+  note: string | null;
+  suggestedRate: string | null;
   screeningAnswers: string[];
   connectsSpent: number;
   status: string;
@@ -532,56 +530,56 @@ export interface ProposalListItem {
   contract?: { id: string; status: string } | null;
 }
 
-export interface PaginatedProposals {
-  data: ProposalListItem[];
+export interface PaginatedApplications {
+  data: ApplicationListItem[];
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
-export const proposalsApi = {
-  /** Student submits a proposal for a gig */
-  create(gigId: string, data: { coverLetter: string; proposedRate: number; estimatedDuration?: string; proposedMilestones?: { title: string; amount: number }[]; screeningAnswers?: string[] }) {
-    return apiFetch<ProposalListItem>(`/gigs/${encodeURIComponent(gigId)}/proposals`, {
+export const applicationsApi = {
+  /** Student applies for a gig (Easy Apply) */
+  create(gigId: string, data: { note?: string; suggestedRate?: number; screeningAnswers?: string[] }) {
+    return apiFetch<ApplicationListItem>(`/gigs/${encodeURIComponent(gigId)}/applications`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
-  /** Employer views proposals for their gig */
+  /** Employer views applications for their gig */
   listByGig(gigId: string, params?: { page?: number; limit?: number; status?: string }) {
     const sp = new URLSearchParams();
     if (params?.page) sp.set('page', String(params.page));
     if (params?.limit) sp.set('limit', String(params.limit));
     if (params?.status) sp.set('status', params.status);
     const qs = sp.toString();
-    return apiFetch<PaginatedProposals>(`/gigs/${encodeURIComponent(gigId)}/proposals${qs ? `?${qs}` : ''}`);
+    return apiFetch<PaginatedApplications>(`/gigs/${encodeURIComponent(gigId)}/applications${qs ? `?${qs}` : ''}`);
   },
 
-  /** Student views their own proposals */
+  /** Student views their own applications */
   listMine(params?: { page?: number; limit?: number; status?: string }) {
     const sp = new URLSearchParams();
     if (params?.page) sp.set('page', String(params.page));
     if (params?.limit) sp.set('limit', String(params.limit));
     if (params?.status) sp.set('status', params.status);
     const qs = sp.toString();
-    return apiFetch<PaginatedProposals>(`/proposals/me${qs ? `?${qs}` : ''}`);
+    return apiFetch<PaginatedApplications>(`/applications/me${qs ? `?${qs}` : ''}`);
   },
 
-  /** Get single proposal detail */
+  /** Get single application detail */
   getById(id: string) {
-    return apiFetch<ProposalListItem>(`/proposals/${encodeURIComponent(id)}`);
+    return apiFetch<ApplicationListItem>(`/applications/${encodeURIComponent(id)}`);
   },
 
-  /** Employer updates proposal status */
+  /** Employer updates application status */
   updateStatus(id: string, data: { status: string; employerNotes?: string }) {
-    return apiFetch<ProposalListItem>(`/proposals/${encodeURIComponent(id)}/status`, {
+    return apiFetch<ApplicationListItem>(`/applications/${encodeURIComponent(id)}/status`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   },
 
-  /** Student withdraws their proposal */
+  /** Student withdraws their application */
   withdraw(id: string) {
-    return apiFetch<ProposalListItem>(`/proposals/${encodeURIComponent(id)}/withdraw`, {
+    return apiFetch<ApplicationListItem>(`/applications/${encodeURIComponent(id)}/withdraw`, {
       method: 'PATCH',
     });
   },
@@ -612,7 +610,7 @@ export interface MilestoneItem {
 export interface ContractListItem {
   id: string;
   gigId: string | null;
-  proposalId: string | null;
+  applicationId: string | null;
   studentId: string;
   employerId: string;
   contractType: string;
@@ -669,7 +667,7 @@ export const contractsApi = {
   /** Employer creates a direct contract */
   create(data: {
     gigId?: string;
-    proposalId?: string;
+    applicationId?: string;
     studentId: string;
     contractType: string;
     title: string;

@@ -158,11 +158,11 @@ const GUIDES: Guide[] = [
             <p className="text-sm text-gray-700 leading-relaxed">Creating an employer account on Intemso is completely free and takes about two minutes. You can register using your email address or Ghana Card number. Once registered, you can immediately start posting gigs and browsing student profiles.</p>
             <StepList steps={[
               { title: 'Create your free account', desc: 'Visit the registration page and choose the Employer role. Provide your name, email or Ghana Card number, password, and company name.' },
-              { title: 'Set up your profile', desc: 'Add your company logo, description, and industry. A complete profile helps students trust your gig listings and increases proposal quality.' },
+              { title: 'Set up your profile', desc: 'Add your company logo, description, and industry. A complete profile helps students trust your gig listings and increases application quality.' },
               { title: 'Post your first gig', desc: 'Describe the work you need, set your budget, timeline, and any screening questions. Posting is completely free with no limits.' },
-              { title: 'Review proposals and hire', desc: 'Browse incoming proposals, check student profiles, ratings, and badges. Chat with candidates before making your hiring decision.' },
+              { title: 'Review applications and hire', desc: 'Browse incoming applications, check student profiles, ratings, and badges. Chat with candidates before making your hiring decision.' },
             ]} />
-            <Tip>Complete your company profile before posting gigs. Students are more likely to submit proposals to employers with a verified, professional looking profile.</Tip>
+            <Tip>Complete your company profile before posting gigs. Students are more likely to apply to gigs from employers with a verified, professional looking profile.</Tip>
           </>
         ),
       },
@@ -170,27 +170,27 @@ const GUIDES: Guide[] = [
         title: 'Writing Effective Gig Listings',
         content: (
           <>
-            <p className="text-sm text-gray-700 leading-relaxed">A well written gig listing attracts better proposals and helps you find the right student faster. Here is what makes a listing stand out.</p>
+            <p className="text-sm text-gray-700 leading-relaxed">A well written gig listing attracts better applications and helps you find the right student faster. Here is what makes a listing stand out.</p>
             <CheckList items={[
               'Use a clear, specific title. Instead of "Need help", write "Data Entry for 200 Product Listings into Google Sheets".',
               'Describe the scope of work in detail. Include what needs to be done, expected deliverables, and any specific tools or skills required.',
               'Set a realistic budget. Research comparable gigs on the platform to understand fair market rates.',
               'Define your timeline clearly. State when you need the work started and completed.',
-              'Add screening questions. These help filter out generic proposals and identify students who truly understand the task.',
+              'Add screening questions. These help filter out generic applications and identify students who truly understand the task.',
               'Specify the experience level you need: entry level, intermediate, or expert.',
               'Choose the right budget type: fixed price for defined scope, or hourly for ongoing work.',
               'Indicate your preferred location type: remote, on site, or hybrid.',
             ]} />
-            <Warning>Avoid vague descriptions like "I will explain later" or "Message me for details". These result in low quality proposals and waste both your time and the students&apos; connects.</Warning>
+            <Warning>Avoid vague descriptions like "I will explain later" or "Message me for details". These result in low quality applications and waste both your time and the students&apos; connects.</Warning>
           </>
         ),
       },
       {
-        title: 'Evaluating Student Proposals',
+        title: 'Evaluating Student Applications',
         content: (
           <>
-            <p className="text-sm text-gray-700 leading-relaxed">Each proposal from a student costs them 2 connects, so most students put genuine effort into their submissions. Here is how to evaluate them effectively.</p>
-            <p className="text-sm text-gray-700 leading-relaxed mt-2 font-medium">What to look for in a strong proposal:</p>
+            <p className="text-sm text-gray-700 leading-relaxed">Each application from a student costs them 1 connect, so most students put genuine effort into their submissions. Here is how to evaluate them effectively.</p>
+            <p className="text-sm text-gray-700 leading-relaxed mt-2 font-medium">What to look for in a strong application:</p>
             <CheckList items={[
               'A personalized cover letter that references your specific gig, not a generic template.',
               'Relevant experience or skills that match your requirements.',
@@ -246,10 +246,10 @@ const GUIDES: Guide[] = [
     ],
   },
   {
-    id: 'winning-proposals',
-    title: 'Writing Winning Proposals',
+    id: 'applying-successfully',
+    title: 'Applying to Gigs Successfully',
     subtitle: 'For Students',
-    description: 'Learn how to craft proposals that stand out, get noticed, and win gigs consistently on the platform.',
+    description: 'Learn how to stand out when applying to gigs and win work consistently on the platform.',
     audience: 'Student',
     icon: PencilSquareIcon,
     color: 'bg-green-50 text-green-600',
@@ -257,11 +257,11 @@ const GUIDES: Guide[] = [
     readTime: '10 min read',
     sections: [
       {
-        title: 'Understanding the Proposal System',
+        title: 'Understanding the Application System',
         content: (
           <>
-            <p className="text-sm text-gray-700 leading-relaxed">On Intemso, submitting a proposal costs 2 connects. You receive 15 free connects every month, which means you can submit up to 7 proposals per month at no cost. Unused connects roll over to the next month, up to a maximum of 80.</p>
-            <p className="text-sm text-gray-700 leading-relaxed mt-2">Because each proposal has a cost, it is important to be strategic. Do not spray generic proposals across dozens of gigs. Instead, focus on gigs that match your skills and write thoughtful, customized proposals.</p>
+            <p className="text-sm text-gray-700 leading-relaxed">On Intemso, applying to a gig costs 1 connect. You receive 15 free connects every month, which means you can apply to up to 15 gigs per month at no cost. Unused connects roll over to the next month, up to a maximum of 80.</p>
+            <p className="text-sm text-gray-700 leading-relaxed mt-2">Because each application has a cost, it is important to be strategic. Focus on gigs that match your skills and make sure your profile is strong before applying.</p>
             <InfoTable
               headers={['Connect Source', 'Amount', 'Details']}
               rows={[
@@ -271,23 +271,21 @@ const GUIDES: Guide[] = [
                 ['40 Pack (Best Value)', 'GH\u20B516', 'GH\u20B50.40 per connect, 20% savings'],
               ]}
             />
-            <Tip>If an employer declines your proposal, the connects you spent are automatically refunded. You only lose connects when your proposal is ignored or when you withdraw it yourself.</Tip>
+            <Tip>If an employer declines your application, the connects you spent are automatically refunded. You only lose connects when your application is ignored or when you withdraw it yourself.</Tip>
           </>
         ),
       },
       {
-        title: 'Anatomy of a Winning Cover Letter',
+        title: 'Making Your Application Stand Out',
         content: (
           <>
-            <p className="text-sm text-gray-700 leading-relaxed">Your cover letter is the single most important part of your proposal. It is the first thing an employer reads. Here is the structure of a cover letter that consistently wins gigs.</p>
+            <p className="text-sm text-gray-700 leading-relaxed">Your application note is optional but can make a big difference. It is a short message (up to 280 characters) that lets the employer know you understand their needs. Here is how to make it count.</p>
             <StepList steps={[
-              { title: 'Open with a hook', desc: 'Reference the specific gig and show you understand what the employer needs. For example: "I noticed you need 200 product listings entered into Google Sheets. I have done similar data entry projects for three other clients on Intemso and can deliver this in two days."' },
-              { title: 'Demonstrate relevant experience', desc: 'Mention specific past work, skills, or coursework that directly relate to the gig. Use concrete numbers: "I typed 5,000 entries for a previous client with 99.8% accuracy."' },
-              { title: 'Explain your approach', desc: 'Briefly outline how you would tackle the project. This shows you have thought about the work and are not just copy pasting a template.' },
-              { title: 'State your proposed rate and timeline', desc: 'Be specific: "I can complete this within 3 days at GH\u20B5150 for the entire project." This gives the employer clarity and confidence.' },
-              { title: 'End with a call to action', desc: 'Invite them to discuss further: "I am available to start immediately and would be happy to discuss any details over chat."' },
+              { title: 'Reference the specific gig', desc: 'Show you understand what the employer needs. For example: "I have done similar data entry projects for three other clients on Intemso and can deliver this in two days."' },
+              { title: 'Highlight relevant experience', desc: 'Mention specific past work, skills, or coursework that directly relate to the gig. Use concrete numbers when possible.' },
+              { title: 'Keep it concise', desc: 'You only have 280 characters. Focus on your strongest selling point rather than trying to cover everything.' },
             ]} />
-            <Warning>Never copy paste the same cover letter for every gig. Employers can tell instantly when a proposal is generic, and it will almost always be skipped.</Warning>
+            <Warning>Do not use generic notes like "I am interested" or "Please hire me". Employers appreciate specific, relevant messages that show you read their gig listing.</Warning>
           </>
         ),
       },
@@ -308,7 +306,7 @@ const GUIDES: Guide[] = [
         ),
       },
       {
-        title: 'Pricing Your Proposals',
+        title: 'Setting Your Rate',
         content: (
           <>
             <p className="text-sm text-gray-700 leading-relaxed">Setting the right rate is crucial. Price too high and employers will skip you. Price too low and you undervalue your work. Here is how to find the sweet spot.</p>
@@ -465,7 +463,7 @@ const GUIDES: Guide[] = [
             ]} />
             <p className="text-sm text-gray-700 leading-relaxed font-medium mt-4">For Students:</p>
             <CheckList items={[
-              'Propose milestones in your proposal if the employer has not defined them. This shows professionalism and planning.',
+              'Suggest milestones when applying if the employer has not defined them. This shows professionalism and planning.',
               'Make each milestone deliverable something tangible and demonstrable.',
               'Do not start work on a milestone until funding is confirmed in escrow.',
               'Submit your work through the platform, not through external channels. This protects you if a dispute arises.',
@@ -528,8 +526,8 @@ const GUIDES: Guide[] = [
         title: 'Why Your Profile Matters',
         content: (
           <>
-            <p className="text-sm text-gray-700 leading-relaxed">Your profile is your storefront on Intemso. When an employer receives your proposal, the first thing they do is click on your profile to evaluate you. A strong profile can be the difference between getting hired and getting ignored.</p>
-            <p className="text-sm text-gray-700 leading-relaxed mt-2">A complete profile also earns you 10 bonus connects, which is enough for 5 additional proposals.</p>
+            <p className="text-sm text-gray-700 leading-relaxed">Your profile is your storefront on Intemso. When an employer receives your application, the first thing they do is click on your profile to evaluate you. A strong profile can be the difference between getting hired and getting ignored.</p>
+            <p className="text-sm text-gray-700 leading-relaxed mt-2">A complete profile also earns you 10 bonus connects, which is enough for 10 additional applications.</p>
             <p className="text-sm text-gray-700 leading-relaxed mt-3 font-medium">Profile completeness checklist:</p>
             <CheckList items={[
               'Professional profile photo (clear headshot, not a group or landscape photo).',
@@ -597,7 +595,7 @@ const GUIDES: Guide[] = [
                 ['Top Rated Plus', 'Earn GH\u20B5200,000+ lifetime. This badge is by invitation only and reserved for the very best on the platform'],
               ]}
             />
-            <p className="text-sm text-gray-700 leading-relaxed mt-2">Focus on earning the Rising Talent badge first. Complete your first gig with a great rating and verify your account. This badge appears on your profile and proposals, significantly increasing employer confidence.</p>
+            <p className="text-sm text-gray-700 leading-relaxed mt-2">Focus on earning the Rising Talent badge first. Complete your first gig with a great rating and verify your account. This badge appears on your profile and applications, significantly increasing employer confidence.</p>
           </>
         ),
       },

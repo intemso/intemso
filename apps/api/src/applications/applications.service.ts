@@ -8,11 +8,11 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ConnectsService } from '../connects/connects.service';
-import { CreateProposalDto } from './dto/create-proposal.dto';
-import { UpdateProposalStatusDto } from './dto/update-proposal-status.dto';
+import { CreateApplicationDto } from './dto/create-application.dto';
+import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
 
 @Injectable()
-export class ProposalsService {
+export class ApplicationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
@@ -20,9 +20,9 @@ export class ProposalsService {
   ) {}
 
   /**
-   * Student submits a proposal for a gig.
+   * Student applies for a gig (Easy Apply).
    */
-  async create(studentUserId: string, gigId: string, dto: CreateProposalDto) {
+  async create(studentUserId: string, gigId: string, dto: CreateApplicationDto) {
     // 1. Find the student profile
     const student = await this.prisma.studentProfile.findUnique({
       where: { userId: studentUserId },
@@ -35,33 +35,31 @@ export class ProposalsService {
     const gig = await this.prisma.gig.findUnique({ where: { id: gigId } });
     if (!gig) throw new NotFoundException('Gig not found');
     if (gig.status !== 'open') {
-      throw new BadRequestException('This gig is not accepting proposals');
+      throw new BadRequestException('This gig is not accepting applications');
     }
-    if (gig.proposalsCount >= gig.maxProposals) {
-      throw new BadRequestException('This gig has reached its maximum number of proposals');
+    if (gig.applicationsCount >= gig.maxApplications) {
+      throw new BadRequestException('This gig has reached its maximum number of applications');
     }
 
-    // 3. Prevent duplicate proposals
-    const existing = await this.prisma.proposal.findUnique({
+    // 3. Prevent duplicate applications
+    const existing = await this.prisma.application.findUnique({
       where: { gigId_studentId: { gigId, studentId: student.id } },
     });
     if (existing) {
-      throw new ConflictException('You have already submitted a proposal for this gig');
+      throw new ConflictException('You have already applied to this gig');
     }
 
-    // 4. Deduct connects
-    await this.connectsService.deductForProposal(studentUserId, gigId, gig.connectsRequired);
+    // 4. Deduct connects (1 per application)
+    await this.connectsService.deductForApplication(studentUserId, gigId, gig.connectsRequired);
 
-    // 5. Create proposal and increment proposalsCount atomically
-    const [proposal] = await this.prisma.$transaction([
-      this.prisma.proposal.create({
+    // 5. Create application and increment applicationsCount atomically
+    const [application] = await this.prisma.$transaction([
+      this.prisma.application.create({
         data: {
           gigId,
           studentId: student.id,
-          coverLetter: dto.coverLetter,
-          proposedRate: dto.proposedRate,
-          estimatedDuration: dto.estimatedDuration,
-          proposedMilestones: dto.proposedMilestones ?? [],
+          note: dto.note,
+          suggestedRate: dto.suggestedRate,
           screeningAnswers: dto.screeningAnswers ?? [],
           connectsSpent: gig.connectsRequired,
         },
@@ -72,11 +70,11 @@ export class ProposalsService {
       }),
       this.prisma.gig.update({
         where: { id: gigId },
-        data: { proposalsCount: { increment: 1 } },
+        data: { applicationsCount: { increment: 1 } },
       }),
     ]);
 
-    // Notify employer about new proposal
+    // Notify employer about new application
     const gigForNotif = await this.prisma.gig.findUnique({
       where: { id: gigId },
       include: { employer: { select: { userId: true } } },
@@ -84,18 +82,18 @@ export class ProposalsService {
     if (gigForNotif) {
       this.notificationsService.create({
         userId: gigForNotif.employer.userId,
-        type: 'proposal_received',
-        title: 'New Proposal Received',
-        body: `${proposal.student.firstName} ${proposal.student.lastName} submitted a proposal for "${proposal.gig.title}"`,
-        data: { proposalId: proposal.id, gigId },
+        type: 'new_application',
+        title: 'New Application Received',
+        body: `${application.student.firstName} ${application.student.lastName} applied for "${application.gig.title}"`,
+        data: { applicationId: application.id, gigId },
       }).catch(() => {});
     }
 
-    return proposal;
+    return application;
   }
 
   /**
-   * Employer views proposals for their gig.
+   * Employer views applications for their gig.
    */
   async findByGig(employerUserId: string, gigId: string, params: { page?: number; limit?: number; status?: string }) {
     // Verify the gig belongs to this employer
@@ -119,8 +117,8 @@ export class ProposalsService {
       where.status = params.status;
     }
 
-    const [proposals, total] = await Promise.all([
-      this.prisma.proposal.findMany({
+    const [applications, total] = await Promise.all([
+      this.prisma.application.findMany({
         where,
         skip,
         take: limit,
@@ -143,19 +141,19 @@ export class ProposalsService {
           },
         },
       }),
-      this.prisma.proposal.count({ where }),
+      this.prisma.application.count({ where }),
     ]);
 
     return {
-      data: proposals,
+      data: applications,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
 
   /**
-   * Student views their own proposals.
+   * Student views their own applications.
    */
-  async findMyProposals(studentUserId: string, params: { page?: number; limit?: number; status?: string }) {
+  async findMyApplications(studentUserId: string, params: { page?: number; limit?: number; status?: string }) {
     const student = await this.prisma.studentProfile.findUnique({
       where: { userId: studentUserId },
     });
@@ -172,8 +170,8 @@ export class ProposalsService {
       where.status = params.status;
     }
 
-    const [proposals, total] = await Promise.all([
-      this.prisma.proposal.findMany({
+    const [applications, total] = await Promise.all([
+      this.prisma.application.findMany({
         where,
         skip,
         take: limit,
@@ -195,21 +193,21 @@ export class ProposalsService {
           },
         },
       }),
-      this.prisma.proposal.count({ where }),
+      this.prisma.application.count({ where }),
     ]);
 
     return {
-      data: proposals,
+      data: applications,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
 
   /**
-   * Get a single proposal by ID.
+   * Get a single application by ID.
    */
-  async findOne(userId: string, userRole: string, proposalId: string) {
-    const proposal = await this.prisma.proposal.findUnique({
-      where: { id: proposalId },
+  async findOne(userId: string, userRole: string, applicationId: string) {
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
       include: {
         gig: {
           select: {
@@ -245,89 +243,93 @@ export class ProposalsService {
       },
     });
 
-    if (!proposal) throw new NotFoundException('Proposal not found');
+    if (!application) throw new NotFoundException('Application not found');
 
-    // Authorization: only the student who submitted or the employer who owns the gig can view
-    if (userRole === 'STUDENT' && proposal.student.userId !== userId) {
-      throw new ForbiddenException('You can only view your own proposals');
+    // Authorization: only the student who applied or the employer who owns the gig can view
+    if (userRole === 'STUDENT' && application.student.userId !== userId) {
+      throw new ForbiddenException('You can only view your own applications');
     }
-    if (userRole === 'EMPLOYER' && proposal.gig.employer.userId !== userId) {
-      throw new ForbiddenException('You can only view proposals for your own gigs');
+    if (userRole === 'EMPLOYER' && application.gig.employer.userId !== userId) {
+      throw new ForbiddenException('You can only view applications for your own gigs');
     }
 
-    return proposal;
+    return application;
   }
 
   /**
-   * Employer updates proposal status (shortlist, decline, hire, etc.)
+   * Employer updates application status (review, hire, decline).
    */
-  async updateStatus(employerUserId: string, proposalId: string, dto: UpdateProposalStatusDto) {
-    const proposal = await this.prisma.proposal.findUnique({
-      where: { id: proposalId },
+  async updateStatus(employerUserId: string, applicationId: string, dto: UpdateApplicationStatusDto) {
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
       include: {
         gig: {
           select: {
             id: true,
             title: true,
             employerId: true,
+            budgetMin: true,
             employer: { select: { userId: true, id: true } },
           },
         },
-        student: { select: { id: true, firstName: true, lastName: true, userId: true } },
+        student: { select: { id: true, firstName: true, lastName: true, userId: true, hourlyRate: true } },
       },
     });
 
-    if (!proposal) throw new NotFoundException('Proposal not found');
-    if (proposal.gig.employer.userId !== employerUserId) {
+    if (!application) throw new NotFoundException('Application not found');
+    if (application.gig.employer.userId !== employerUserId) {
       throw new ForbiddenException('You do not own this gig');
     }
 
     // If hiring, create a contract and update gig status
     if (dto.status === 'hired') {
+      // Use suggested rate, or gig budget min, or student hourly rate
+      const agreedRate = application.suggestedRate ?? application.gig.budgetMin ?? application.student.hourlyRate ?? 0;
+
       const result = await this.prisma.$transaction(async (tx) => {
-        // Update proposal status
-        const updated = await tx.proposal.update({
-          where: { id: proposalId },
+        // Update application status
+        const updated = await tx.application.update({
+          where: { id: applicationId },
           data: { status: 'hired', employerNotes: dto.employerNotes },
         });
 
-        // Create contract from proposal
+        // Create contract from application
         const contract = await tx.contract.create({
           data: {
-            gigId: proposal.gig.id,
-            proposalId: proposal.id,
-            studentId: proposal.student.id,
-            employerId: proposal.gig.employer.id,
+            gigId: application.gig.id,
+            applicationId: application.id,
+            studentId: application.student.id,
+            employerId: application.gig.employer.id,
             contractType: 'fixed',
-            title: proposal.gig.title,
-            agreedRate: proposal.proposedRate,
+            title: application.gig.title,
+            agreedRate,
           },
         });
 
         // Update gig status to hired
         await tx.gig.update({
-          where: { id: proposal.gig.id },
+          where: { id: application.gig.id },
           data: { status: 'hired' },
         });
 
-        return { proposal: updated, contract };
+        return { application: updated, contract };
       });
 
       // Notify student they've been hired
       this.notificationsService.create({
-        userId: proposal.student.userId,
-        type: 'proposal_hired',
+        userId: application.student.userId,
+        type: 'application_hired',
         title: 'You\'ve Been Hired!',
-        body: `Congratulations! You\'ve been hired for "${proposal.gig.title}"`,
-        data: { proposalId: proposal.id, contractId: result.contract.id, gigId: proposal.gig.id },
+        body: `Congratulations! You\'ve been hired for "${application.gig.title}"`,
+        data: { applicationId: application.id, contractId: result.contract.id, gigId: application.gig.id },
       }).catch(() => {});
 
       return result;
     }
 
     // Regular status update
-    const updated = await this.prisma.proposal.update({
-      where: { id: proposalId },
+    const updated = await this.prisma.application.update({
+      where: { id: applicationId },
       data: {
         status: dto.status,
         employerNotes: dto.employerNotes,
@@ -340,28 +342,28 @@ export class ProposalsService {
     });
 
     // Notify student of status change
-    if (dto.status === 'shortlisted') {
+    if (dto.status === 'reviewed') {
       this.notificationsService.create({
-        userId: proposal.student.userId,
-        type: 'proposal_shortlisted',
-        title: 'Proposal Shortlisted',
-        body: `Your proposal for "${proposal.gig.title}" has been shortlisted`,
-        data: { proposalId: proposal.id, gigId: proposal.gig.id },
+        userId: application.student.userId,
+        type: 'application_reviewed',
+        title: 'Application Reviewed',
+        body: `Your application for "${application.gig.title}" is being reviewed`,
+        data: { applicationId: application.id, gigId: application.gig.id },
       }).catch(() => {});
     } else if (dto.status === 'declined') {
       // Refund connects on decline
-      this.connectsService.refundForProposal(
-        proposal.student.userId,
-        proposal.gig.id,
-        proposal.connectsSpent || 2,
+      this.connectsService.refundForApplication(
+        application.student.userId,
+        application.gig.id,
+        application.connectsSpent || 1,
       ).catch(() => {});
 
       this.notificationsService.create({
-        userId: proposal.student.userId,
-        type: 'proposal_declined',
-        title: 'Proposal Update',
-        body: `Your proposal for "${proposal.gig.title}" was not selected`,
-        data: { proposalId: proposal.id, gigId: proposal.gig.id },
+        userId: application.student.userId,
+        type: 'application_declined',
+        title: 'Application Update',
+        body: `Your application for "${application.gig.title}" was not selected`,
+        data: { applicationId: application.id, gigId: application.gig.id },
       }).catch(() => {});
     }
 
@@ -369,36 +371,36 @@ export class ProposalsService {
   }
 
   /**
-   * Student withdraws their proposal.
+   * Student withdraws their application.
    */
-  async withdraw(studentUserId: string, proposalId: string) {
+  async withdraw(studentUserId: string, applicationId: string) {
     const student = await this.prisma.studentProfile.findUnique({
       where: { userId: studentUserId },
     });
     if (!student) throw new BadRequestException('Student profile not found');
 
-    const proposal = await this.prisma.proposal.findUnique({
-      where: { id: proposalId },
+    const application = await this.prisma.application.findUnique({
+      where: { id: applicationId },
     });
-    if (!proposal) throw new NotFoundException('Proposal not found');
-    if (proposal.studentId !== student.id) {
-      throw new ForbiddenException('You can only withdraw your own proposals');
+    if (!application) throw new NotFoundException('Application not found');
+    if (application.studentId !== student.id) {
+      throw new ForbiddenException('You can only withdraw your own applications');
     }
-    if (proposal.status === 'hired') {
-      throw new BadRequestException('Cannot withdraw an already hired proposal');
+    if (application.status === 'hired') {
+      throw new BadRequestException('Cannot withdraw an already hired application');
     }
-    if (proposal.status === 'withdrawn') {
-      throw new BadRequestException('Proposal is already withdrawn');
+    if (application.status === 'withdrawn') {
+      throw new BadRequestException('Application is already withdrawn');
     }
 
     const [updated] = await this.prisma.$transaction([
-      this.prisma.proposal.update({
-        where: { id: proposalId },
+      this.prisma.application.update({
+        where: { id: applicationId },
         data: { status: 'withdrawn' },
       }),
       this.prisma.gig.update({
-        where: { id: proposal.gigId },
-        data: { proposalsCount: { decrement: 1 } },
+        where: { id: application.gigId },
+        data: { applicationsCount: { decrement: 1 } },
       }),
     ]);
 

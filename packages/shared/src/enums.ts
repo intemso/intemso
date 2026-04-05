@@ -51,17 +51,13 @@ export enum Urgency {
   FLEXIBLE = 'flexible',
 }
 
-// ── Proposal Status ──
-export enum ProposalStatus {
-  SUBMITTED = 'submitted',
-  VIEWED = 'viewed',
-  SHORTLISTED = 'shortlisted',
-  INTERVIEW = 'interview',
-  OFFER_SENT = 'offer_sent',
+// ── Application Status (Easy Apply) ──
+export enum ApplicationStatus {
+  APPLIED = 'applied',
+  REVIEWED = 'reviewed',
   HIRED = 'hired',
   DECLINED = 'declined',
   WITHDRAWN = 'withdrawn',
-  ARCHIVED = 'archived',
 }
 
 // ── Contract Status ──
@@ -139,12 +135,10 @@ export enum DisputeStatus {
 
 // ── Notification Type ──
 export enum NotificationType {
-  NEW_PROPOSAL = 'new_proposal',
-  PROPOSAL_VIEWED = 'proposal_viewed',
-  PROPOSAL_SHORTLISTED = 'proposal_shortlisted',
-  OFFER_SENT = 'offer_sent',
-  OFFER_ACCEPTED = 'offer_accepted',
-  PROPOSAL_DECLINED = 'proposal_declined',
+  NEW_APPLICATION = 'new_application',
+  APPLICATION_REVIEWED = 'application_reviewed',
+  APPLICATION_HIRED = 'application_hired',
+  APPLICATION_DECLINED = 'application_declined',
   MILESTONE_FUNDED = 'milestone_funded',
   MILESTONE_SUBMITTED = 'milestone_submitted',
   MILESTONE_APPROVED = 'milestone_approved',
@@ -168,8 +162,8 @@ export enum NotificationType {
 export enum ConnectTransactionType {
   MONTHLY_GRANT = 'monthly_grant',
   PURCHASE = 'purchase',
-  PROPOSAL_SPENT = 'proposal_spent',
-  PROPOSAL_REFUND = 'proposal_refund',
+  APPLICATION_SPENT = 'proposal_spent',
+  APPLICATION_REFUND = 'proposal_refund',
   BOOST_SPENT = 'boost_spent',
   ROLLOVER = 'rollover',
   REWARD_GIG_COMPLETED = 'reward_gig_completed',

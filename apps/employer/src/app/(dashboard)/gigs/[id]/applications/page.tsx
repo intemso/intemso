@@ -1,36 +1,29 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import {
   ArrowLeftIcon,
-  StarIcon as StarIconOutline,
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
-import { proposalsApi, gigsApi, type ProposalListItem, type GigListItem } from '@/lib/api';
+import { applicationsApi, gigsApi, type ApplicationListItem, type GigListItem } from '@/lib/api';
 
 const statusStyles: Record<string, string> = {
-  submitted: 'bg-gray-100 text-gray-700',
-  viewed: 'bg-blue-50 text-blue-700',
-  shortlisted: 'bg-amber-50 text-amber-700',
-  interview: 'bg-green-50 text-green-700',
-  offer_sent: 'bg-purple-50 text-purple-700',
+  applied: 'bg-blue-50 text-blue-700',
+  reviewed: 'bg-amber-50 text-amber-700',
   hired: 'bg-green-100 text-green-800',
   declined: 'bg-red-50 text-red-600',
   withdrawn: 'bg-gray-100 text-gray-500',
 };
 
 const statusLabels: Record<string, string> = {
-  submitted: 'Submitted',
-  viewed: 'Viewed',
-  shortlisted: 'Shortlisted',
-  interview: 'Interview',
-  offer_sent: 'Offer Sent',
+  applied: 'New',
+  reviewed: 'Reviewed',
   hired: 'Hired',
   declined: 'Declined',
   withdrawn: 'Withdrawn',
@@ -47,12 +40,12 @@ function timeAgo(dateStr: string) {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-export default function GigProposalsPage() {
+export default function GigApplicationsPage() {
   const params = useParams();
   const gigId = params.id as string;
 
   const [gig, setGig] = useState<GigListItem | null>(null);
-  const [proposals, setProposals] = useState<ProposalListItem[]>([]);
+  const [applications, setApplications] = useState<ApplicationListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -62,23 +55,22 @@ export default function GigProposalsPage() {
     setLoading(true);
     Promise.all([
       gigsApi.getById(gigId),
-      proposalsApi.listByGig(gigId),
+      applicationsApi.listByGig(gigId),
     ])
-      .then(([gigData, proposalsData]) => {
+      .then(([gigData, appsData]) => {
         setGig(gigData);
-        setProposals(proposalsData.data);
+        setApplications(appsData.data);
       })
-      .catch(() => setError('Failed to load proposals'))
+      .catch(() => setError('Failed to load applications'))
       .finally(() => setLoading(false));
   }, [gigId]);
 
-  const handleAction = async (proposalId: string, status: string) => {
-    setActionLoading(proposalId);
+  const handleAction = async (applicationId: string, status: string) => {
+    setActionLoading(applicationId);
     try {
-      const result = await proposalsApi.updateStatus(proposalId, { status });
-      // If hired, result may have a contract field
-      setProposals((prev) =>
-        prev.map((p) => (p.id === proposalId ? { ...p, status } : p)),
+      await applicationsApi.updateStatus(applicationId, { status });
+      setApplications((prev) =>
+        prev.map((a) => (a.id === applicationId ? { ...a, status } : a)),
       );
     } catch {
       // ignore
@@ -114,24 +106,24 @@ export default function GigProposalsPage() {
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Proposals</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
         {gig && (
           <p className="text-sm text-gray-500 mt-1">
-            {proposals.length} proposal{proposals.length !== 1 ? 's' : ''} for &ldquo;{gig.title}&rdquo;
+            {applications.length} application{applications.length !== 1 ? 's' : ''} for &ldquo;{gig.title}&rdquo;
           </p>
         )}
       </div>
 
-      {proposals.length === 0 ? (
+      {applications.length === 0 ? (
         <div className="text-center py-16">
           <UserIcon className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-          <p className="text-gray-500">No proposals yet</p>
+          <p className="text-gray-500">No applications yet</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {proposals.map((proposal) => (
+          {applications.map((application) => (
             <div
-              key={proposal.id}
+              key={application.id}
               className="bg-white border border-gray-100 rounded-xl p-6 hover:shadow-md transition-all"
             >
               {/* Student info */}
@@ -139,64 +131,65 @@ export default function GigProposalsPage() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-bold text-primary-600">
-                      {(proposal.student?.firstName?.[0] || '') + (proposal.student?.lastName?.[0] || '')}
+                      {(application.student?.firstName?.[0] || '') + (application.student?.lastName?.[0] || '')}
                     </span>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
-                      {proposal.student?.firstName} {proposal.student?.lastName}
+                      {application.student?.firstName} {application.student?.lastName}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {proposal.student?.professionalTitle || proposal.student?.university}
+                      {application.student?.professionalTitle || application.student?.university}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`px-2.5 py-1 text-xs font-medium rounded-full ${statusStyles[proposal.status] || 'bg-gray-100 text-gray-700'}`}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-full ${statusStyles[application.status] || 'bg-gray-100 text-gray-700'}`}
                   >
-                    {statusLabels[proposal.status] || proposal.status}
+                    {statusLabels[application.status] || application.status}
                   </span>
                 </div>
               </div>
 
               {/* Student stats */}
-              {proposal.student && (
+              {application.student && (
                 <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                  {Number(proposal.student.ratingAvg) > 0 && (
+                  {Number(application.student.ratingAvg) > 0 && (
                     <span className="flex items-center gap-0.5">
                       <StarIcon className="w-3.5 h-3.5 text-amber-400" />
-                      {parseFloat(proposal.student.ratingAvg).toFixed(1)} ({proposal.student.ratingCount})
+                      {parseFloat(application.student.ratingAvg).toFixed(1)} ({application.student.ratingCount})
                     </span>
                   )}
-                  <span>{proposal.student.gigsCompleted} gigs completed</span>
-                  {proposal.student.hourlyRate && (
-                    <span>GH₵{parseFloat(proposal.student.hourlyRate)}/hr</span>
+                  <span>{application.student.gigsCompleted} gigs completed</span>
+                  {application.student.hourlyRate && (
+                    <span>GH&#8373;{parseFloat(application.student.hourlyRate)}/hr</span>
                   )}
                 </div>
               )}
 
-              {/* Cover letter */}
-              <p className="text-sm text-gray-600 mb-4 whitespace-pre-line">{proposal.coverLetter}</p>
+              {/* Note */}
+              {application.note && (
+                <p className="text-sm text-gray-600 mb-4">{application.note}</p>
+              )}
 
-              {/* Bid info */}
+              {/* Rate & time */}
               <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                <span>
-                  Bid: <span className="font-semibold text-green-600">GH₵{parseFloat(proposal.proposedRate).toFixed(0)}</span>
-                </span>
-                {proposal.estimatedDuration && (
-                  <span>Duration: <span className="font-medium text-gray-700">{proposal.estimatedDuration}</span></span>
+                {application.suggestedRate && (
+                  <span>
+                    Suggested Rate: <span className="font-semibold text-green-600">GH&#8373;{parseFloat(application.suggestedRate).toFixed(0)}</span>
+                  </span>
                 )}
                 <span className="flex items-center gap-1">
                   <ClockIcon className="w-3.5 h-3.5" />
-                  {timeAgo(proposal.createdAt)}
+                  {timeAgo(application.createdAt)}
                 </span>
               </div>
 
               {/* Skills */}
-              {proposal.student?.skills && proposal.student.skills.length > 0 && (
+              {application.student?.skills && application.student.skills.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-4">
-                  {proposal.student.skills.slice(0, 6).map((skill) => (
+                  {application.student.skills.slice(0, 6).map((skill) => (
                     <span
                       key={skill}
                       className="px-2 py-0.5 bg-gray-50 text-gray-600 text-xs rounded-full"
@@ -208,44 +201,40 @@ export default function GigProposalsPage() {
               )}
 
               {/* Actions */}
-              {proposal.status !== 'hired' && proposal.status !== 'declined' && proposal.status !== 'withdrawn' && (
+              {application.status !== 'hired' && application.status !== 'declined' && application.status !== 'withdrawn' && (
                 <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
-                  {proposal.status === 'submitted' && (
+                  {application.status === 'applied' && (
                     <button
-                      onClick={() => handleAction(proposal.id, 'shortlisted')}
-                      disabled={actionLoading === proposal.id}
+                      onClick={() => handleAction(application.id, 'reviewed')}
+                      disabled={actionLoading === application.id}
                       className="px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors disabled:opacity-50"
                     >
-                      Shortlist
+                      Mark Reviewed
                     </button>
                   )}
-                  {(proposal.status === 'submitted' || proposal.status === 'shortlisted' || proposal.status === 'interview') && (
-                    <>
-                      <button
-                        onClick={() => handleAction(proposal.id, 'hired')}
-                        disabled={actionLoading === proposal.id}
-                        className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50 flex items-center gap-1"
-                      >
-                        <CheckCircleIcon className="w-3.5 h-3.5" />
-                        Hire
-                      </button>
-                      <button
-                        onClick={() => handleAction(proposal.id, 'declined')}
-                        disabled={actionLoading === proposal.id}
-                        className="px-3 py-1.5 text-xs font-medium bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-1"
-                      >
-                        <XCircleIcon className="w-3.5 h-3.5" />
-                        Decline
-                      </button>
-                    </>
-                  )}
+                  <button
+                    onClick={() => handleAction(application.id, 'hired')}
+                    disabled={actionLoading === application.id}
+                    className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50 flex items-center gap-1"
+                  >
+                    <CheckCircleIcon className="w-3.5 h-3.5" />
+                    Hire
+                  </button>
+                  <button
+                    onClick={() => handleAction(application.id, 'declined')}
+                    disabled={actionLoading === application.id}
+                    className="px-3 py-1.5 text-xs font-medium bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-1"
+                  >
+                    <XCircleIcon className="w-3.5 h-3.5" />
+                    Decline
+                  </button>
                 </div>
               )}
-              {proposal.status === 'hired' && (
+              {application.status === 'hired' && (
                 <div className="pt-3 border-t border-gray-50">
                   <span className="text-xs font-medium text-green-600 flex items-center gap-1">
                     <CheckCircleIcon className="w-4 h-4" />
-                    Hired — Contract created
+                    Hired &#8212; Contract created
                   </span>
                 </div>
               )}

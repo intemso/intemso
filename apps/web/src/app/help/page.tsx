@@ -115,7 +115,7 @@ const CATEGORIES: HelpCategory[] = [
 3. Create a strong password (8–72 characters, must include uppercase, lowercase, and a digit)
 4. Complete your basic profile information
 
-After registering, you'll receive 15 free connects to start submitting proposals. Complete your profile (name, university, bio, and at least 1 skill) to earn an additional 10 bonus connects.`,
+After registering, you'll receive 15 free connects to start applying to gigs. Complete your profile (name, university, bio, and at least 1 skill) to earn an additional 10 bonus connects.`,
         tags: ['register', 'signup', 'student', 'account', 'create'],
       },
       {
@@ -128,7 +128,7 @@ After registering, you'll receive 15 free connects to start submitting proposals
 3. Fill in your business name and basic company details
 4. Start posting gigs immediately — posting gigs is completely free
 
-You'll get access to the employer portal at hire.intemso.com where you can manage gigs, review proposals, track contracts, and handle payments.`,
+You'll get access to the employer portal at hire.intemso.com where you can manage gigs, review applications, track contracts, and handle payments.`,
         tags: ['register', 'signup', 'employer', 'account', 'business'],
       },
       {
@@ -170,7 +170,7 @@ For Employers:
         a: `Intemso uses separate portals for each user type:
 
 • intemso.com — The public website for browsing gigs, talent, and showcases
-• jobs.intemso.com — Student portal for managing your gigs, proposals, contracts, and earnings
+• jobs.intemso.com — Student portal for managing your gigs, applications, contracts, and earnings
 • hire.intemso.com — Employer portal for posting gigs, managing contracts, and handling payments
 • admin.intemso.com — Admin control panel (admin access only)
 
@@ -195,8 +195,8 @@ Requirements: Use a genuine, recent, professional photo with your face clearly v
   },
   {
     id: 'connects',
-    title: 'Connects & Proposals',
-    desc: 'How connects work, earning, buying, and submitting proposals',
+    title: 'Connects & Applications',
+    desc: 'How connects work, earning, buying, and applying to gigs',
     icon: SparklesIcon,
     audience: 'students',
     color: 'bg-indigo-500',
@@ -204,15 +204,15 @@ Requirements: Use a genuine, recent, professional photo with your face clearly v
       {
         id: 'cn-1',
         q: 'What are connects and how do they work?',
-        a: `Connects are the currency students use to submit proposals on gigs. Each proposal costs a certain number of connects (default: 2 per proposal, but employers can set a custom amount per gig).
+        a: `Connects are the currency students use to apply to gigs. Each application costs a certain number of connects (default: 1 per application, but employers can set a custom amount per gig).
 
-When you submit a proposal, connects are deducted in this priority order:
+When you apply to a gig, connects are deducted in this priority order:
 1. Free connects (from monthly grant)
 2. Rollover connects (unused from previous months)
 3. Purchased connects
 
-You cannot submit a proposal if you don't have enough connects. This system ensures proposals are thoughtful and intentional, reducing spam for employers.`,
-        tags: ['connects', 'proposals', 'cost', 'deduction', 'submit'],
+You cannot apply if you don't have enough connects. This system ensures applications are intentional, reducing spam for employers.`,
+        tags: ['connects', 'applications', 'cost', 'deduction', 'apply'],
       },
       {
         id: 'cn-2',
@@ -252,50 +252,47 @@ Payments are processed securely via Paystack. You can pay with Visa/Mastercard, 
       },
       {
         id: 'cn-5',
-        q: 'Do I get connects back if my proposal is declined?',
-        a: `Yes — if an employer declines your proposal, the full number of connects you spent on that proposal are automatically refunded to your free connects balance.
+        q: 'Do I get connects back if my application is declined?',
+        a: `Yes — if an employer declines your application, the full number of connects you spent on that application are automatically refunded to your free connects balance.
 
-However, if you withdraw your own proposal, no refund is given. This policy discourages submitting proposals carelessly and then withdrawing them.
+However, if you withdraw your own application, no refund is given. This policy discourages applying carelessly and then withdrawing.
 
-Connect refunds appear in your transaction history with the type "proposal_refund".`,
-        tags: ['refund', 'declined', 'withdraw', 'connects', 'proposal'],
+Connect refunds appear in your transaction history as a "refund" entry.`,
+        tags: ['refund', 'declined', 'withdraw', 'connects', 'application'],
       },
       {
         id: 'cn-6',
-        q: 'How do I submit a winning proposal?',
+        q: 'How do I apply to a gig?',
         a: `When you find a gig you want to work on:
 
-1. Click "Submit Proposal" on the gig detail page
-2. Write a personalized cover letter explaining why you're a great fit
-3. Set your proposed rate (fixed price or hourly)
-4. Provide an estimated duration for the project
-5. Answer any screening questions the employer has set
-6. Optionally break down the work into proposed milestones
-7. Submit — the required connects will be deducted
+1. Click "Apply Now" on the gig detail page
+2. Optionally add a short note (up to 280 characters) to introduce yourself
+3. Optionally suggest your rate
+4. Answer any screening questions the employer has set
+5. Submit — the required connects will be deducted (default: 1 connect)
 
-Tips for winning proposals:
-• Address the employer's specific needs mentioned in the gig description
-• Highlight relevant experience and portfolio items
-• Be realistic about timelines and pricing
+Tips for standing out:
+• Keep your profile complete with a strong bio and relevant skills
+• Build your portfolio with showcase items
+• Only apply to gigs you're genuinely qualified for
 • Answer screening questions thoroughly — employers use these to filter candidates
-• Only submit to gigs you're genuinely qualified for
 
-Your proposal starts with "submitted" status. The employer can then view, shortlist, or hire you. You'll be notified at each status change.`,
-        tags: ['proposal', 'submit', 'cover letter', 'rate', 'screening', 'milestones'],
+Your application starts with "applied" status. The employer can then review or hire you. You'll be notified at each status change.`,
+        tags: ['apply', 'application', 'note', 'rate', 'screening'],
       },
       {
         id: 'cn-7',
-        q: 'What happens when I get hired from a proposal?',
-        a: `When an employer hires you from your proposal:
+        q: 'What happens when I get hired from an application?',
+        a: `When an employer hires you from your application:
 
-1. A contract is automatically created with your agreed rate and the gig details
-2. The gig status changes to "hired" (no more proposals accepted)
+1. A contract is automatically created with the agreed rate and gig details
+2. The gig status changes to "hired" (no more applications accepted)
 3. You receive a notification about being hired
 4. The contract appears in your dashboard under active contracts
 5. The employer begins creating milestones with funding
 
-You can then start working on the first funded milestone. Your contract type will be "fixed" by default when hired through a proposal.`,
-        tags: ['hired', 'contract', 'proposal', 'notification'],
+You can then start working on the first funded milestone. Your contract type will be "fixed" by default when hired through an application.`,
+        tags: ['hired', 'contract', 'application', 'notification'],
       },
     ],
   },
@@ -318,7 +315,7 @@ You can then start working on the first funded milestone. Your contract type wil
 • Filter by location type (remote, on-site, or hybrid)
 • Filter by experience level (entry, intermediate, expert)
 
-Results show 20 gigs per page by default. Only gigs with "open" status are shown — meaning they're actively accepting proposals. Each gig listing shows the title, budget range, required skills, experience level, number of proposals received, and the employer's rating.
+Results show 20 gigs per page by default. Only gigs with "open" status are shown — meaning they're actively accepting applications. Each gig listing shows the title, budget range, required skills, experience level, number of applications received, and the employer's rating.
 
 You can also save gigs to review later using the bookmark feature.`,
         tags: ['browse', 'search', 'filter', 'find', 'gigs', 'category'],
@@ -340,35 +337,35 @@ You can also save gigs to review later using the bookmark feature.`,
 8. Set experience level: entry, intermediate, or expert
 9. Set project scope, urgency, and expected duration
 10. Add screening questions (optional but recommended)
-11. Set how many connects the proposal costs (default: 2)
-12. Set max proposals to accept (default: 50)
+11. Set how many connects the application costs (default: 1)
+12. Set max applications to accept (default: 50)
 13. Choose visibility: public or invite-only
 14. Add any attachments (briefs, specs, mockups)
 
-You can save as draft first and publish when ready. Once published, your gig status becomes "open" and students can start submitting proposals.`,
+You can save as draft first and publish when ready. Once published, your gig status becomes "open" and students can start applying.`,
         tags: ['post', 'create', 'gig', 'employer', 'listing', 'draft'],
       },
       {
         id: 'gig-3',
-        q: 'How do I evaluate and hire from proposals?',
-        a: `When proposals come in on your gig:
+        q: 'How do I evaluate and hire from applications?',
+        a: `When applications come in on your gig:
 
-1. Go to your gig's detail page → Proposals tab
-2. Review each proposal's cover letter, proposed rate, and screening answers
+1. Go to your gig's detail page → Applications tab
+2. Review each application's note, suggested rate, and screening answers
 3. Click into a student's profile to see their portfolio, ratings, and work history
 4. Use these status actions:
-   • Shortlist — Mark promising candidates for review
-   • Decline — Reject the proposal (connects are refunded to the student)
+   • Mark Reviewed — Flag promising candidates
+   • Decline — Reject the application (connects are refunded to the student)
    • Hire — Select this student for the job
 
 When you hire a student:
 • A contract is automatically created
-• The gig status changes to "hired" (no more proposals accepted)
+• The gig status changes to "hired" (no more applications accepted)
 • The student is notified immediately
 • You'll be directed to set up milestones and fund the first payment
 
-You can also view proposal screening answers to compare candidates objectively.`,
-        tags: ['proposals', 'review', 'shortlist', 'hire', 'evaluate'],
+You can also view screening answers to compare candidates objectively.`,
+        tags: ['applications', 'review', 'hire', 'evaluate'],
       },
       {
         id: 'gig-4',
@@ -376,8 +373,8 @@ You can also view proposal screening answers to compare candidates objectively.`
         a: `Every gig follows this status progression:
 
 1. Draft — Saved but not yet published publicly
-2. Open — Published and accepting proposals from students
-3. Hired — A student has been selected (proposals closed)
+2. Open — Published and accepting applications from students
+3. Hired — A student has been selected (applications closed)
 4. In Progress — Active work happening on the contract
 5. Completed — All milestones delivered and contract finished
 
@@ -385,7 +382,7 @@ Additional statuses:
 • Closed — Employer manually closes the gig
 • Cancelled — Gig cancelled before completion
 
-You can manage your gig status from the employer dashboard. Once a gig reaches "hired" status, no more proposals can be submitted.`,
+You can manage your gig status from the employer dashboard. Once a gig reaches "hired" status, no more applications can be submitted.`,
         tags: ['status', 'lifecycle', 'draft', 'open', 'hired', 'completed'],
       },
       {
@@ -395,10 +392,10 @@ You can manage your gig status from the employer dashboard. Once a gig reaches "
 
 1. Click the bookmark icon on any gig listing or detail page
 2. Access your saved gigs from your student dashboard
-3. Each saved gig shows its current status, budget, and proposal count
+3. Each saved gig shows its current status, budget, and application count
 4. You can unsave a gig at any time
 
-This is useful for gigs you want to research before committing connects to a proposal. Saved gigs are tied to your account and persist across sessions.`,
+This is useful for gigs you want to research before committing connects to an application. Saved gigs are tied to your account and persist across sessions.`,
         tags: ['save', 'bookmark', 'gig', 'later', 'saved'],
       },
     ],
@@ -578,7 +575,7 @@ Example: If you earn GH₵1,000 from a client:
 
 Fees are calculated per client relationship, so if you work with multiple employers, each relationship has its own tier progression. The fee tier is snapshotted at contract creation.
 
-Employers have no service fees — posting gigs, reviewing proposals, and hiring are all free.`,
+Employers have no service fees — posting gigs, reviewing applications, and hiring are all free.`,
         tags: ['fees', 'service', 'percentage', 'tiers', 'sliding', 'cost'],
       },
       {
@@ -857,7 +854,7 @@ Your Job Success Score (JSS) is calculated from:
 • Dispute history
 • Client satisfaction (re-hire rate)
 
-Badges appear on your profile, in search results, and on proposals to help you stand out.`,
+Badges appear on your profile, in search results, and on applications to help you stand out.`,
         tags: ['badge', 'talent', 'rising', 'top rated', 'jss', 'score'],
       },
       {
@@ -943,11 +940,11 @@ All communication should happen through the platform messaging system. Sharing e
         q: 'What notifications will I receive?',
         a: `Intemso sends in-app notifications for important events:
 
-Proposal notifications:
-• proposal_received — When a student submits a proposal on your gig
-• proposal_shortlisted — When your proposal is shortlisted
-• proposal_hired — When you're hired from a proposal
-• proposal_declined — When your proposal is declined
+Application notifications:
+• application_received — When a student applies to your gig
+• application_reviewed — When your application is reviewed
+• application_hired — When you're hired from an application
+• application_declined — When your application is declined
 
 Contract & milestone notifications:
 • milestone_submitted — Student submitted deliverables
@@ -1195,7 +1192,7 @@ Red flags to watch for:
 Protection measures:
 • Always use Intemso's escrow for payments — never pay or accept payment directly
 • Keep all communication on-platform (messages are evidence in disputes)
-• Verify employer profiles before submitting proposals
+• Verify employer profiles before applying to gigs
 • Don't share personal contact info before a contract is in place
 • Report suspicious activity immediately
 

@@ -32,7 +32,7 @@ export default function AcceptableUsePage() {
           <ul className="list-disc pl-6 text-gray-600 space-y-2 mb-6">
             <li>Create and maintain a User profile that accurately represents your identity, skills, and qualifications.</li>
             <li>Post gigs for legitimate tasks and projects (as an Employer).</li>
-            <li>Submit proposals and perform work in accordance with agreed Contracts (as a Student).</li>
+            <li>Apply to gigs and perform work in accordance with agreed Contracts (as a Student).</li>
             <li>Communicate with other Users through the Platform&apos;s messaging system for purposes related to gig work.</li>
             <li>Process payments and manage financial transactions through the Platform&apos;s payment and escrow system.</li>
             <li>Participate in the Community forums in a constructive and respectful manner.</li>
@@ -134,7 +134,7 @@ export default function AcceptableUsePage() {
           <ul className="list-disc pl-6 text-gray-600 space-y-2 mb-6">
             <li><strong>Warning:</strong> Issuing a formal written warning to the offending User.</li>
             <li><strong>Content Removal:</strong> Removing, editing, or restricting access to content that violates this Policy.</li>
-            <li><strong>Feature Restriction:</strong> Temporarily restricting the offending User&apos;s access to certain features of the Platform, such as messaging, proposal submission, or community participation.</li>
+            <li><strong>Feature Restriction:</strong> Temporarily restricting the offending User&apos;s access to certain features of the Platform, such as messaging, applying to gigs, or community participation.</li>
             <li><strong>Temporary Suspension:</strong> Temporarily suspending the offending User&apos;s Account for a specified period.</li>
             <li><strong>Permanent Termination:</strong> Permanently terminating the offending User&apos;s Account and revoking all access to the Platform.</li>
             <li><strong>Financial Penalties:</strong> Withholding or forfeiting pending payments, earnings, or Connects associated with the violation.</li>

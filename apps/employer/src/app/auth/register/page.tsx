@@ -39,7 +39,7 @@ function getPasswordStrength(pw: string): { score: number; label: string; color:
 const STEPS = [
   { icon: UserIcon, text: 'Create your free account', time: '2 min', done: true },
   { icon: BriefcaseIcon, text: 'Post your first gig', time: 'Free' },
-  { icon: BoltIcon, text: 'Start receiving proposals', time: 'Instant' },
+  { icon: BoltIcon, text: 'Start receiving applications', time: 'Instant' },
 ];
 
 const CATEGORY_TILES = [

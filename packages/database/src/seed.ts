@@ -231,7 +231,7 @@ async function main() {
         urgency: g.urgency,
         status: g.status,
         viewsCount: 20 + Math.floor(Math.random() * 200),
-        proposalsCount: 2 + Math.floor(Math.random() * 10),
+        applicationsCount: 2 + Math.floor(Math.random() * 10),
         publishedAt: daysAgo(Math.floor(Math.random() * 30) + 1),
       },
     });
@@ -239,35 +239,34 @@ async function main() {
     console.log(`  ✅ ${g.title.slice(0, 55)}…`);
   }
 
-  // ---- 6. Proposals ----
-  console.log('\n📝 Seeding proposals…');
-  const proposalPairs: [number, number][] = [
+  // ---- 6. Applications ----
+  console.log('\n📝 Seeding applications…');
+  const applicationPairs: [number, number][] = [
     [0, 0], [1, 5], [2, 2], [3, 3], [4, 4], [0, 9], [1, 0], [5, 11], [6, 6], [7, 1],
     [2, 0], [3, 7], [4, 5], [6, 10], [7, 8], [0, 5], [5, 3],
   ];
-  const createdProposals: { id: string; gigIdx: number; studentIdx: number }[] = [];
-  for (const [sIdx, gIdx] of proposalPairs) {
+  const createdApplications: { id: string; gigIdx: number; studentIdx: number }[] = [];
+  for (const [sIdx, gIdx] of applicationPairs) {
     if (!createdGigs[gIdx]) continue;
     const stu = studentUsers[sIdx];
     const g = GIG_DATA[gIdx];
     try {
-      const proposal = await prisma.proposal.create({
+      const application = await prisma.application.create({
         data: {
           gigId: createdGigs[gIdx].id,
           studentId: stu.profileId,
-          coverLetter: `Hi! I'm ${stu.data.firstName} ${stu.data.lastName}, and I'd love to work on "${g.title}". With experience in ${stu.data.skills.slice(0, 3).join(', ')}, I can deliver high-quality results within your timeline. I've completed ${stu.data.completed} similar projects. Let's discuss!`,
-          proposedRate: g.min + Math.floor(Math.random() * (g.max - g.min) * 0.5),
-          estimatedDuration: pick(['1 week', '2 weeks', '3 weeks', '1 month']),
-          status: pick(['submitted', 'viewed', 'shortlisted']),
-          connectsSpent: 2,
+          note: `Hi! I'm ${stu.data.firstName} and I'd love to work on "${g.title}". I have experience in ${stu.data.skills.slice(0, 3).join(', ')}.`,
+          suggestedRate: g.min + Math.floor(Math.random() * (g.max - g.min) * 0.5),
+          status: pick(['applied', 'reviewed']),
+          connectsSpent: 1,
         },
       });
-      createdProposals.push({ id: proposal.id, gigIdx: gIdx, studentIdx: sIdx });
+      createdApplications.push({ id: application.id, gigIdx: gIdx, studentIdx: sIdx });
     } catch {
       // unique constraint — skip
     }
   }
-  console.log(`  ✅ ${createdProposals.length} proposals`);
+  console.log(`  ✅ ${createdApplications.length} applications`);
 
   // ---- 7. Contracts & Milestones ----
   console.log('\n📋 Seeding contracts…');
@@ -458,7 +457,7 @@ async function main() {
   console.log('\n💬 Seeding conversations…');
   const convos = [
     { parts: [studentUsers[0].userId, employerUsers[0].userId], msgs: [
-      [1, 'Hi Kwame, I loved your proposal for the admin panel. Can you start next week?'],
+      [1, 'Hi Kwame, I loved your application for the admin panel. Can you start next week?'],
       [0, 'Hi! Thank you! Yes, I can start Monday. Should I set up the repo first?'],
       [1, 'Perfect. I will send you the Figma designs and API docs by Friday.'],
       [0, 'Sounds great! I will review them over the weekend and prepare a sprint plan.'],
@@ -625,7 +624,7 @@ async function main() {
   // ---- 19. Notifications ----
   console.log('\n🔔 Seeding notifications…');
   const notifs = [
-    { type: 'proposal_received', title: 'New Proposal Received', body: 'A new proposal was submitted for your gig.' },
+    { type: 'application_received', title: 'New Application Received', body: 'A student applied to your gig.' },
     { type: 'contract_started', title: 'Contract Started', body: 'Your contract has begun. Good luck!' },
     { type: 'payment_received', title: 'Payment Received', body: 'You received a payment of GHS 500.00' },
     { type: 'review_received', title: 'New Review', body: 'Someone left you a 5-star review!' },
@@ -653,7 +652,7 @@ async function main() {
 
   // ---- 20. Audit Logs ----
   console.log('\n📋 Seeding audit logs…');
-  const auditActions = ['user.login', 'gig.create', 'proposal.submit', 'contract.start', 'payment.release', 'profile.update'];
+  const auditActions = ['user.login', 'gig.create', 'application.submit', 'contract.start', 'payment.release', 'profile.update'];
   for (let i = 0; i < 20; i++) {
     const user = pick([...studentUsers.map((s) => s.userId), ...employerUsers.map((e) => e.userId), adminUser.id]);
     await prisma.auditLog.create({
@@ -673,7 +672,7 @@ async function main() {
   Employers:        ${EMPLOYERS.length}
   Admin:            1
   Gigs:             ${GIG_DATA.length}
-  Proposals:        ${createdProposals.length}
+  Applications:     ${createdApplications.length}
   Contracts:        ${contractData.length}
   Service Listings: ${SERVICES.length}
   Portfolio Items:  ${PORTFOLIO_ITEMS.length}

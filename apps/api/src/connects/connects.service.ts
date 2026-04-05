@@ -36,9 +36,9 @@ export class ConnectsService {
     };
   }
 
-  // ── Deduct connects on proposal submission ──
+  // ── Deduct connects on application submission ──
 
-  async deductForProposal(userId: string, gigId: string, cost: number = 2) {
+  async deductForApplication(userId: string, gigId: string, cost: number = 1) {
     const student = await this.prisma.studentProfile.findFirst({
       where: { user: { id: userId } },
     });
@@ -98,15 +98,15 @@ export class ConnectsService {
           amount: -cost,
           balanceAfter: totalAfter,
           referenceId: gigId,
-          description: `Spent ${cost} connects on proposal`,
+          description: `Spent ${cost} connect on application`,
         },
       });
     });
   }
 
-  // ── Refund connects on declined proposal ──
+  // ── Refund connects on declined application ──
 
-  async refundForProposal(userId: string, gigId: string, amount: number = 2) {
+  async refundForApplication(userId: string, gigId: string, amount: number = 1) {
     const student = await this.prisma.studentProfile.findFirst({
       where: { user: { id: userId } },
     });
@@ -138,7 +138,7 @@ export class ConnectsService {
           amount,
           balanceAfter: totalAfter,
           referenceId: gigId,
-          description: `Refunded ${amount} connects (proposal declined)`,
+          description: `Refunded ${amount} connect (application declined)`,
         },
       });
     });

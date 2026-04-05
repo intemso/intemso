@@ -280,7 +280,7 @@ export default function PostGigPage() {
                   className="input-field resize-none"
                 />
                 <p className="text-xs text-gray-400 mt-1.5">
-                  The more detail you provide, the better proposals you&apos;ll
+                  The more detail you provide, the better applications you&apos;ll
                   receive
                 </p>
               </div>
@@ -594,8 +594,8 @@ export default function PostGigPage() {
                   Your gig is ready to post!
                 </h3>
                 <p className="text-sm text-green-600 mt-2 max-w-md mx-auto">
-                  Once posted, students will be able to view and submit
-                  proposals. You&apos;ll receive notifications as proposals come
+                  Once posted, students will be able to view and apply.
+                  You&apos;ll receive notifications as applications come
                   in.
                 </p>
               </div>

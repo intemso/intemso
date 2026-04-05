@@ -12,28 +12,28 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { ProposalsService } from './proposals.service';
-import { CreateProposalDto } from './dto/create-proposal.dto';
-import { UpdateProposalStatusDto } from './dto/update-proposal-status.dto';
+import { ApplicationsService } from './applications.service';
+import { CreateApplicationDto } from './dto/create-application.dto';
+import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
 
 @Controller()
-export class ProposalsController {
-  constructor(private readonly proposalsService: ProposalsService) {}
+export class ApplicationsController {
+  constructor(private readonly applicationsService: ApplicationsService) {}
 
-  /** Student submits a proposal for a gig */
-  @Post('gigs/:gigId/proposals')
+  /** Student applies for a gig (Easy Apply) */
+  @Post('gigs/:gigId/applications')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('STUDENT')
   create(
     @CurrentUser('id') userId: string,
     @Param('gigId') gigId: string,
-    @Body() dto: CreateProposalDto,
+    @Body() dto: CreateApplicationDto,
   ) {
-    return this.proposalsService.create(userId, gigId, dto);
+    return this.applicationsService.create(userId, gigId, dto);
   }
 
-  /** Employer views proposals for their gig */
-  @Get('gigs/:gigId/proposals')
+  /** Employer views applications for their gig */
+  @Get('gigs/:gigId/applications')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('EMPLOYER')
   findByGig(
@@ -43,15 +43,15 @@ export class ProposalsController {
     @Query('limit') limit?: string,
     @Query('status') status?: string,
   ) {
-    return this.proposalsService.findByGig(userId, gigId, {
+    return this.applicationsService.findByGig(userId, gigId, {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
       status,
     });
   }
 
-  /** Student views their own proposals */
-  @Get('proposals/me')
+  /** Student views their own applications */
+  @Get('applications/me')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('STUDENT')
   findMine(
@@ -60,44 +60,44 @@ export class ProposalsController {
     @Query('limit') limit?: string,
     @Query('status') status?: string,
   ) {
-    return this.proposalsService.findMyProposals(userId, {
+    return this.applicationsService.findMyApplications(userId, {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
       status,
     });
   }
 
-  /** Get single proposal detail */
-  @Get('proposals/:id')
+  /** Get single application detail */
+  @Get('applications/:id')
   @UseGuards(JwtAuthGuard)
   findOne(
     @CurrentUser('id') userId: string,
     @CurrentUser('role') role: string,
     @Param('id') id: string,
   ) {
-    return this.proposalsService.findOne(userId, role, id);
+    return this.applicationsService.findOne(userId, role, id);
   }
 
-  /** Employer updates proposal status (shortlist, decline, hire, etc.) */
-  @Patch('proposals/:id/status')
+  /** Employer updates application status (review, hire, decline) */
+  @Patch('applications/:id/status')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('EMPLOYER')
   updateStatus(
     @CurrentUser('id') userId: string,
     @Param('id') id: string,
-    @Body() dto: UpdateProposalStatusDto,
+    @Body() dto: UpdateApplicationStatusDto,
   ) {
-    return this.proposalsService.updateStatus(userId, id, dto);
+    return this.applicationsService.updateStatus(userId, id, dto);
   }
 
-  /** Student withdraws their proposal */
-  @Patch('proposals/:id/withdraw')
+  /** Student withdraws their application */
+  @Patch('applications/:id/withdraw')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('STUDENT')
   withdraw(
     @CurrentUser('id') userId: string,
     @Param('id') id: string,
   ) {
-    return this.proposalsService.withdraw(userId, id);
+    return this.applicationsService.withdraw(userId, id);
   }
 }

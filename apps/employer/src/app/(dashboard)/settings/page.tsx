@@ -122,7 +122,7 @@ export default function SettingsPage() {
           <div className="space-y-4">
             {[
               { label: 'New gig matches', description: 'Get notified when gigs match your skills', defaultChecked: true },
-              { label: 'Proposal updates', description: 'When employers view or respond to your proposals', defaultChecked: true },
+              { label: 'Application updates', description: 'When students apply to your gigs', defaultChecked: true },
               { label: 'Messages', description: 'New messages from employers', defaultChecked: true },
               { label: 'Payment notifications', description: 'Milestone payments and withdrawals', defaultChecked: true },
               { label: 'Marketing emails', description: 'Tips, promotions, and platform updates', defaultChecked: false },

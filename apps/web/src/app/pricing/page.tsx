@@ -83,14 +83,14 @@ const HOW_IT_WORKS_STUDENT = [
   {
     step: 2,
     icon: BoltIcon,
-    title: 'Submit Proposals',
-    desc: 'Use connects to submit proposals on gigs that match your skills. Each proposal costs 2 connects.',
+    title: 'Apply to Gigs',
+    desc: 'Use connects to apply to gigs that match your skills. Each application costs 1 connect.',
   },
   {
     step: 3,
     icon: DocumentCheckIcon,
     title: 'Get Hired & Deliver',
-    desc: 'Once an employer accepts your proposal, a contract is created. Complete the work and submit deliverables.',
+    desc: 'Once an employer accepts your application, a contract is created. Complete the work and submit deliverables.',
   },
   {
     step: 4,
@@ -110,8 +110,8 @@ const HOW_IT_WORKS_EMPLOYER = [
   {
     step: 2,
     icon: UserGroupIcon,
-    title: 'Review Proposals',
-    desc: 'Browse proposals from qualified students. Check profiles, ratings, reviews, and talent badges.',
+    title: 'Review Applications',
+    desc: 'Browse applications from qualified students. Check profiles, ratings, reviews, and talent badges.',
   },
   {
     step: 3,
@@ -138,7 +138,7 @@ const EARNED_CONNECTS = [
 const FAQS = [
   {
     q: 'What are connects?',
-    a: 'Connects are credits that students use to submit proposals on gigs. Each proposal costs 2 connects. You receive 15 free connects every month, and unused connects roll over up to a maximum of 80. You can also earn connects by completing gigs, getting reviews, and more.',
+    a: 'Connects are credits that students use to apply to gigs. Each application costs 1 connect. You receive 15 free connects every month, and unused connects roll over up to a maximum of 80. You can also earn connects by completing gigs, getting reviews, and more.',
   },
   {
     q: 'Do I need to pay to post a gig?',
@@ -162,7 +162,7 @@ const FAQS = [
   },
   {
     q: 'What happens if connects are not used?',
-    a: 'Free monthly connects roll over to the next month, up to a maximum of 80 total rollover connects. Purchased connects never expire. If your proposal is declined by an employer, the connects spent on that proposal are refunded to you automatically.',
+    a: 'Free monthly connects roll over to the next month, up to a maximum of 80 total rollover connects. Purchased connects never expire. If your application is declined by an employer, the connects spent on that application are refunded to you automatically.',
   },
   {
     q: 'Are there any hidden fees?',
@@ -532,7 +532,7 @@ export default function PricingPage() {
             </div>
             <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-3">Connects</h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
-              Connects are the credits you use to submit proposals on gigs. Each proposal costs <span className="font-semibold text-gray-900">2 connects</span>.
+              Connects are the credits you use to apply to gigs. Each application costs <span className="font-semibold text-gray-900">1 connect</span>.
               You get <span className="font-semibold text-primary-600">15 free connects every month</span>, and unused ones roll over (up to 80 total).
             </p>
           </div>
@@ -546,7 +546,7 @@ export default function PricingPage() {
               <div className="flex-1">
                 <h3 className="font-bold text-green-900 mb-0.5">15 Free Connects Every Month</h3>
                 <p className="text-sm text-green-700">
-                  Every student receives 15 free connects on the 1st of each month. That&apos;s enough to submit up to 7 proposals without spending a single pesewa. Unused free connects roll over to the next month, up to a maximum of 80.
+                  Every student receives 15 free connects on the 1st of each month. That&apos;s enough to apply to up to 15 gigs without spending a single pesewa. Unused free connects roll over to the next month, up to a maximum of 80.
                 </p>
               </div>
               <div className="text-3xl font-extrabold text-green-600 shrink-0">FREE</div>
@@ -603,13 +603,13 @@ export default function PricingPage() {
                     )}
                   </div>
 
-                  {/* Per proposal cost */}
+                  {/* Per application cost */}
                   <div className="bg-gray-50 rounded-lg px-3 py-2 mb-6">
                     <p className="text-xs text-gray-500">
-                      <span className="font-medium text-gray-700">{Math.floor(pack.connects / 2)} proposals</span> per pack
+                      <span className="font-medium text-gray-700">{pack.connects} applications</span> per pack
                     </p>
                     <p className="text-xs text-gray-400">
-                      GH&#x20B5;{(pack.price / Math.floor(pack.connects / 2)).toFixed(2)} per proposal
+                      GH&#x20B5;{(pack.price / pack.connects).toFixed(2)} per application
                     </p>
                   </div>
 
@@ -792,7 +792,7 @@ export default function PricingPage() {
                     step={2}
                     icon={DocumentCheckIcon}
                     title="Student Gets Hired"
-                    desc="Student submits a proposal, employer accepts, and a contract is created."
+                    desc="Student applies, employer accepts, and a contract is created."
                     isLast={false}
                   />
                   <EscrowStep
@@ -901,7 +901,7 @@ export default function PricingPage() {
                       <span className="block text-primary-200">for Employers</span>
                     </h2>
                     <p className="text-primary-100 leading-relaxed mb-6">
-                      Posting gigs, browsing talent, reviewing proposals, and hiring students costs absolutely nothing. You only pay the agreed budget to the student, secured safely in escrow.
+                      Posting gigs, browsing talent, reviewing applications, and hiring students costs absolutely nothing. You only pay the agreed budget to the student, secured safely in escrow.
                     </p>
                     <Link
                       href="/auth/register?role=employer"
@@ -969,7 +969,7 @@ export default function PricingPage() {
                     { feature: 'Account creation', student: 'Free', employer: 'Free' },
                     { feature: 'Monthly subscription', student: 'None', employer: 'None' },
                     { feature: 'Free monthly connects', student: '15/month', employer: 'N/A' },
-                    { feature: 'Cost per proposal', student: '2 connects', employer: 'N/A' },
+                    { feature: 'Cost per application', student: '1 connect', employer: 'N/A' },
                     { feature: 'Post gigs', student: 'N/A', employer: 'Free & unlimited' },
                     { feature: 'Service fee on earnings', student: '5% to 20%', employer: 'None' },
                     { feature: 'Escrow protection', student: true, employer: true },
