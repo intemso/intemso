@@ -17,12 +17,12 @@ import {
   DocumentTextIcon,
   ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
-import { gigsApi, proposalsApi, reportsApi, savedGigsApi, communityApi, type GigListItem } from '@/lib/api';
+import { gigsApi, applicationsApi, reportsApi, savedGigsApi, communityApi, type GigListItem } from '@/lib/api';
 import { useAuth } from '@/context/auth';
 
 function formatBudget(min: string | null, max: string | null) {
   const f = (n: number) =>
-    n >= 1000 ? `GH₵${(n / 1000).toFixed(1)}k` : `GH₵${n}`;
+    n >= 1000 ? `GHâ‚µ${(n / 1000).toFixed(1)}k` : `GHâ‚µ${n}`;
   const minN = min ? parseFloat(min) : 0;
   const maxN = max ? parseFloat(max) : 0;
   if (minN && maxN) return `${f(minN)} - ${f(maxN)}`;
@@ -48,16 +48,16 @@ export default function GigDetailPage() {
   const { user } = useAuth();
   const gigId = params.id as string;
 
-  const [gig, setGig] = useState<(GigListItem & { proposals?: { id: string; status: string; proposedRate: string }[] }) | null>(null);
+  const [gig, setGig] = useState<(GigListItem & { applications?: { id: string; status: string; suggestedRate: string }[] }) | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
-  const [showProposalForm, setShowProposalForm] = useState(false);
+  const [showApplyForm, setShowApplyForm] = useState(false);
 
-  // Proposal form state
-  const [proposedRate, setProposedRate] = useState('');
-  const [coverLetter, setCoverLetter] = useState('');
-  const [estimatedDuration, setEstimatedDuration] = useState('Less than 1 week');
+  // Easy apply form state
+  const [applyNote, setApplyNote] = useState('');
+  const [suggestedRate, setSuggestedRate] = useState('');
+  
   const [submitting, setSubmitting] = useState(false);
 
   // Report modal state
@@ -65,8 +65,8 @@ export default function GigDetailPage() {
   const [reportReason, setReportReason] = useState('');
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
-  const [proposalError, setProposalError] = useState('');
-  const [proposalSuccess, setProposalSuccess] = useState(false);
+  const [applyError, setApplyError] = useState('');
+  const [applySuccess, setApplySuccess] = useState(false);
 
   // Community discussion state
   const [discussionPostId, setDiscussionPostId] = useState<string | null>(null);
@@ -185,7 +185,7 @@ export default function GigDetailPage() {
                     <span>Posted {timeAgo(gig.createdAt)}</span>
                     {gig.locationAddress && (
                       <>
-                        <span className="text-gray-200">•</span>
+                        <span className="text-gray-200">â€¢</span>
                         <MapPinIcon className="w-3.5 h-3.5" />
                         <span>{gig.locationAddress}</span>
                       </>
@@ -299,9 +299,9 @@ export default function GigDetailPage() {
               <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 <div className="text-center p-2.5 sm:p-4 bg-gray-50 rounded-xl">
                   <p className="text-lg sm:text-2xl font-bold text-gray-900">
-                    {gig.proposalsCount}
+                    {gig.applicationsCount}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">Proposals</p>
+                  <p className="text-xs text-gray-500 mt-1">Applications</p>
                 </div>
                 <div className="text-center p-2.5 sm:p-4 bg-gray-50 rounded-xl">
                   <p className="text-lg sm:text-2xl font-bold text-gray-900">
@@ -326,14 +326,14 @@ export default function GigDetailPage() {
               {user?.role === 'STUDENT' ? (
                 <>
                   <button
-                    onClick={() => setShowProposalForm(!showProposalForm)}
+                    onClick={() => setShowApplyForm(!showApplyForm)}
                     className="btn-primary w-full btn-lg flex items-center justify-center gap-2"
                   >
                     <PaperAirplaneIcon className="w-5 h-5" />
-                    Submit a Proposal
+                    Easy Apply
                   </button>
                   <p className="text-xs text-gray-400 text-center mt-3">
-                    {gig.connectsRequired} connects required to submit
+                    {gig.connectsRequired} connect required to apply
                   </p>
                 </>
               ) : user?.role === 'EMPLOYER' ? (
@@ -347,92 +347,73 @@ export default function GigDetailPage() {
                 </Link>
               )}
 
-              {showProposalForm && (
+              {showApplyForm && (
                 <div className="mt-6 pt-6 border-t border-gray-100 space-y-4">
-                  {proposalSuccess ? (
+                  {applySuccess ? (
                     <div className="text-center py-4">
                       <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                         <DocumentTextIcon className="w-6 h-6 text-green-600" />
                       </div>
-                      <p className="text-sm font-medium text-green-700">Proposal submitted!</p>
+                      <p className="text-sm font-medium text-green-700">Application submitted!</p>
                       <p className="text-xs text-gray-500 mt-1">You can track it in your dashboard.</p>
                       <button
-                        onClick={() => router.push('/dashboard/proposals')}
+                        onClick={() => router.push('/dashboard/applications')}
                         className="text-sm text-primary-600 font-medium mt-3 hover:underline"
                       >
-                        View My Proposals
+                        View My Applications
                       </button>
                     </div>
                   ) : (
                     <>
-                      {proposalError && (
+                      {applyError && (
                         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                          {proposalError}
+                          {applyError}
                         </div>
                       )}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Your bid
+                          Note <span className="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <textarea
+                          rows={3}
+                          maxLength={280}
+                          placeholder="Briefly introduce yourself or mention relevant experience..."
+                          value={applyNote}
+                          onChange={(e) => setApplyNote(e.target.value)}
+                          className="input-field resize-none"
+                        />
+                        <p className="text-xs text-gray-400 mt-1 text-right">{applyNote.length}/280</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Suggested rate <span className="text-gray-400 font-normal">(optional)</span>
                         </label>
                         <div className="relative">
                           <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                            GH₵
+                            GH&#8373;
                           </span>
                           <input
                             type="number"
-                            placeholder="Enter amount"
-                            value={proposedRate}
-                            onChange={(e) => setProposedRate(e.target.value)}
-                            className="input-field pl-8"
+                            placeholder="Your rate"
+                            value={suggestedRate}
+                            onChange={(e) => setSuggestedRate(e.target.value)}
+                            className="input-field pl-12"
                           />
                         </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Cover letter
-                        </label>
-                        <textarea
-                          rows={5}
-                          placeholder="Introduce yourself and explain why you're a great fit..."
-                          value={coverLetter}
-                          onChange={(e) => setCoverLetter(e.target.value)}
-                          className="input-field resize-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Estimated duration
-                        </label>
-                        <select
-                          value={estimatedDuration}
-                          onChange={(e) => setEstimatedDuration(e.target.value)}
-                          className="input-field"
-                        >
-                          <option>Less than 1 week</option>
-                          <option>1-2 weeks</option>
-                          <option>2-4 weeks</option>
-                          <option>1-3 months</option>
-                          <option>3-6 months</option>
-                        </select>
-                      </div>
                       <button
                         onClick={async () => {
-                          if (!proposedRate || !coverLetter.trim()) {
-                            setProposalError('Please enter a bid amount and cover letter.');
-                            return;
-                          }
                           setSubmitting(true);
-                          setProposalError('');
+                          setApplyError('');
                           try {
-                            await proposalsApi.create(gigId, {
-                              coverLetter: coverLetter.trim(),
-                              proposedRate: parseFloat(proposedRate),
-                              estimatedDuration,
+                            await applicationsApi.create(gigId, {
+                              ...(applyNote.trim() && { note: applyNote.trim() }),
+                              ...(suggestedRate && { suggestedRate: parseFloat(suggestedRate) }),
                             });
-                            setProposalSuccess(true);
+                            setApplySuccess(true);
                           } catch (err: any) {
-                            const msg = Array.isArray(err?.message) ? err.message.join(', ') : err?.message || 'Failed to submit proposal';
-                            setProposalError(msg);
+                            const msg = Array.isArray(err?.message) ? err.message.join(', ') : err?.message || 'Failed to submit application';
+                            setApplyError(msg);
                           } finally {
                             setSubmitting(false);
                           }
@@ -443,9 +424,9 @@ export default function GigDetailPage() {
                         {submitting ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                          <DocumentTextIcon className="w-4 h-4" />
+                          <PaperAirplaneIcon className="w-4 h-4" />
                         )}
-                        {submitting ? 'Sending...' : 'Send Proposal'}
+                        {submitting ? 'Applying...' : 'Submit Application'}
                       </button>
                     </>
                   )}
