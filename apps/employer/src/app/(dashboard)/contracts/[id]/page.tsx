@@ -636,12 +636,14 @@ export default function ContractDetailPage() {
                 <div className="flex justify-between">
                   <dt className="text-gray-500">Gig</dt>
                   <dd>
-                    <Link
-                      href={`/gigs/${contract.gig.id}`}
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}/gigs/${contract.gig.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-primary-600 font-medium hover:underline"
                     >
                       View Gig
-                    </Link>
+                    </a>
                   </dd>
                 </div>
               )}

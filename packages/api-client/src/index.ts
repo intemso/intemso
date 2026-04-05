@@ -564,6 +564,16 @@ export const applicationsApi = {
     return apiFetch<PaginatedApplications>(`/applications/me${qs ? `?${qs}` : ''}`);
   },
 
+  /** Employer views all received applications across their gigs */
+  listReceived(params?: { page?: number; limit?: number; status?: string }) {
+    const sp = new URLSearchParams();
+    if (params?.page) sp.set('page', String(params.page));
+    if (params?.limit) sp.set('limit', String(params.limit));
+    if (params?.status) sp.set('status', params.status);
+    const qs = sp.toString();
+    return apiFetch<PaginatedApplications>(`/applications/received${qs ? `?${qs}` : ''}`);
+  },
+
   /** Get single application detail */
   getById(id: string) {
     return apiFetch<ApplicationListItem>(`/applications/${encodeURIComponent(id)}`);

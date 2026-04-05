@@ -233,6 +233,52 @@ export class ApplicationsService {
   }
 
   /**
+   * Employer views all applications across all their gigs.
+   */
+  async findEmployerApplications(employerUserId: string, params: { page?: number; limit?: number; status?: string }) {
+    const employer = await this.prisma.employerProfile.findUnique({
+      where: { userId: employerUserId },
+    });
+    if (!employer) throw new ForbiddenException('Employer profile not found');
+
+    const page = params.page || 1;
+    const limit = Math.min(params.limit || 20, 50);
+    const skip = (page - 1) * limit;
+
+    const where: any = { gig: { employerId: employer.id } };
+    if (params.status) {
+      where.status = params.status;
+    }
+
+    const [applications, total] = await Promise.all([
+      this.prisma.application.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          gig: {
+            select: { id: true, title: true, budgetType: true, budgetMin: true, budgetMax: true, currency: true, status: true },
+          },
+          student: {
+            select: {
+              id: true, firstName: true, lastName: true, professionalTitle: true,
+              university: true, skills: true, hourlyRate: true, ratingAvg: true,
+              ratingCount: true, gigsCompleted: true, userId: true,
+            },
+          },
+        },
+      }),
+      this.prisma.application.count({ where }),
+    ]);
+
+    return {
+      data: applications,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  /**
    * Get a single application by ID.
    */
   async findOne(userId: string, userRole: string, applicationId: string) {

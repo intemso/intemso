@@ -73,14 +73,18 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [statsRes, contractsRes, appsRes] = await Promise.allSettled([
-          apiFetch<DashboardStats>('/stats'),
-          apiFetch<{ data?: Contract[] }>('/contracts?status=active&limit=3'),
-          apiFetch<{ data?: Application[] }>('/applications?limit=4'),
+        const [contractsRes, appsRes] = await Promise.allSettled([
+          apiFetch<{ data?: Contract[]; meta?: { total: number } }>('/contracts/me?status=active&limit=3'),
+          apiFetch<{ data?: Application[]; meta?: { total: number } }>('/applications/received?limit=4'),
         ]);
-        if (statsRes.status === 'fulfilled') setStats(statsRes.value);
-        if (contractsRes.status === 'fulfilled') setContracts(contractsRes.value?.data ?? []);
-        if (appsRes.status === 'fulfilled') setApplications(appsRes.value?.data ?? []);
+        if (contractsRes.status === 'fulfilled') {
+          setContracts(contractsRes.value?.data ?? []);
+          setStats(s => ({ ...s, activeContracts: contractsRes.value?.meta?.total ?? 0 }));
+        }
+        if (appsRes.status === 'fulfilled') {
+          setApplications(appsRes.value?.data ?? []);
+          setStats(s => ({ ...s, pendingApplications: appsRes.value?.meta?.total ?? 0 }));
+        }
       } catch {
         // silently fail — dashboard shows zeros
       } finally {
@@ -109,10 +113,10 @@ export default function DashboardPage() {
           </p>
         </div>
         <Link
-          href="/gigs"
+          href="/post-gig"
           className="hidden sm:flex items-center gap-2 btn-primary"
         >
-          Find New Gigs
+          Post a Gig
           <ArrowUpRightIcon className="w-4 h-4" />
         </Link>
       </div>
@@ -157,7 +161,7 @@ export default function DashboardPage() {
               <div className="text-center py-8">
                 <BriefcaseIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                 <p className="text-sm text-gray-500">No active contracts yet</p>
-                <Link href="/gigs" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Browse gigs to get started</Link>
+                <Link href="/post-gig" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Post a gig to get started</Link>
               </div>
             ) : contracts.map((contract) => {
               const style = statusStyles[contract.status] ?? statusStyles.pending;
@@ -203,12 +207,6 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-5">
             <h2 className="text-base sm:text-lg font-bold text-gray-900">Earnings</h2>
-            <Link
-              href="/earnings"
-              className="text-sm font-medium text-primary-600 hover:text-primary-700"
-            >
-              Details
-            </Link>
           </div>
           <div className="text-center py-8">
             <CurrencyDollarIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
@@ -237,8 +235,8 @@ export default function DashboardPage() {
             {applications.length === 0 ? (
               <div className="text-center py-8">
                 <DocumentTextIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No applications yet</p>
-                <Link href="/gigs" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Post a gig to receive applications</Link>
+                <p className="text-sm text-gray-500">No applications received yet</p>
+                <Link href="/post-gig" className="text-sm text-primary-600 font-medium hover:underline mt-1 inline-block">Post a gig to receive applications</Link>
               </div>
             ) : applications.map((application) => {
               const style = statusStyles[application.status] ?? statusStyles.applied;
@@ -270,21 +268,21 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-5">
             <h2 className="text-base sm:text-lg font-bold text-gray-900">
-              Find Work
+              Quick Actions
             </h2>
             <Link
               href="/gigs"
               className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
             >
-              Browse All
+              My Gigs
               <ChevronRightIcon className="w-3 h-3" />
             </Link>
           </div>
           <div className="text-center py-8">
             <ArrowUpRightIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-500 mb-2">Explore available gigs and start earning</p>
-            <Link href="/gigs" className="btn-primary inline-flex items-center gap-2">
-              Browse Gigs
+            <p className="text-sm text-gray-500 mb-2">Post a new gig to find talented students</p>
+            <Link href="/post-gig" className="btn-primary inline-flex items-center gap-2">
+              Post a Gig
               <ArrowUpRightIcon className="w-4 h-4" />
             </Link>
           </div>
@@ -298,13 +296,13 @@ export default function DashboardPage() {
             <UserGroupIcon className="w-5 h-5 text-primary-600" />
             <h2 className="text-base sm:text-lg font-bold text-gray-900">Community Activity</h2>
           </div>
-          <Link
-            href="/community"
+          <a
+            href={`${process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}/community`}
             className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
           >
             View Community
             <ChevronRightIcon className="w-3 h-3" />
-          </Link>
+          </a>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
           <div className="text-center p-4 bg-primary-50/50 rounded-xl">

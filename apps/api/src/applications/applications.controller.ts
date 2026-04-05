@@ -69,6 +69,23 @@ export class ApplicationsController {
     });
   }
 
+  /** Employer views all applications across all their gigs */
+  @Get('applications/received')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('employer')
+  findReceived(
+    @CurrentUser('id') userId: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.applicationsService.findEmployerApplications(userId, {
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+      status,
+    });
+  }
+
   /** Get single application detail */
   @Get('applications/:id')
   @UseGuards(JwtAuthGuard)

@@ -45,7 +45,7 @@ export default function ApplicationsPage() {
     setLoading(true);
     setError('');
     applicationsApi
-      .listMine()
+      .listReceived()
       .then((res) => setApplications(res.data))
       .catch(() => setError('Failed to load applications'))
       .finally(() => setLoading(false));
@@ -144,7 +144,7 @@ export default function ApplicationsPage() {
               <div className="flex items-center justify-between text-sm text-gray-500">
                 <div className="flex items-center gap-4">
                   <Link
-                    href={`/gigs/${application.gigId}`}
+                    href={`/gigs/${application.gigId}/applications`}
                     className="text-primary-600 font-medium hover:underline"
                   >
                     {application.gig?.title || 'View Gig'}
@@ -175,7 +175,7 @@ export default function ApplicationsPage() {
         <div className="text-center py-16">
           <p className="text-gray-500">No applications in this category</p>
           <Link
-            href="/gigs"
+            href="/post-gig"
             className="text-primary-600 text-sm font-medium mt-2 inline-block hover:underline"
           >
             Post a gig to receive applications

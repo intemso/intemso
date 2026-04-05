@@ -173,12 +173,14 @@ export default function MyGigsPage() {
                     >
                       Applications ({gig.applicationsCount})
                     </Link>
-                    <Link
-                      href={`/gigs/${gig.id}`}
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}/gigs/${gig.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-sm text-gray-500 font-medium hover:underline"
                     >
                       View
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </div>
