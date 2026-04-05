@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useAuth } from '@/context/auth';
+import { getAccessToken, getRefreshToken } from '@/lib/api';
 
 const PORTAL_URLS: Record<string, string> = {
   student: process.env.NEXT_PUBLIC_STUDENT_PORTAL_URL || 'https://jobs.intemso.com',
@@ -20,8 +21,17 @@ export default function DashboardRedirect() {
       return;
     }
 
-    const portalUrl = PORTAL_URLS[user.role] || PORTAL_URLS.STUDENT;
-    window.location.href = portalUrl;
+    const portalUrl = PORTAL_URLS[user.role] || PORTAL_URLS.student;
+
+    // Pass auth tokens via URL hash so the portal can pick them up
+    // Hash fragments are NOT sent to the server, keeping tokens safe
+    const accessToken = getAccessToken();
+    const refreshToken = getRefreshToken();
+    if (accessToken && refreshToken) {
+      window.location.href = `${portalUrl}#access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken)}`;
+    } else {
+      window.location.href = portalUrl;
+    }
   }, [user, isLoading]);
 
   return (

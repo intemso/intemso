@@ -51,6 +51,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check for tokens passed via URL hash (cross-domain redirect from intemso.com)
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const params = new URLSearchParams(window.location.hash.slice(1));
+      const hashAccess = params.get('access_token');
+      const hashRefresh = params.get('refresh_token');
+      if (hashAccess && hashRefresh) {
+        setTokens(hashAccess, hashRefresh);
+        // Clear the hash from URL to avoid exposing tokens
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    }
+
     const token = getAccessToken();
     if (!token) {
       setIsLoading(false);

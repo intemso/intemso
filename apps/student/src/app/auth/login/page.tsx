@@ -359,9 +359,9 @@ export default function StudentLoginPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-semibold text-gray-700">Password</label>
-                <Link href="/auth/forgot-password" className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+                <a href={`${process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'https://intemso.com'}/auth/forgot-password`} className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
                   Forgot?
-                </Link>
+                </a>
               </div>
               <div className="relative group">
                 <input
