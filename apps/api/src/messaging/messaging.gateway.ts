@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../prisma/prisma.service';
 
 @WebSocketGateway({
   cors: {
@@ -30,6 +31,7 @@ export class MessagingGateway
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -78,10 +80,24 @@ export class MessagingGateway
 
   // Client joins a conversation room for live updates
   @SubscribeMessage('join_conversation')
-  handleJoinConversation(
+  async handleJoinConversation(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string },
   ) {
+    const userId = (client as any).userId;
+    if (!userId) return;
+
+    // Verify the user is a participant in this conversation
+    const conversation = await this.prisma.conversation.findFirst({
+      where: {
+        id: data.conversationId,
+        participantIds: { has: userId },
+      },
+      select: { id: true },
+    });
+
+    if (!conversation) return;
+
     client.join(`conversation:${data.conversationId}`);
   }
 

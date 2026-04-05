@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGigDto } from './dto/create-gig.dto';
 import { UpdateGigDto } from './dto/update-gig.dto';
@@ -6,6 +6,15 @@ import { UpdateGigDto } from './dto/update-gig.dto';
 @Injectable()
 export class GigsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private async getEmployerProfileId(userId: string): Promise<string> {
+    const profile = await this.prisma.employerProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    if (!profile) throw new BadRequestException('Employer profile not found');
+    return profile.id;
+  }
 
   async findAll(params: {
     page?: number;
@@ -60,7 +69,8 @@ export class GigsService {
     };
   }
 
-  async findMyGigs(employerId: string, params: { page?: number; limit?: number; status?: string }) {
+  async findMyGigs(userId: string, params: { page?: number; limit?: number; status?: string }) {
+    const employerId = await this.getEmployerProfileId(userId);
     const page = params.page || 1;
     const limit = Math.min(params.limit || 50, 100);
     const skip = (page - 1) * limit;
@@ -97,12 +107,12 @@ export class GigsService {
           select: { id: true, businessName: true, contactPerson: true, logoUrl: true },
         },
         category: { select: { id: true, name: true } },
-        applications: { select: { id: true, status: true, suggestedRate: true } },
       },
     });
   }
 
-  async create(employerId: string, data: CreateGigDto) {
+  async create(userId: string, data: CreateGigDto) {
+    const employerId = await this.getEmployerProfileId(userId);
     return this.prisma.gig.create({
       data: {
         ...data,
@@ -112,7 +122,8 @@ export class GigsService {
     });
   }
 
-  async update(id: string, employerId: string, data: UpdateGigDto) {
+  async update(id: string, userId: string, data: UpdateGigDto) {
+    const employerId = await this.getEmployerProfileId(userId);
     const gig = await this.prisma.gig.findUnique({ where: { id } });
     if (!gig) throw new NotFoundException('Gig not found');
     if (gig.employerId !== employerId) throw new ForbiddenException('You do not own this gig');
@@ -129,7 +140,8 @@ export class GigsService {
     });
   }
 
-  async remove(id: string, employerId: string) {
+  async remove(id: string, userId: string) {
+    const employerId = await this.getEmployerProfileId(userId);
     const gig = await this.prisma.gig.findUnique({ where: { id } });
     if (!gig) throw new NotFoundException('Gig not found');
     if (gig.employerId !== employerId) throw new ForbiddenException('You do not own this gig');

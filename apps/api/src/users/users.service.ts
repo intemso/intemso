@@ -308,6 +308,17 @@ export class UsersService {
     });
     if (!target) throw new NotFoundException('User not found');
 
+    // Block check: prevent following or being followed by a blocked user
+    const blockExists = await (this.prisma as any).blockedUser.findFirst({
+      where: {
+        OR: [
+          { blockerId: followerId, blockedId: followingId },
+          { blockerId: followingId, blockedId: followerId },
+        ],
+      },
+    });
+    if (blockExists) throw new BadRequestException('Cannot follow this user');
+
     try {
       await this.prisma.userFollow.create({
         data: { followerId, followingId },

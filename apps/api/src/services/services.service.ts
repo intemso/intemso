@@ -194,8 +194,18 @@ export class ServicesService {
     if (listing.status !== 'active')
       throw new BadRequestException('Service is not available');
 
+    // Validate tier and use server-side price (never trust client amount)
+    const tiers = listing.tiers as any[];
+    const selectedTier = Array.isArray(tiers)
+      ? tiers.find((t: any) => t.name === dto.tierSelected || t.title === dto.tierSelected)
+      : null;
+    if (!selectedTier || !selectedTier.price || selectedTier.price <= 0) {
+      throw new BadRequestException('Invalid tier selected or tier has no price');
+    }
+    const amount = Number(selectedTier.price);
+
     const deadline = new Date();
-    deadline.setDate(deadline.getDate() + listing.deliveryDays);
+    deadline.setDate(deadline.getDate() + (selectedTier.deliveryDays || listing.deliveryDays));
 
     const order = await this.prisma.serviceOrder.create({
       data: {
@@ -203,7 +213,7 @@ export class ServicesService {
         employerId,
         studentId: listing.studentId,
         tierSelected: dto.tierSelected,
-        amount: dto.amount,
+        amount,
         requirements: dto.requirements,
         status: 'pending',
         deliveryDeadline: deadline,

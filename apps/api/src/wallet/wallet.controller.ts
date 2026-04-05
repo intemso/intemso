@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { WalletService } from './wallet.service';
@@ -70,6 +71,7 @@ export class WalletController {
 
   /** Request a withdrawal via Paystack transfer */
   @Post('withdraw')
+  @Throttle({ default: { ttl: 60_000, limit: 3 } })
   async withdraw(
     @CurrentUser('id') userId: string,
     @Body() dto: RequestWithdrawalDto,

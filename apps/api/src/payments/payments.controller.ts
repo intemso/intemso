@@ -61,7 +61,9 @@ export class PaymentsController {
   ) {
     // IP whitelist check in production
     if (this.config.get('NODE_ENV') === 'production') {
-      const clientIp = forwardedFor?.split(',')[0]?.trim() || req.ip || '';
+      // Take the LAST IP (the one added by our trusted Nginx proxy)
+      const forwardedIps = forwardedFor?.split(',').map(s => s.trim()) || [];
+      const clientIp = forwardedIps[forwardedIps.length - 1] || req.ip || '';
       if (!isPaystackIp(clientIp)) {
         this.logger.warn(`Webhook rejected — untrusted IP: ${clientIp}`);
         throw new ForbiddenException('Untrusted source');
@@ -76,11 +78,19 @@ export class PaymentsController {
     return { status: 'ok' };
   }
 
-  /** Verify a payment reference */
+  /** Verify a payment reference (only your own payments) */
   @UseGuards(JwtAuthGuard)
   @Post('payments/verify')
-  verify(@Body('reference') reference: string) {
-    return this.paymentsService.verifyTransaction(reference);
+  async verify(
+    @CurrentUser('id') userId: string,
+    @Body('reference') reference: string,
+  ) {
+    const result = await this.paymentsService.verifyTransaction(reference);
+    // Ensure the payment belongs to the requesting user
+    if (result?.data?.metadata?.userId && result.data.metadata.userId !== userId) {
+      throw new ForbiddenException('You can only verify your own payments');
+    }
+    return result;
   }
 
   /** List Ghanaian banks (for withdrawal setup UI) */

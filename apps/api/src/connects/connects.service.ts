@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
+import { FREE_MONTHLY_CONNECTS, MAX_ROLLOVER_CONNECTS } from '@intemso/shared';
 
 @Injectable()
 export class ConnectsService {
@@ -21,7 +22,7 @@ export class ConnectsService {
       update: {},
       create: {
         studentId: student.id,
-        freeConnects: 15,
+        freeConnects: FREE_MONTHLY_CONNECTS,
         purchasedConnects: 0,
         rolloverConnects: 0,
       },
@@ -39,12 +40,19 @@ export class ConnectsService {
   // ── Deduct connects on application submission ──
 
   async deductForApplication(userId: string, gigId: string, cost: number = 1) {
-    const student = await this.prisma.studentProfile.findFirst({
+    return this.deductForApplicationWithTx(this.prisma, userId, gigId, cost);
+  }
+
+  /**
+   * Deduct connects using a provided transaction client (for atomic operations).
+   */
+  async deductForApplicationWithTx(tx: any, userId: string, gigId: string, cost: number = 1) {
+    const student = await tx.studentProfile.findFirst({
       where: { user: { id: userId } },
     });
     if (!student) throw new NotFoundException('Student profile not found');
 
-    const balance = await this.prisma.connectBalance.findUnique({
+    const balance = await tx.connectBalance.findUnique({
       where: { studentId: student.id },
     });
 
@@ -74,81 +82,82 @@ export class ConnectsService {
       }
     }
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.connectBalance.update({
-        where: { studentId: student.id },
-        data: {
-          freeConnects: { decrement: freeDeduct },
-          rolloverConnects: { decrement: rolloverDeduct },
-          purchasedConnects: { decrement: purchasedDeduct },
-        },
-      });
+    await tx.connectBalance.update({
+      where: { studentId: student.id },
+      data: {
+        freeConnects: { decrement: freeDeduct },
+        rolloverConnects: { decrement: rolloverDeduct },
+        purchasedConnects: { decrement: purchasedDeduct },
+      },
+    });
 
-      const updatedBalance = await tx.connectBalance.findUnique({
-        where: { studentId: student.id },
-      });
-      const totalAfter = (updatedBalance?.freeConnects ?? 0) +
-        (updatedBalance?.purchasedConnects ?? 0) +
-        (updatedBalance?.rolloverConnects ?? 0);
+    const updatedBalance = await tx.connectBalance.findUnique({
+      where: { studentId: student.id },
+    });
+    const totalAfter = (updatedBalance?.freeConnects ?? 0) +
+      (updatedBalance?.purchasedConnects ?? 0) +
+      (updatedBalance?.rolloverConnects ?? 0);
 
-      await tx.connectTransaction.create({
-        data: {
-          studentId: student.id,
-          type: 'proposal_spent',
-          amount: -cost,
-          balanceAfter: totalAfter,
-          referenceId: gigId,
-          description: `Spent ${cost} connect on application`,
-        },
-      });
+    await tx.connectTransaction.create({
+      data: {
+        studentId: student.id,
+        type: 'proposal_spent',
+        amount: -cost,
+        balanceAfter: totalAfter,
+        referenceId: gigId,
+        description: `Spent ${cost} connect on application`,
+      },
     });
   }
 
   // ── Refund connects on declined application ──
 
   async refundForApplication(userId: string, gigId: string, amount: number = 1) {
-    const student = await this.prisma.studentProfile.findFirst({
+    return this.refundForApplicationWithTx(this.prisma, userId, gigId, amount);
+  }
+
+  /**
+   * Refund connects using a provided transaction client (for atomic operations).
+   */
+  async refundForApplicationWithTx(tx: any, userId: string, gigId: string, amount: number = 1) {
+    const student = await tx.studentProfile.findFirst({
       where: { user: { id: userId } },
     });
     if (!student) return;
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.connectBalance.upsert({
-        where: { studentId: student.id },
-        update: { freeConnects: { increment: amount } },
-        create: {
-          studentId: student.id,
-          freeConnects: 15 + amount,
-          purchasedConnects: 0,
-          rolloverConnects: 0,
-        },
-      });
+    await tx.connectBalance.upsert({
+      where: { studentId: student.id },
+      update: { freeConnects: { increment: amount } },
+      create: {
+        studentId: student.id,
+        freeConnects: FREE_MONTHLY_CONNECTS + amount,
+        purchasedConnects: 0,
+        rolloverConnects: 0,
+      },
+    });
 
-      const balance = await tx.connectBalance.findUnique({
-        where: { studentId: student.id },
-      });
-      const totalAfter = (balance?.freeConnects ?? 0) +
-        (balance?.purchasedConnects ?? 0) +
-        (balance?.rolloverConnects ?? 0);
+    const balance = await tx.connectBalance.findUnique({
+      where: { studentId: student.id },
+    });
+    const totalAfter = (balance?.freeConnects ?? 0) +
+      (balance?.purchasedConnects ?? 0) +
+      (balance?.rolloverConnects ?? 0);
 
-      await tx.connectTransaction.create({
-        data: {
-          studentId: student.id,
-          type: 'proposal_refund',
-          amount,
-          balanceAfter: totalAfter,
-          referenceId: gigId,
-          description: `Refunded ${amount} connect (application declined)`,
-        },
-      });
+    await tx.connectTransaction.create({
+      data: {
+        studentId: student.id,
+        type: 'proposal_refund',
+        amount,
+        balanceAfter: totalAfter,
+        referenceId: gigId,
+        description: `Refunded ${amount} connect (application declined)`,
+      },
     });
   }
 
   // ── Monthly free grant + rollover ──
 
   async processMonthlyGrant(studentId: string) {
-    const MAX_ROLLOVER = 80;
-
     return this.prisma.$transaction(async (tx) => {
       const balance = await tx.connectBalance.findUnique({
         where: { studentId },
@@ -157,18 +166,18 @@ export class ConnectsService {
 
       // Unused free connects → rollover (capped)
       const rolloverAdd = balance.freeConnects;
-      const newRollover = Math.min(balance.rolloverConnects + rolloverAdd, MAX_ROLLOVER);
+      const newRollover = Math.min(balance.rolloverConnects + rolloverAdd, MAX_ROLLOVER_CONNECTS);
 
       await tx.connectBalance.update({
         where: { studentId },
         data: {
           rolloverConnects: newRollover,
-          freeConnects: 15, // fresh monthly grant
+          freeConnects: FREE_MONTHLY_CONNECTS,
           lastRefreshAt: new Date(),
         },
       });
 
-      const totalAfter = 15 + balance.purchasedConnects + newRollover;
+      const totalAfter = FREE_MONTHLY_CONNECTS + balance.purchasedConnects + newRollover;
 
       // Log rollover
       if (rolloverAdd > 0) {
@@ -188,7 +197,7 @@ export class ConnectsService {
         data: {
           studentId,
           type: 'monthly_grant',
-          amount: 15,
+          amount: FREE_MONTHLY_CONNECTS,
           balanceAfter: totalAfter,
           description: 'Monthly free connects grant',
         },
@@ -253,7 +262,7 @@ export class ConnectsService {
         update: { freeConnects: { increment: amount } },
         create: {
           studentId: studentProfileId,
-          freeConnects: 15 + amount,
+          freeConnects: FREE_MONTHLY_CONNECTS + amount,
           purchasedConnects: 0,
           rolloverConnects: 0,
         },

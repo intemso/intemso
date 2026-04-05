@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -24,6 +25,7 @@ export class ApplicationsController {
   @Post('gigs/:gigId/applications')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('STUDENT')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   create(
     @CurrentUser('id') userId: string,
     @Param('gigId') gigId: string,

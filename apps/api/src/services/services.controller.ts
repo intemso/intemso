@@ -8,16 +8,21 @@ import {
   Query,
   UseGuards,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ServicesService } from './services.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/service.dto';
 import { CreateOrderDto } from './dto/order.dto';
 
 @Controller('services')
 export class ServicesController {
-  constructor(private servicesService: ServicesService) {}
+  constructor(
+    private servicesService: ServicesService,
+    private prisma: PrismaService,
+  ) {}
 
   /** Browse active services (public) */
   @Get()
@@ -44,10 +49,12 @@ export class ServicesController {
   /** My service listings (student) */
   @Get('mine')
   @UseGuards(JwtAuthGuard)
-  findMine(@CurrentUser() user: any) {
+  async findMine(@CurrentUser() user: any) {
     if (user.role !== 'student')
       throw new ForbiddenException('Only students can manage services');
-    return this.servicesService.findMyListings(user.studentProfile.id);
+    const profile = await this.prisma.studentProfile.findUnique({ where: { userId: user.id } });
+    if (!profile) throw new BadRequestException('Student profile not found');
+    return this.servicesService.findMyListings(profile.id);
   }
 
   /** Service detail */
@@ -59,36 +66,42 @@ export class ServicesController {
   /** Create service listing */
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() dto: CreateServiceDto, @CurrentUser() user: any) {
+  async create(@Body() dto: CreateServiceDto, @CurrentUser() user: any) {
     if (user.role !== 'student')
       throw new ForbiddenException('Only students can create services');
-    return this.servicesService.create(user.studentProfile.id, dto);
+    const profile = await this.prisma.studentProfile.findUnique({ where: { userId: user.id } });
+    if (!profile) throw new BadRequestException('Student profile not found');
+    return this.servicesService.create(profile.id, dto);
   }
 
   /** Update service listing */
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(
+  async update(
     @Param('id') id: string,
     @Body() dto: UpdateServiceDto,
     @CurrentUser() user: any,
   ) {
     if (user.role !== 'student')
       throw new ForbiddenException('Only students can manage services');
-    return this.servicesService.update(id, user.studentProfile.id, dto);
+    const profile = await this.prisma.studentProfile.findUnique({ where: { userId: user.id } });
+    if (!profile) throw new BadRequestException('Student profile not found');
+    return this.servicesService.update(id, profile.id, dto);
   }
 
   /** Order a service (employer) */
   @Post(':id/order')
   @UseGuards(JwtAuthGuard)
-  createOrder(
+  async createOrder(
     @Param('id') id: string,
     @Body() dto: CreateOrderDto,
     @CurrentUser() user: any,
   ) {
     if (user.role !== 'employer')
       throw new ForbiddenException('Only employers can order services');
-    return this.servicesService.createOrder(id, user.employerProfile.id, dto);
+    const profile = await this.prisma.employerProfile.findUnique({ where: { userId: user.id } });
+    if (!profile) throw new BadRequestException('Employer profile not found');
+    return this.servicesService.createOrder(id, profile.id, dto);
   }
 
   /** List my orders */

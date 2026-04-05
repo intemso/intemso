@@ -8,6 +8,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UploadsService, UploadedFile as UploadedFileResult } from './uploads.service';
 
@@ -17,6 +18,7 @@ export class UploadsController {
 
   @Post('avatar')
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 2 * 1024 * 1024 } }))
   async uploadAvatar(
     @UploadedFile() file: Express.Multer.File,
@@ -27,6 +29,7 @@ export class UploadsController {
 
   @Post('portfolio')
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseInterceptors(FilesInterceptor('files', 5, { limits: { fileSize: 10 * 1024 * 1024 } }))
   async uploadPortfolio(
     @UploadedFiles() files: Express.Multer.File[],
@@ -37,6 +40,7 @@ export class UploadsController {
 
   @Post('deliverable')
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 10 * 1024 * 1024 } }))
   async uploadDeliverable(
     @UploadedFiles() files: Express.Multer.File[],
@@ -47,6 +51,7 @@ export class UploadsController {
 
   @Post('attachment')
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   async uploadAttachment(
     @UploadedFile() file: Express.Multer.File,

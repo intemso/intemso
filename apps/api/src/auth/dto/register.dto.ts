@@ -1,5 +1,4 @@
-import { IsEmail, IsEnum, IsString, MinLength, MaxLength, Matches } from 'class-validator';
-import { UserRole } from '@intemso/shared';
+import { IsEmail, IsIn, IsString, MinLength, MaxLength, Matches } from 'class-validator';
 
 export class RegisterDto {
   @IsEmail()
@@ -13,6 +12,6 @@ export class RegisterDto {
   })
   password!: string;
 
-  @IsEnum(UserRole, { message: 'Role must be either student or employer' })
-  role!: UserRole.STUDENT | UserRole.EMPLOYER;
+  @IsIn(['student', 'employer'], { message: 'Role must be either student or employer' })
+  role!: 'student' | 'employer';
 }

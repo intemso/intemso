@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -11,8 +12,19 @@ import { ConnectsService } from '../connects/connects.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
 
+/** Valid status transitions for applications */
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  applied: ['reviewed', 'hired', 'declined'],
+  reviewed: ['hired', 'declined'],
+  hired: [],
+  declined: [],
+  withdrawn: [],
+};
+
 @Injectable()
 export class ApplicationsService {
+  private readonly logger = new Logger(ApplicationsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
@@ -49,12 +61,26 @@ export class ApplicationsService {
       throw new ConflictException('You have already applied to this gig');
     }
 
-    // 4. Deduct connects (1 per application)
-    await this.connectsService.deductForApplication(studentUserId, gigId, gig.connectsRequired);
+    // 4. Validate screening answers match gig questions count
+    const screeningQuestions = (gig as any).screeningQuestions ?? [];
+    if (Array.isArray(screeningQuestions) && screeningQuestions.length > 0) {
+      const answers = dto.screeningAnswers ?? [];
+      if (answers.length !== screeningQuestions.length) {
+        throw new BadRequestException(
+          `Expected ${screeningQuestions.length} screening answers, got ${answers.length}`,
+        );
+      }
+    }
 
-    // 5. Create application and increment applicationsCount atomically
-    const [application] = await this.prisma.$transaction([
-      this.prisma.application.create({
+    // 5. Atomic: deduct connects + create application + increment count
+    const application = await this.prisma.$transaction(async (tx) => {
+      // Deduct connects inside the transaction
+      await this.connectsService.deductForApplicationWithTx(
+        tx, studentUserId, gigId, gig.connectsRequired,
+      );
+
+      // Create application
+      const app = await tx.application.create({
         data: {
           gigId,
           studentId: student.id,
@@ -67,14 +93,18 @@ export class ApplicationsService {
           gig: { select: { id: true, title: true } },
           student: { select: { id: true, firstName: true, lastName: true } },
         },
-      }),
-      this.prisma.gig.update({
+      });
+
+      // Increment applications count
+      await tx.gig.update({
         where: { id: gigId },
         data: { applicationsCount: { increment: 1 } },
-      }),
-    ]);
+      });
 
-    // Notify employer about new application
+      return app;
+    });
+
+    // Notify employer about new application (fire-and-forget with logging)
     const gigForNotif = await this.prisma.gig.findUnique({
       where: { id: gigId },
       include: { employer: { select: { userId: true } } },
@@ -86,7 +116,7 @@ export class ApplicationsService {
         title: 'New Application Received',
         body: `${application.student.firstName} ${application.student.lastName} applied for "${application.gig.title}"`,
         data: { applicationId: application.id, gigId },
-      }).catch(() => {});
+      }).catch((err) => this.logger.error('Failed to send new_application notification', err));
     }
 
     return application;
@@ -281,12 +311,33 @@ export class ApplicationsService {
       throw new ForbiddenException('You do not own this gig');
     }
 
+    // Validate status transition
+    const allowed = VALID_TRANSITIONS[application.status] ?? [];
+    if (!allowed.includes(dto.status)) {
+      throw new BadRequestException(
+        `Cannot transition from "${application.status}" to "${dto.status}"`,
+      );
+    }
+
     // If hiring, create a contract and update gig status
     if (dto.status === 'hired') {
-      // Use suggested rate, or gig budget min, or student hourly rate
-      const agreedRate = application.suggestedRate ?? application.gig.budgetMin ?? application.student.hourlyRate ?? 0;
+      // Guard against rate=0: require at least one non-zero rate source
+      const agreedRate = application.suggestedRate ?? application.gig.budgetMin ?? application.student.hourlyRate;
+      if (!agreedRate || agreedRate <= 0) {
+        throw new BadRequestException(
+          'Cannot hire: no valid agreed rate. The student must set an hourly rate or suggest a rate.',
+        );
+      }
 
       const result = await this.prisma.$transaction(async (tx) => {
+        // Prevent concurrent hires: check if another student was already hired
+        const existingHire = await tx.application.findFirst({
+          where: { gigId: application.gig.id, status: 'hired' },
+        });
+        if (existingHire) {
+          throw new ConflictException('Another student has already been hired for this gig');
+        }
+
         // Update application status
         const updated = await tx.application.update({
           where: { id: applicationId },
@@ -322,12 +373,45 @@ export class ApplicationsService {
         title: 'You\'ve Been Hired!',
         body: `Congratulations! You\'ve been hired for "${application.gig.title}"`,
         data: { applicationId: application.id, contractId: result.contract.id, gigId: application.gig.id },
-      }).catch(() => {});
+      }).catch((err) => this.logger.error('Failed to send application_hired notification', err));
 
       return result;
     }
 
-    // Regular status update
+    // For decline: refund connects atomically within transaction
+    if (dto.status === 'declined') {
+      const updated = await this.prisma.$transaction(async (tx) => {
+        const upd = await tx.application.update({
+          where: { id: applicationId },
+          data: { status: dto.status, employerNotes: dto.employerNotes },
+          include: {
+            student: { select: { id: true, firstName: true, lastName: true } },
+          },
+        });
+
+        // Refund connects within the same transaction
+        await this.connectsService.refundForApplicationWithTx(
+          tx,
+          application.student.userId,
+          application.gig.id,
+          application.connectsSpent || 1,
+        );
+
+        return upd;
+      });
+
+      this.notificationsService.create({
+        userId: application.student.userId,
+        type: 'application_declined',
+        title: 'Application Update',
+        body: `Your application for "${application.gig.title}" was not selected`,
+        data: { applicationId: application.id, gigId: application.gig.id },
+      }).catch((err) => this.logger.error('Failed to send application_declined notification', err));
+
+      return updated;
+    }
+
+    // Regular status update (reviewed)
     const updated = await this.prisma.application.update({
       where: { id: applicationId },
       data: {
@@ -341,7 +425,6 @@ export class ApplicationsService {
       },
     });
 
-    // Notify student of status change
     if (dto.status === 'reviewed') {
       this.notificationsService.create({
         userId: application.student.userId,
@@ -349,22 +432,7 @@ export class ApplicationsService {
         title: 'Application Reviewed',
         body: `Your application for "${application.gig.title}" is being reviewed`,
         data: { applicationId: application.id, gigId: application.gig.id },
-      }).catch(() => {});
-    } else if (dto.status === 'declined') {
-      // Refund connects on decline
-      this.connectsService.refundForApplication(
-        application.student.userId,
-        application.gig.id,
-        application.connectsSpent || 1,
-      ).catch(() => {});
-
-      this.notificationsService.create({
-        userId: application.student.userId,
-        type: 'application_declined',
-        title: 'Application Update',
-        body: `Your application for "${application.gig.title}" was not selected`,
-        data: { applicationId: application.id, gigId: application.gig.id },
-      }).catch(() => {});
+      }).catch((err) => this.logger.error('Failed to send application_reviewed notification', err));
     }
 
     return updated;
@@ -392,17 +460,35 @@ export class ApplicationsService {
     if (application.status === 'withdrawn') {
       throw new BadRequestException('Application is already withdrawn');
     }
+    if (application.status === 'declined') {
+      throw new BadRequestException('Cannot withdraw a declined application');
+    }
 
-    const [updated] = await this.prisma.$transaction([
-      this.prisma.application.update({
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const upd = await tx.application.update({
         where: { id: applicationId },
         data: { status: 'withdrawn' },
-      }),
-      this.prisma.gig.update({
-        where: { id: application.gigId },
-        data: { applicationsCount: { decrement: 1 } },
-      }),
-    ]);
+      });
+
+      // Decrement applicationsCount with floor guard (never go below 0)
+      const gig = await tx.gig.findUnique({ where: { id: application.gigId } });
+      if (gig && gig.applicationsCount > 0) {
+        await tx.gig.update({
+          where: { id: application.gigId },
+          data: { applicationsCount: { decrement: 1 } },
+        });
+      }
+
+      // Refund connects on withdrawal
+      await this.connectsService.refundForApplicationWithTx(
+        tx,
+        studentUserId,
+        application.gigId,
+        application.connectsSpent || 1,
+      );
+
+      return upd;
+    });
 
     return updated;
   }

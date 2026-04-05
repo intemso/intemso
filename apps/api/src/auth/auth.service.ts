@@ -253,6 +253,14 @@ export class AuthService {
       const user = await this.usersService.findById(payload.sub);
       if (!user) throw new BadRequestException('Invalid reset token');
 
+      // Prevent token reuse: if password was changed after token was issued, reject
+      if (payload.iat && user.updatedAt) {
+        const tokenIssuedAt = new Date(payload.iat * 1000);
+        if (user.updatedAt > tokenIssuedAt) {
+          throw new BadRequestException('This reset link has already been used');
+        }
+      }
+
       const passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
       await this.usersService.updatePassword(user.id, passwordHash);
 

@@ -190,6 +190,21 @@ export class ContractsService {
       throw new ForbiddenException('Access denied');
     }
 
+    // Validate status transitions
+    const validTransitions: Record<string, string[]> = {
+      active: ['paused', 'completed', 'cancelled'],
+      paused: ['active', 'cancelled'],
+      completed: [],
+      cancelled: [],
+      disputed: [],
+    };
+    const allowed = validTransitions[contract.status] ?? [];
+    if (!allowed.includes(dto.status)) {
+      throw new BadRequestException(
+        `Cannot transition contract from "${contract.status}" to "${dto.status}"`,
+      );
+    }
+
     const updateData: any = {
       status: dto.status,
       endedById: userId,
