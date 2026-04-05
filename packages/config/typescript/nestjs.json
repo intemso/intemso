@@ -1,9 +1,8 @@
 {
   "extends": "./base.json",
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "ES2022",
