@@ -22,7 +22,7 @@ import { useAuth } from '@/context/auth';
 
 function formatBudget(min: string | null, max: string | null) {
   const f = (n: number) =>
-    n >= 1000 ? `GHâ‚µ${(n / 1000).toFixed(1)}k` : `GHâ‚µ${n}`;
+    n >= 1000 ? `GHÃ¢â€šÂµ${(n / 1000).toFixed(1)}k` : `GHÃ¢â€šÂµ${n}`;
   const minN = min ? parseFloat(min) : 0;
   const maxN = max ? parseFloat(max) : 0;
   if (minN && maxN) return `${f(minN)} - ${f(maxN)}`;
@@ -48,7 +48,7 @@ export default function GigDetailPage() {
   const { user } = useAuth();
   const gigId = params.id as string;
 
-  const [gig, setGig] = useState<(GigListItem & { applications?: { id: string; status: string; suggestedRate: string }[] }) | null>(null);
+  const [gig, setGig] = useState<(GigListItem & { applications?: { id: string; status: string; suggestedRate: string | null }[] }) | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
@@ -185,7 +185,7 @@ export default function GigDetailPage() {
                     <span>Posted {timeAgo(gig.createdAt)}</span>
                     {gig.locationAddress && (
                       <>
-                        <span className="text-gray-200">â€¢</span>
+                        <span className="text-gray-200">Ã¢â‚¬Â¢</span>
                         <MapPinIcon className="w-3.5 h-3.5" />
                         <span>{gig.locationAddress}</span>
                       </>
