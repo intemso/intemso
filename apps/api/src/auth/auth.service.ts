@@ -4,6 +4,8 @@ import {
   ConflictException,
   BadRequestException,
   Inject,
+  Logger,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -22,6 +24,8 @@ import { LoginGhanaCardDto } from './dto/login-ghana-card.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -44,20 +48,26 @@ export class AuthService {
       throw new ConflictException('An account with this email already exists');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+    try {
+      const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
-    const user = await this.usersService.create({
-      email: dto.email,
-      passwordHash,
-      role: dto.role,
-    });
+      const user = await this.usersService.create({
+        email: dto.email,
+        passwordHash,
+        role: dto.role,
+      });
 
-    const tokens = await this.generateTokens(user.id, user.email ?? user.ghanaCardNumber ?? user.id, user.role);
+      const tokens = await this.generateTokens(user.id, user.email ?? user.ghanaCardNumber ?? user.id, user.role);
 
-    return {
-      user: { id: user.id, email: user.email, role: user.role },
-      ...tokens,
-    };
+      return {
+        user: { id: user.id, email: user.email, role: user.role },
+        ...tokens,
+      };
+    } catch (err) {
+      if (err instanceof ConflictException || err instanceof BadRequestException) throw err;
+      this.logger.error(`Registration failed for ${dto.email}: ${(err as Error).message}`, (err as Error).stack);
+      throw new InternalServerErrorException('Registration failed. Please try again.');
+    }
   }
 
   async registerWithGhanaCard(dto: RegisterGhanaCardDto) {
@@ -68,76 +78,94 @@ export class AuthService {
       throw new ConflictException('An account with this Ghana Card number already exists');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+    try {
+      const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
-    const user = await this.usersService.create({
-      ghanaCardNumber: cardNumber,
-      passwordHash,
-      role: dto.role,
-    });
+      const user = await this.usersService.create({
+        ghanaCardNumber: cardNumber,
+        passwordHash,
+        role: dto.role,
+      });
 
-    const tokens = await this.generateTokens(user.id, cardNumber, user.role);
+      const tokens = await this.generateTokens(user.id, cardNumber, user.role);
 
-    return {
-      user: { id: user.id, email: user.email, ghanaCardNumber: user.ghanaCardNumber, role: user.role },
-      ...tokens,
-    };
+      return {
+        user: { id: user.id, email: user.email, ghanaCardNumber: user.ghanaCardNumber, role: user.role },
+        ...tokens,
+      };
+    } catch (err) {
+      if (err instanceof ConflictException || err instanceof BadRequestException) throw err;
+      this.logger.error(`Ghana Card registration failed for ${cardNumber}: ${(err as Error).message}`, (err as Error).stack);
+      throw new InternalServerErrorException('Registration failed. Please try again.');
+    }
   }
 
   async loginWithGhanaCard(dto: LoginGhanaCardDto) {
-    const cardNumber = normalizeGhanaCard(dto.ghanaCardNumber);
+    try {
+      const cardNumber = normalizeGhanaCard(dto.ghanaCardNumber);
 
-    const user = await this.usersService.findByGhanaCard(cardNumber);
-    if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid Ghana Card number or password');
+      const user = await this.usersService.findByGhanaCard(cardNumber);
+      if (!user || !user.passwordHash) {
+        throw new UnauthorizedException('Invalid Ghana Card number or password');
+      }
+
+      if (user.isSuspended) {
+        throw new UnauthorizedException('Your account has been suspended');
+      }
+
+      const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid Ghana Card number or password');
+      }
+
+      await this.usersService.updateLastLogin(user.id);
+      this.connectsService.rewardDailyLogin(user.id).catch(() => {});
+
+      const tokens = await this.generateTokens(user.id, user.email ?? cardNumber, user.role);
+
+      return {
+        user: { id: user.id, email: user.email, ghanaCardNumber: user.ghanaCardNumber, role: user.role },
+        ...tokens,
+      };
+    } catch (err) {
+      if (err instanceof UnauthorizedException) throw err;
+      this.logger.error(`Ghana Card login failed: ${(err as Error).message}`, (err as Error).stack);
+      throw new InternalServerErrorException('Login failed. Please try again.');
     }
-
-    if (user.isSuspended) {
-      throw new UnauthorizedException('Your account has been suspended');
-    }
-
-    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid Ghana Card number or password');
-    }
-
-    await this.usersService.updateLastLogin(user.id);
-    this.connectsService.rewardDailyLogin(user.id).catch(() => {});
-
-    const tokens = await this.generateTokens(user.id, user.email ?? cardNumber, user.role);
-
-    return {
-      user: { id: user.id, email: user.email, ghanaCardNumber: user.ghanaCardNumber, role: user.role },
-      ...tokens,
-    };
   }
 
   async login(dto: LoginDto) {
-    const user = await this.usersService.findByEmail(dto.email);
-    if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid email or password');
+    try {
+      const user = await this.usersService.findByEmail(dto.email);
+      if (!user || !user.passwordHash) {
+        throw new UnauthorizedException('Invalid email or password');
+      }
+
+      if (user.isSuspended) {
+        throw new UnauthorizedException('Your account has been suspended');
+      }
+
+      const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid email or password');
+      }
+
+      await this.usersService.updateLastLogin(user.id);
+
+      // Award daily login connect (fire-and-forget)
+      this.connectsService.rewardDailyLogin(user.id).catch(() => {});
+
+      const tokens = await this.generateTokens(user.id, user.email, user.role);
+
+      return {
+        user: { id: user.id, email: user.email, role: user.role },
+        ...tokens,
+      };
+    } catch (err) {
+      if (err instanceof UnauthorizedException) throw err;
+      this.logger.error(`Login failed for ${dto.email}: ${(err as Error).message}`, (err as Error).stack);
+      throw new InternalServerErrorException('Login failed. Please try again.');
     }
-
-    if (user.isSuspended) {
-      throw new UnauthorizedException('Your account has been suspended');
-    }
-
-    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
-
-    await this.usersService.updateLastLogin(user.id);
-
-    // Award daily login connect (fire-and-forget)
-    this.connectsService.rewardDailyLogin(user.id).catch(() => {});
-
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
-
-    return {
-      user: { id: user.id, email: user.email, role: user.role },
-      ...tokens,
-    };
   }
 
   async refreshToken(refreshToken: string) {

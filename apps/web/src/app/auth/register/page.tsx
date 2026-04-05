@@ -97,22 +97,27 @@ export default function RegisterPage() {
         await register(email, password, role);
       }
 
-      // After registration, create the initial profile
+      // After registration, create the initial profile (non-blocking: user is already registered)
       const nameParts = fullName.trim().split(/\s+/);
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      if (role === 'student') {
-        await usersApi.updateStudentProfile({
-          firstName,
-          lastName,
-          university: university || undefined,
-        });
-      } else {
-        await usersApi.updateEmployerProfile({
-          businessName: company || undefined,
-          contactPerson: fullName,
-        });
+      try {
+        if (role === 'student') {
+          await usersApi.updateStudentProfile({
+            firstName,
+            lastName,
+            university: university || undefined,
+          });
+        } else {
+          await usersApi.updateEmployerProfile({
+            businessName: company || undefined,
+            contactPerson: fullName,
+          });
+        }
+      } catch {
+        // Profile creation is best-effort; user can complete it later from dashboard.
+        // Registration itself succeeded, so we continue to redirect.
       }
 
       router.push('/dashboard');

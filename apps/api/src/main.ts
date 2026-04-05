@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { SanitizeInterceptor } from './common/interceptors/sanitize.interceptor';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import * as express from 'express';
 
 async function bootstrap() {
@@ -52,6 +53,9 @@ async function bootstrap() {
     ],
     credentials: true,
   });
+
+  // Global exception filter (catches ALL unhandled errors, logs stack traces)
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Global validation pipe
   app.useGlobalPipes(
