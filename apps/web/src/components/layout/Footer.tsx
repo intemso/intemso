@@ -12,7 +12,6 @@ const footerLinks = {
   'For Employers': [
     { name: 'Post a Gig', href: '/post-gig' },
     { name: 'Find Talent', href: '/talent' },
-    { name: 'Enterprise', href: '/enterprise' },
     { name: 'Hiring Resources', href: '/resources' },
     { name: 'Trust & Safety', href: '/trust' },
   ],
