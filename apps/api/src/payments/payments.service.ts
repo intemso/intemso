@@ -8,18 +8,17 @@ import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { InitializePaymentDto, PaymentPurpose } from './dto/initialize-payment.dto';
+import { CONNECT_PACKS, FEE_TIERS, FREE_MONTHLY_CONNECTS } from '@intemso/shared';
 import * as crypto from 'crypto';
 
-const CONNECT_PACKS: Record<number, number> = {
-  10: 5,   // 10 connects = GH₵5
-  20: 9,   // 20 connects = GH₵9
-  40: 16,  // 40 connects = GH₵16
-};
+const CONNECT_PACK_PRICES: Record<number, number> = Object.fromEntries(
+  CONNECT_PACKS.map(p => [p.size, p.price]),
+);
 
-const FEE_TIERS = [
-  { threshold: 500, rate: 0.15 },   // tier_1: first 500 → 15%
-  { threshold: 2000, rate: 0.10 },  // tier_2: 500–2000 → 10%
-  { threshold: Infinity, rate: 0.05 }, // tier_3: above 2000 → 5%
+const FEE_TIER_LIST = [
+  { threshold: FEE_TIERS.tier_1.maxBillings, rate: FEE_TIERS.tier_1.percentage / 100 },
+  { threshold: FEE_TIERS.tier_2.maxBillings, rate: FEE_TIERS.tier_2.percentage / 100 },
+  { threshold: FEE_TIERS.tier_3.maxBillings, rate: FEE_TIERS.tier_3.percentage / 100 },
 ];
 
 @Injectable()
@@ -72,10 +71,10 @@ export class PaymentsService {
         userId,
       };
     } else if (dto.purpose === PaymentPurpose.CONNECTS_PURCHASE) {
-      if (!dto.packSize || !CONNECT_PACKS[dto.packSize]) {
+      if (!dto.packSize || !CONNECT_PACK_PRICES[dto.packSize]) {
         throw new BadRequestException('Invalid pack size. Options: 10, 20, 40');
       }
-      amountPesewas = CONNECT_PACKS[dto.packSize] * 100;
+      amountPesewas = CONNECT_PACK_PRICES[dto.packSize] * 100;
       metadata = {
         purpose: 'connects_purchase',
         packSize: String(dto.packSize),
@@ -700,14 +699,14 @@ export class PaymentsService {
         update: { purchasedConnects: { increment: packSize } },
         create: {
           studentId: student.id,
-          freeConnects: 10,
+          freeConnects: FREE_MONTHLY_CONNECTS,
           purchasedConnects: packSize,
         },
       });
 
       // Record connect transaction
       const balance = await tx.connectBalance.findUnique({ where: { studentId: student.id } });
-      const totalAfter = (balance?.freeConnects ?? 10) + (balance?.purchasedConnects ?? 0) + (balance?.rolloverConnects ?? 0);
+      const totalAfter = (balance?.freeConnects ?? FREE_MONTHLY_CONNECTS) + (balance?.purchasedConnects ?? 0) + (balance?.rolloverConnects ?? 0);
 
       await tx.connectTransaction.create({
         data: {
@@ -1369,7 +1368,7 @@ export class PaymentsService {
     let remaining = amount;
     let current = lifetimeBefore;
 
-    for (const tier of FEE_TIERS) {
+    for (const tier of FEE_TIER_LIST) {
       if (remaining <= 0) break;
 
       const tierCeiling = tier.threshold;

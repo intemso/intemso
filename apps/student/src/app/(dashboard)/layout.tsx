@@ -31,6 +31,7 @@ const navigation = [
   { name: 'Find Work', href: '/gigs', icon: MagnifyingGlassIcon },
   { name: 'My Applications', href: '/applications', icon: DocumentTextIcon },
   { name: 'Active Contracts', href: '/contracts', icon: BriefcaseIcon },
+  { name: 'Connects', href: '/connects', icon: BoltIcon },
   { name: 'My Portfolio', href: '/showcase', icon: RectangleStackIcon },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
   { name: 'Earnings', href: '/earnings', icon: CurrencyDollarIcon },
@@ -42,7 +43,7 @@ const navigation = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const [connects, setConnects] = useState<{ total: number; free: number; purchased: number } | null>(null);
+  const [connects, setConnects] = useState<{ total: number; free: number; purchased: number; rollover: number } | null>(null);
   const [walletBalance, setWalletBalance] = useState<string>('0.00');
   const [unreadCount, setUnreadCount] = useState(0);
   const [profileScore, setProfileScore] = useState(0);
@@ -204,13 +205,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </nav>
 
             <div className="p-4 space-y-2 border-t border-gray-100">
-              <a
-                href={process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'http://localhost:3000'}
+              <Link
+                href="/gigs"
                 className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-primary-50 text-primary-700 text-sm font-medium rounded-xl hover:bg-primary-100 transition-colors"
               >
                 <MagnifyingGlassIcon className="w-4 h-4" />
                 Find Gigs
-              </a>
+              </Link>
               <button
                 onClick={logout}
                 className="flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
@@ -301,7 +302,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Connects</h4>
                       <a
-                        href={`${process.env.NEXT_PUBLIC_MAIN_SITE_URL || 'http://localhost:3000'}/pricing`}
+                        href="/connects"
                         className="text-xs text-primary-600 font-medium hover:underline"
                       >
                         Get more
@@ -317,10 +318,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                           <p className="text-xs text-primary-500">Available connects</p>
                         </div>
                       </div>
-                      <div className="mt-3 pt-3 border-t border-primary-100 grid grid-cols-2 gap-2 text-center">
+                      <div className="mt-3 pt-3 border-t border-primary-100 grid grid-cols-3 gap-2 text-center">
                         <div>
                           <p className="text-sm font-bold text-gray-900">{connects?.free ?? '—'}</p>
                           <p className="text-[10px] text-gray-400">Free</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">{connects?.rollover ?? '—'}</p>
+                          <p className="text-[10px] text-gray-400">Rollover</p>
                         </div>
                         <div>
                           <p className="text-sm font-bold text-gray-900">{connects?.purchased ?? '—'}</p>
