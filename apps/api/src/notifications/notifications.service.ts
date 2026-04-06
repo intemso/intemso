@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsGateway } from './notifications.gateway';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(NotificationsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly gateway: NotificationsGateway,
+  ) {}
 
   // ── Create a notification (called internally by other services) ──
 
@@ -15,7 +21,7 @@ export class NotificationsService {
     data?: Record<string, any>;
     channel?: string;
   }) {
-    return this.prisma.notification.create({
+    const notification = await this.prisma.notification.create({
       data: {
         userId: params.userId,
         type: params.type,
@@ -25,11 +31,22 @@ export class NotificationsService {
         channel: params.channel || 'in_app',
       },
     });
+
+    // Push real-time via WebSocket
+    try {
+      this.gateway.emitNotification(params.userId, notification);
+      const { unread } = await this.getUnreadCount(params.userId);
+      this.gateway.emitUnreadCount(params.userId, unread);
+    } catch (err) {
+      this.logger.warn(`Failed to emit real-time notification: ${err}`);
+    }
+
+    return notification;
   }
 
   // ── Get user notifications (paginated) ──
 
-  async list(userId: string, params: { page?: number; limit?: number; unreadOnly?: boolean }) {
+  async list(userId: string, params: { page?: number; limit?: number; unreadOnly?: boolean; type?: string }) {
     const page = params.page || 1;
     const limit = params.limit || 20;
     const skip = (page - 1) * limit;
@@ -37,6 +54,9 @@ export class NotificationsService {
     const where: any = { userId };
     if (params.unreadOnly) {
       where.isRead = false;
+    }
+    if (params.type) {
+      where.type = params.type;
     }
 
     const [data, total] = await Promise.all([
@@ -87,5 +107,29 @@ export class NotificationsService {
       data: { isRead: true },
     });
     return { marked: result.count };
+  }
+
+  // ── Delete a single notification ──
+
+  async delete(userId: string, notificationId: string) {
+    const notification = await this.prisma.notification.findUnique({
+      where: { id: notificationId },
+    });
+    if (!notification) throw new NotFoundException('Notification not found');
+    if (notification.userId !== userId) throw new ForbiddenException();
+
+    await this.prisma.notification.delete({
+      where: { id: notificationId },
+    });
+    return { deleted: true };
+  }
+
+  // ── Delete all read notifications ──
+
+  async deleteAllRead(userId: string) {
+    const result = await this.prisma.notification.deleteMany({
+      where: { userId, isRead: true },
+    });
+    return { deleted: result.count };
   }
 }

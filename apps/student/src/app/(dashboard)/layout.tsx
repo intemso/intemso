@@ -23,6 +23,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import NotificationDropdown from '@/components/NotificationDropdown';
 import { useAuth } from '@/context/auth';
 import { connectsApi, walletApi, notificationsApi, apiFetch } from '@/lib/api';
 
@@ -34,6 +35,7 @@ const navigation = [
   { name: 'Connects', href: '/connects', icon: BoltIcon },
   { name: 'My Portfolio', href: '/showcase', icon: RectangleStackIcon },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
+  { name: 'Notifications', href: '/notifications', icon: BellIcon },
   { name: 'Earnings', href: '/earnings', icon: CurrencyDollarIcon },
   { name: 'Services', href: '/services', icon: BoltIcon },
   { name: 'My Profile', href: '/profile', icon: UserCircleIcon },
@@ -115,14 +117,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             <div className="flex items-center gap-3">
               {/* Notifications */}
-              <Link href="/settings" className="relative p-2 rounded-lg hover:bg-gray-100">
-                <BellIcon className="w-5 h-5 text-gray-600" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Link>
+              <NotificationDropdown unreadCount={unreadCount} onUnreadChange={setUnreadCount} />
 
               {/* Messages */}
               <Link href="/messages" className="p-2 rounded-lg hover:bg-gray-100">

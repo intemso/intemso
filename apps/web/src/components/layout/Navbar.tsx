@@ -30,31 +30,36 @@ const navigation = [
 
 function getNotificationRoute(type: string, data: Record<string, any>): string | null {
   switch (type) {
-    case 'proposal_received':
-      return data.gigId ? `/dashboard/gigs/${data.gigId}/proposals` : '/dashboard/gigs';
-    case 'proposal_hired':
-      return data.contractId ? `/dashboard/contracts/${data.contractId}` : '/dashboard/contracts';
-    case 'proposal_shortlisted':
-    case 'proposal_declined':
-      return '/dashboard/proposals';
+    case 'new_application':
+    case 'application_reviewed':
+    case 'application_hired':
+    case 'application_declined':
+      return '/dashboard';
     case 'contract_status_changed':
-      return data.contractId ? `/dashboard/contracts/${data.contractId}` : '/dashboard/contracts';
+    case 'milestone_funded':
     case 'milestone_submitted':
     case 'milestone_approved':
     case 'milestone_revision':
-      return data.contractId ? `/dashboard/contracts/${data.contractId}` : '/dashboard/contracts';
+    case 'payment_released':
+      return '/dashboard';
     case 'new_message':
-      return data.conversationId ? `/dashboard/messages?conversation=${data.conversationId}` : '/dashboard/messages';
+      return '/dashboard';
     case 'review_received':
-      return '/dashboard/profile';
+      return '/profile';
+    case 'dispute_opened':
+    case 'dispute_response':
+    case 'dispute_resolved':
     case 'dispute_raised':
-      return data.contractId ? `/dashboard/contracts/${data.contractId}` : '/dashboard/contracts';
+      return '/dashboard';
     case 'community_comment':
     case 'community_reply':
     case 'community_like':
-      return '/community';
-    case 'community_pin':
-      return '/community';
+    case 'community_mention':
+      return data.postId ? `/community?post=${data.postId}` : '/community';
+    case 'user_followed':
+      return '/profile';
+    case 'service_order':
+      return '/dashboard';
     default:
       return null;
   }

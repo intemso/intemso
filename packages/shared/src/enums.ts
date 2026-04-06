@@ -135,24 +135,44 @@ export enum DisputeStatus {
 
 // ── Notification Type ──
 export enum NotificationType {
+  // Applications
   NEW_APPLICATION = 'new_application',
   APPLICATION_REVIEWED = 'application_reviewed',
   APPLICATION_HIRED = 'application_hired',
   APPLICATION_DECLINED = 'application_declined',
+  // Contracts
+  CONTRACT_STATUS_CHANGED = 'contract_status_changed',
+  // Milestones
   MILESTONE_FUNDED = 'milestone_funded',
   MILESTONE_SUBMITTED = 'milestone_submitted',
   MILESTONE_APPROVED = 'milestone_approved',
-  REVISION_REQUESTED = 'revision_requested',
-  NEW_MESSAGE = 'new_message',
+  MILESTONE_REVISION = 'milestone_revision',
+  // Payments
   PAYMENT_RELEASED = 'payment_released',
-  NEW_REVIEW = 'new_review',
+  // Messaging
+  NEW_MESSAGE = 'new_message',
+  // Reviews
+  REVIEW_RECEIVED = 'review_received',
+  // Disputes
+  DISPUTE_OPENED = 'dispute_opened',
+  DISPUTE_RESPONSE = 'dispute_response',
+  DISPUTE_RESOLVED = 'dispute_resolved',
+  DISPUTE_RAISED = 'dispute_raised',
+  // Community
+  COMMUNITY_COMMENT = 'community_comment',
+  COMMUNITY_REPLY = 'community_reply',
+  COMMUNITY_LIKE = 'community_like',
+  COMMUNITY_MENTION = 'community_mention',
+  // Social
+  USER_FOLLOWED = 'user_followed',
+  // Student metrics
   JSS_UPDATED = 'jss_updated',
   BADGE_EARNED = 'badge_earned',
   CONNECTS_LOW = 'connects_low',
   CONNECTS_REFRESHED = 'connects_refreshed',
+  // Services
   SERVICE_ORDER = 'service_order',
-  DISPUTE_OPENED = 'dispute_opened',
-  DISPUTE_RESOLVED = 'dispute_resolved',
+  // Future/planned
   GIG_MATCH = 'gig_match',
   INVITE_TO_GIG = 'invite_to_gig',
   DIRECT_OFFER = 'direct_offer',

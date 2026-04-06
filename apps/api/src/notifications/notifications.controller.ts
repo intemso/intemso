@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Patch,
+  Delete,
   Param,
   Query,
   UseGuards,
@@ -21,11 +22,13 @@ export class NotificationsController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('unreadOnly') unreadOnly?: string,
+    @Query('type') type?: string,
   ) {
     return this.notificationsService.list(user.id, {
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
       unreadOnly: unreadOnly === 'true',
+      type: type || undefined,
     });
   }
 
@@ -42,5 +45,15 @@ export class NotificationsController {
   @Patch('read-all')
   markAllAsRead(@CurrentUser() user: any) {
     return this.notificationsService.markAllAsRead(user.id);
+  }
+
+  @Delete('read')
+  deleteAllRead(@CurrentUser() user: any) {
+    return this.notificationsService.deleteAllRead(user.id);
+  }
+
+  @Delete(':id')
+  delete(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.notificationsService.delete(user.id, id);
   }
 }

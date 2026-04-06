@@ -1038,12 +1038,13 @@ export interface PaginatedNotifications {
 // ── Notifications API ──
 
 export const notificationsApi = {
-  /** List notifications */
-  list(params?: { page?: number; limit?: number; unreadOnly?: boolean }) {
+  /** List notifications (paginated, filterable) */
+  list(params?: { page?: number; limit?: number; unreadOnly?: boolean; type?: string }) {
     const sp = new URLSearchParams();
     if (params?.page) sp.set('page', String(params.page));
     if (params?.limit) sp.set('limit', String(params.limit));
     if (params?.unreadOnly) sp.set('unreadOnly', 'true');
+    if (params?.type) sp.set('type', params.type);
     const qs = sp.toString();
     return apiFetch<PaginatedNotifications>(`/notifications${qs ? `?${qs}` : ''}`);
   },
@@ -1061,6 +1062,16 @@ export const notificationsApi = {
   /** Mark all as read */
   markAllAsRead() {
     return apiFetch<{ marked: number }>('/notifications/read-all', { method: 'PATCH' });
+  },
+
+  /** Delete a single notification */
+  delete(id: string) {
+    return apiFetch<{ deleted: boolean }>(`/notifications/${id}`, { method: 'DELETE' });
+  },
+
+  /** Delete all read notifications */
+  deleteAllRead() {
+    return apiFetch<{ deleted: number }>('/notifications/read', { method: 'DELETE' });
   },
 };
 

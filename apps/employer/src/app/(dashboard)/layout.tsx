@@ -23,6 +23,7 @@ import {
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import NotificationDropdown from '@/components/NotificationDropdown';
 import { useAuth } from '@/context/auth';
 import { notificationsApi, apiFetch } from '@/lib/api';
 
@@ -32,6 +33,7 @@ const navigation = [
   { name: 'Applications', href: '/applications', icon: DocumentTextIcon },
   { name: 'Contracts', href: '/contracts', icon: BriefcaseIcon },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
+  { name: 'Notifications', href: '/notifications', icon: BellIcon },
   { name: 'Find Talent', href: '/talent', icon: MagnifyingGlassIcon },
   { name: 'Services', href: '/services', icon: RectangleStackIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
@@ -79,14 +81,7 @@ export default function EmployerDashboardLayout({ children }: { children: React.
             </div>
 
             <div className="flex items-center gap-3">
-              <Link href="/settings" className="relative p-2 rounded-lg hover:bg-gray-100">
-                <BellIcon className="w-5 h-5 text-gray-600" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Link>
+              <NotificationDropdown unreadCount={unreadCount} onUnreadChange={setUnreadCount} />
               <Link href="/messages" className="p-2 rounded-lg hover:bg-gray-100">
                 <ChatBubbleLeftRightIcon className="w-5 h-5 text-gray-600" />
               </Link>
