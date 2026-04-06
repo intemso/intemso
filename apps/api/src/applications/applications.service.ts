@@ -44,8 +44,17 @@ export class ApplicationsService {
     }
 
     // 2. Find the gig and validate
-    const gig = await this.prisma.gig.findUnique({ where: { id: gigId } });
+    const gig = await this.prisma.gig.findUnique({
+      where: { id: gigId },
+      include: { employer: { select: { userId: true } } },
+    });
     if (!gig) throw new NotFoundException('Gig not found');
+
+    // Prevent self-application (employer applying to their own gig)
+    if (gig.employer.userId === studentUserId) {
+      throw new BadRequestException('You cannot apply to your own gig');
+    }
+
     if (gig.status !== 'open') {
       throw new BadRequestException('This gig is not accepting applications');
     }

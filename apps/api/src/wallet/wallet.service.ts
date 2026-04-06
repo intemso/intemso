@@ -214,10 +214,7 @@ export class WalletService {
 
     const withdrawal = await this.prisma.$transaction(async (tx) => {
       // Lock the wallet row to prevent concurrent withdrawals (SELECT ... FOR UPDATE)
-      const [freshWallet] = await tx.$queryRawUnsafe<any[]>(
-        `SELECT * FROM wallets WHERE id = $1 FOR UPDATE`,
-        wallet.id,
-      );
+      const [freshWallet] = await tx.$queryRaw<any[]>`SELECT * FROM wallets WHERE id = ${wallet.id} FOR UPDATE`;
       if (!freshWallet || Number(freshWallet.balance) < dto.amount) {
         throw new BadRequestException('Insufficient balance');
       }

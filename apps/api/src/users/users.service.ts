@@ -119,7 +119,23 @@ export class UsersService {
   }
 
   async findById(id: string) {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        ghanaCardNumber: true,
+        role: true,
+        avatarUrl: true,
+        bannerUrl: true,
+        emailVerified: true,
+        isActive: true,
+        isSuspended: true,
+        lastLoginAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
   }
 
   async create(data: { email?: string; ghanaCardNumber?: string; passwordHash: string; role: string }) {

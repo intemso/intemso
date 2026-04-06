@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { DisputesService } from './disputes.service';
@@ -19,6 +20,7 @@ export class DisputesController {
   constructor(private readonly disputesService: DisputesService) {}
 
   @Post()
+  @Throttle({ default: { ttl: 60_000, limit: 3 } })
   create(
     @CurrentUser('id') userId: string,
     @Body() dto: CreateDisputeDto,

@@ -14,6 +14,7 @@ import {
   setTokens,
   clearTokens,
   getAccessToken,
+  getRefreshToken,
   type AuthResponse,
 } from '@/lib/api';
 
@@ -86,6 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    const rt = getRefreshToken();
+    if (rt) authApi.logout(rt).catch(() => {});
     clearTokens();
     setUser(null);
     window.location.href = '/auth/login';

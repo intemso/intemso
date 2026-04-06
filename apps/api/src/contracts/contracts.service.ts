@@ -180,6 +180,7 @@ export class ContractsService {
       include: {
         student: { select: { userId: true } },
         employer: { select: { userId: true } },
+        milestones: { select: { id: true, status: true } },
       },
     });
 
@@ -218,6 +219,16 @@ export class ContractsService {
       updateData.pausedAt = new Date();
     }
     if (dto.status === 'completed') {
+      // Verify all milestones are in a terminal state before allowing completion
+      const pendingMilestones = contract.milestones.filter(
+        (m: any) => !['approved', 'cancelled', 'paid'].includes(m.status),
+      );
+      if (pendingMilestones.length > 0) {
+        throw new BadRequestException(
+          `Cannot complete contract: ${pendingMilestones.length} milestone(s) still pending. All milestones must be approved, paid, or cancelled first.`,
+        );
+      }
+
       updateData.completedAt = new Date();
       // Update gig status
       if (contract.gigId) {

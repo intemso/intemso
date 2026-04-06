@@ -53,15 +53,22 @@ export default function Footer() {
               short-term, flexible work opportunities.
             </p>
             <div className="flex gap-2.5 sm:gap-3">
-              {['twitter', 'linkedin', 'instagram', 'facebook'].map(
+              {[
+                { name: 'twitter', url: 'https://x.com/intemso' },
+                { name: 'linkedin', url: 'https://linkedin.com/company/intemso' },
+                { name: 'instagram', url: 'https://instagram.com/intemso' },
+                { name: 'facebook', url: 'https://facebook.com/intemso' },
+              ].map(
                 (social) => (
                   <a
-                    key={social}
-                    href={`#${social}`}
+                    key={social.name}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-9 h-9 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 rounded-lg flex items-center justify-center transition-colors"
-                    aria-label={social}
+                    aria-label={social.name}
                   >
-                    <SocialIcon name={social} />
+                    <SocialIcon name={social.name} />
                   </a>
                 )
               )}

@@ -10,12 +10,14 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ServicesService } from './services.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/service.dto';
 import { CreateOrderDto } from './dto/order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Controller('services')
 export class ServicesController {
@@ -92,6 +94,7 @@ export class ServicesController {
   /** Order a service (employer) */
   @Post(':id/order')
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   async createOrder(
     @Param('id') id: string,
     @Body() dto: CreateOrderDto,
@@ -132,9 +135,9 @@ export class ServicesController {
   @UseGuards(JwtAuthGuard)
   updateOrderStatus(
     @Param('orderId') orderId: string,
-    @Body('status') status: string,
+    @Body() dto: UpdateOrderStatusDto,
     @CurrentUser() user: any,
   ) {
-    return this.servicesService.updateOrderStatus(orderId, user.id, status);
+    return this.servicesService.updateOrderStatus(orderId, user.id, dto.status);
   }
 }

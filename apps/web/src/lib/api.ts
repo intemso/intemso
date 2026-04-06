@@ -189,6 +189,26 @@ export const authApi = {
       body: JSON.stringify({ token, newPassword }),
     });
   },
+
+  createCode() {
+    return apiFetch<{ code: string }>('/auth/create-code', {
+      method: 'POST',
+    });
+  },
+
+  exchangeCode(code: string) {
+    return apiFetch<TokenResponse>('/auth/exchange-code', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    });
+  },
+
+  logout(refreshToken: string) {
+    return apiFetch<{ message: string }>('/auth/logout', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+    });
+  },
 };
 
 // ── Users API ──

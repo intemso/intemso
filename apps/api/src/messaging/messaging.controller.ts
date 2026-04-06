@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { MessagingService } from './messaging.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -43,6 +44,7 @@ export class MessagingController {
   }
 
   @Post(':id/messages')
+  @Throttle({ default: { ttl: 60_000, limit: 30 } })
   sendMessage(
     @CurrentUser() user: any,
     @Param('id') conversationId: string,

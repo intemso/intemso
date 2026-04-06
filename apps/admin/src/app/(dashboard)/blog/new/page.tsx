@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeftIcon,
@@ -206,7 +207,7 @@ export default function NewBlogPostPage() {
             <div className="min-h-[400px] px-6 py-4 bg-gray-800 border border-gray-700 rounded-xl">
               <div
                 className="prose prose-invert max-w-none prose-headings:text-white prose-p:text-gray-300 prose-a:text-red-400 prose-strong:text-white prose-img:rounded-xl"
-                dangerouslySetInnerHTML={{ __html: form.content }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(form.content) }}
               />
             </div>
           ) : (

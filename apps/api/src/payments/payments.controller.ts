@@ -12,11 +12,14 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { PaymentsService } from './payments.service';
 import { InitializePaymentDto } from './dto/initialize-payment.dto';
+import { VerifyPaymentDto } from './dto/verify-payment.dto';
+import { ResolveAccountDto } from './dto/resolve-account.dto';
 import { Request } from 'express';
 import * as net from 'net';
 
@@ -44,6 +47,7 @@ export class PaymentsController {
   /** Initialize a Paystack payment (escrow or connect purchase) */
   @UseGuards(JwtAuthGuard)
   @Post('payments/initialize')
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   initialize(
     @CurrentUser('id') userId: string,
     @Body() dto: InitializePaymentDto,
@@ -83,9 +87,9 @@ export class PaymentsController {
   @Post('payments/verify')
   async verify(
     @CurrentUser('id') userId: string,
-    @Body('reference') reference: string,
+    @Body() dto: VerifyPaymentDto,
   ) {
-    const result = await this.paymentsService.verifyTransaction(reference);
+    const result = await this.paymentsService.verifyTransaction(dto.reference);
     // Ensure the payment belongs to the requesting user
     if (result?.data?.metadata?.userId && result.data.metadata.userId !== userId) {
       throw new ForbiddenException('You can only verify your own payments');
@@ -106,9 +110,8 @@ export class PaymentsController {
   @UseGuards(JwtAuthGuard)
   @Post('payments/resolve-account')
   resolveAccount(
-    @Body('accountNumber') accountNumber: string,
-    @Body('bankCode') bankCode: string,
+    @Body() dto: ResolveAccountDto,
   ) {
-    return this.paymentsService.resolveAccountNumber(accountNumber, bankCode);
+    return this.paymentsService.resolveAccountNumber(dto.accountNumber, dto.bankCode);
   }
 }

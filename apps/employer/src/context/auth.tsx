@@ -14,6 +14,7 @@ import {
   setTokens,
   clearTokens,
   getAccessToken,
+  getRefreshToken,
   type AuthResponse,
 } from '@/lib/api';
 
@@ -51,15 +52,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for tokens passed via URL hash (cross-domain redirect from intemso.com)
-    if (typeof window !== 'undefined' && window.location.hash) {
-      const params = new URLSearchParams(window.location.hash.slice(1));
-      const hashAccess = params.get('access_token');
-      const hashRefresh = params.get('refresh_token');
-      if (hashAccess && hashRefresh) {
-        setTokens(hashAccess, hashRefresh);
-        // Clear the hash from URL to avoid exposing tokens
-        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    // Check for one-time auth code from cross-domain redirect
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const authCode = params.get('auth_code');
+      if (authCode) {
+        // Clear the code from URL immediately
+        params.delete('auth_code');
+        const newSearch = params.toString();
+        window.history.replaceState(null, '', window.location.pathname + (newSearch ? '?' + newSearch : ''));
+        // Exchange the code for tokens
+        authApi
+          .exchangeCode(authCode)
+          .then(({ accessToken, refreshToken }) => {
+            setTokens(accessToken, refreshToken);
+            // Reload to initialize with the new tokens
+            window.location.reload();
+          })
+          .catch(() => {
+            // Code invalid or expired — continue without auth
+            setIsLoading(false);
+          });
+        return;
       }
     }
 
@@ -135,6 +149,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    const rt = getRefreshToken();
+    if (rt) authApi.logout(rt).catch(() => {});
     clearTokens();
     setUser(null);
     window.location.href = '/auth/login';

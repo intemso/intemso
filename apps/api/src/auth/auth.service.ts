@@ -255,7 +255,7 @@ export class AuthService {
     const resetToken = await this.jwtService.signAsync(
       { sub: user.id, purpose: 'password_reset' },
       {
-        secret: this.config.getOrThrow<string>('JWT_SECRET'),
+        secret: this.config.get<string>('JWT_RESET_SECRET') || this.config.getOrThrow<string>('JWT_SECRET'),
         expiresIn: '1h',
       },
     );
@@ -271,7 +271,7 @@ export class AuthService {
   async resetPassword(token: string, newPassword: string) {
     try {
       const payload = this.jwtService.verify(token, {
-        secret: this.config.getOrThrow<string>('JWT_SECRET'),
+        secret: this.config.get<string>('JWT_RESET_SECRET') || this.config.getOrThrow<string>('JWT_SECRET'),
       });
 
       if (payload.purpose !== 'password_reset') {
@@ -297,6 +297,46 @@ export class AuthService {
       if (err instanceof BadRequestException) throw err;
       throw new BadRequestException('Invalid or expired reset token');
     }
+  }
+
+  /**
+   * Create a short-lived one-time auth code for cross-portal redirect.
+   * The code is stored in cache and can be exchanged for tokens exactly once.
+   */
+  async createAuthCode(userId: string): Promise<{ code: string }> {
+    const user = await this.usersService.findById(userId);
+    if (!user || !user.isActive || user.isSuspended) {
+      throw new UnauthorizedException();
+    }
+
+    const code = crypto.randomBytes(32).toString('hex');
+    // Store code → userId mapping, expires in 30 seconds
+    await this.cache.set(`auth_code:${code}`, JSON.stringify({ userId: user.id, email: user.email, role: user.role }), 30_000);
+
+    return { code };
+  }
+
+  /**
+   * Exchange a one-time auth code for access + refresh tokens.
+   */
+  async exchangeAuthCode(code: string) {
+    const key = `auth_code:${code}`;
+    const raw = await this.cache.get<string>(key);
+    if (!raw) {
+      throw new UnauthorizedException('Invalid or expired auth code');
+    }
+
+    // Delete immediately so it can only be used once
+    await this.cache.del(key);
+
+    const { userId, email, role } = JSON.parse(raw);
+
+    const user = await this.usersService.findById(userId);
+    if (!user || !user.isActive || user.isSuspended) {
+      throw new UnauthorizedException('Account is not active');
+    }
+
+    return this.generateTokens(user.id, email, role);
   }
 
   private async generateTokens(userId: string, email: string | null, role: string) {
