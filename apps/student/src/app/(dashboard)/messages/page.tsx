@@ -162,7 +162,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] sm:h-[calc(100vh-12rem)] flex bg-white rounded-xl sm:rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="h-[calc(100dvh-10rem)] sm:h-[calc(100vh-12rem)] flex bg-white rounded-xl sm:rounded-2xl border border-gray-100 overflow-hidden">
       {/* Conversation List */}
       <div className={`${selectedConvoId ? 'hidden sm:flex' : 'flex'} w-full sm:w-80 border-r border-gray-100 flex-col sm:shrink-0`}>
         <div className="p-3 sm:p-4 border-b border-gray-100">

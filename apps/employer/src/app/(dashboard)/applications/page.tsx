@@ -64,10 +64,10 @@ export default function ApplicationsPage() {
         : activeApplications;
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl">
+    <div className="max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Applications</h1>
           <p className="text-sm text-gray-500 mt-1">Review applications from students</p>
         </div>
       </div>
@@ -141,8 +141,8 @@ export default function ApplicationsPage() {
                 <p className="text-sm text-gray-600 mb-3">{application.note}</p>
               )}
 
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center justify-between text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                   <Link
                     href={`/gigs/${application.gigId}/applications`}
                     className="text-primary-600 font-medium hover:underline"

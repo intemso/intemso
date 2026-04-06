@@ -461,8 +461,8 @@ function ComposePost({ user, onPost }: { user: any; onPost: (data: { content: st
               {tags.map((tag) => (
                 <span key={tag} className="inline-flex items-center gap-1 text-xs font-medium bg-primary-50 text-primary-600 px-2.5 py-1 rounded-full">
                   #{tag}
-                  <button onClick={() => setTags(tags.filter((t) => t !== tag))} className="hover:text-primary-800">
-                    <XMarkIcon className="w-3 h-3" />
+                  <button onClick={() => setTags(tags.filter((t) => t !== tag))} className="hover:text-primary-800 p-0.5">
+                    <XMarkIcon className="w-3.5 h-3.5" />
                   </button>
                 </span>
               ))}
@@ -481,7 +481,7 @@ function ComposePost({ user, onPost }: { user: any; onPost: (data: { content: st
                   />
                   <button
                     onClick={() => setImageUrls((prev) => prev.filter((_, j) => j !== i))}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-800 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-gray-800 text-white rounded-full flex items-center justify-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   >
                     <XMarkIcon className="w-3 h-3" />
                   </button>

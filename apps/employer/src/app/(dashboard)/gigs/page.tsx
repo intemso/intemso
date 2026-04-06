@@ -83,10 +83,10 @@ export default function MyGigsPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-5xl">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Gigs</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Gigs</h1>
           <p className="text-sm text-gray-500 mt-1">Manage your posted gigs and track applications</p>
         </div>
         <Link href="/post-gig" className="btn-primary flex items-center gap-2">
@@ -154,8 +154,8 @@ export default function MyGigsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-4 text-gray-500">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-500">
                     <span>Budget: <span className="font-medium text-gray-900">{formatBudget(gig.budgetMin, gig.budgetMax)}</span></span>
                     <span>
                       Applications: <span className="font-medium text-gray-900">{gig.applicationsCount}</span>
@@ -164,7 +164,7 @@ export default function MyGigsPage() {
                       <EyeIcon className="w-3.5 h-3.5" />
                       {gig.viewsCount} views
                     </span>
-                    <span>Posted {gig.publishedAt ? timeAgo(gig.publishedAt) : timeAgo(gig.createdAt)}</span>
+                    <span className="hidden sm:inline">Posted {gig.publishedAt ? timeAgo(gig.publishedAt) : timeAgo(gig.createdAt)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Link

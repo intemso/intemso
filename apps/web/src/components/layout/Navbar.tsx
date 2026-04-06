@@ -170,13 +170,13 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
               <>
-                <Link href="/dashboard/messages" className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                <Link href="/dashboard/messages" className="relative p-2.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
                   <ChatBubbleLeftRightIcon className="w-5 h-5" />
                 </Link>
                 <div className="relative" ref={notifRef}>
                   <button
                     onClick={() => setNotifOpen(!notifOpen)}
-                    className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="relative p-2.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <BellIcon className="w-5 h-5" />
                     {unreadCount > 0 && (
@@ -203,7 +203,7 @@ export default function Navbar() {
                           </button>
                         )}
                       </div>
-                      <div className="max-h-80 overflow-y-auto">
+                      <div className="max-h-[60vh] sm:max-h-80 overflow-y-auto">
                         {notifications.length === 0 ? (
                           <div className="p-6 text-center text-gray-400 text-sm">
                             No notifications yet

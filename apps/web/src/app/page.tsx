@@ -129,7 +129,7 @@ function StatsBar() {
   return (
     <section className="py-6 md:py-10 bg-white border-y border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-4 md:grid-cols-4 gap-2 sm:gap-6 md:gap-4 lg:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 gap-2 sm:gap-6 md:gap-4 lg:gap-8">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
               <div className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-8 md:h-8 lg:w-10 lg:h-10 rounded-xl sm:rounded-xl bg-primary-50 mb-1.5 sm:mb-2 lg:mb-3">

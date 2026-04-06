@@ -211,7 +211,7 @@ export default function BrowseGigsPage() {
                 )}
                 <button
                   onClick={() => setShowMobileFilters(false)}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg"
+                  className="p-2.5 hover:bg-gray-100 rounded-lg"
                 >
                   <XMarkIcon className="w-5 h-5 text-gray-500" />
                 </button>
@@ -470,7 +470,7 @@ export default function BrowseGigsPage() {
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full">
                     {selectedCategory}
                     <button onClick={() => { setSelectedCategory(null); setSelectedSubType(null); setExpandedCategory(null); }}>
-                      <XMarkIcon className="w-3 h-3" />
+                      <XMarkIcon className="w-3.5 h-3.5" />
                     </button>
                   </span>
                 )}
@@ -478,7 +478,7 @@ export default function BrowseGigsPage() {
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full">
                     {selectedSubType}
                     <button onClick={() => setSelectedSubType(null)}>
-                      <XMarkIcon className="w-3 h-3" />
+                      <XMarkIcon className="w-3.5 h-3.5" />
                     </button>
                   </span>
                 )}
@@ -486,7 +486,7 @@ export default function BrowseGigsPage() {
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full">
                     {BUDGET_RANGES[budgetRange].label}
                     <button onClick={() => setBudgetRange(0)}>
-                      <XMarkIcon className="w-3 h-3" />
+                      <XMarkIcon className="w-3.5 h-3.5" />
                     </button>
                   </span>
                 )}
@@ -494,7 +494,7 @@ export default function BrowseGigsPage() {
                   <span key={l} className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full">
                     {l}
                     <button onClick={() => toggleExperience(l)}>
-                      <XMarkIcon className="w-3 h-3" />
+                      <XMarkIcon className="w-3.5 h-3.5" />
                     </button>
                   </span>
                 ))}
@@ -502,7 +502,7 @@ export default function BrowseGigsPage() {
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full">
                     {duration}
                     <button onClick={() => setDuration(null)}>
-                      <XMarkIcon className="w-3 h-3" />
+                      <XMarkIcon className="w-3.5 h-3.5" />
                     </button>
                   </span>
                 )}

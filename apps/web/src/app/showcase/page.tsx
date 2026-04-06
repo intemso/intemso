@@ -126,7 +126,7 @@ export default function ShowcaseGalleryPage() {
       {/* Hero section */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
             Talent{' '}
             <span className="bg-linear-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
               Showcase

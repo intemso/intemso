@@ -180,7 +180,7 @@ export default function NotificationDropdown({ unreadCount, onUnreadChange }: No
             </div>
           </div>
 
-          <div className="max-h-100 overflow-y-auto">
+          <div className="max-h-[60vh] sm:max-h-100 overflow-y-auto">
             {loading ? (
               <div className="p-4 space-y-3">
                 {[1, 2, 3].map((i) => (

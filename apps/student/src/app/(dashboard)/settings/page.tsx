@@ -26,8 +26,8 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Settings</h1>
+    <div className="max-w-4xl">
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Settings</h1>
       <p className="text-sm text-gray-500 mb-6">Manage your account preferences</p>
 
       {/* Tabs */}

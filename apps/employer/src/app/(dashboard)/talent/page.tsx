@@ -66,9 +66,9 @@ export default function DashboardTalentPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl">
+    <div className="max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Saved Talent</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Saved Talent</h1>
         <p className="text-sm text-gray-500 mt-1">Students you&apos;ve saved for future gigs</p>
       </div>
 

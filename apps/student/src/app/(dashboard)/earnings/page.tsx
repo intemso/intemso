@@ -86,10 +86,10 @@ export default function EarningsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl">
+    <div className="max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Earnings</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Earnings</h1>
           <p className="text-sm text-gray-500 mt-1">Track your income and withdrawals</p>
         </div>
         <button
@@ -109,7 +109,7 @@ export default function EarningsPage() {
           { label: 'Pending', value: `GH₵${pending.toFixed(0)}`, icon: ClockIcon, color: 'bg-amber-50 text-amber-600' },
           { label: 'Withdrawn', value: `GH₵${totalWithdrawn.toFixed(0)}`, icon: ArrowDownTrayIcon, color: 'bg-purple-50 text-purple-600' },
         ].map((card) => (
-          <div key={card.label} className="bg-white border border-gray-100 rounded-xl p-5">
+          <div key={card.label} className="bg-white border border-gray-100 rounded-xl p-3.5 sm:p-5">
             <div className={`w-10 h-10 ${card.color} rounded-xl flex items-center justify-center mb-3`}>
               <card.icon className="w-5 h-5" />
             </div>
@@ -172,7 +172,7 @@ export default function EarningsPage() {
       {/* Withdrawal Modal */}
       {showWithdraw && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-900">Withdraw Funds</h2>
               <button

@@ -371,7 +371,7 @@ export default function FindTalentPage() {
                           {isEmployer && (
                             <button
                               onClick={(e) => { e.preventDefault(); toggleSave(s.id); }}
-                              className="p-1.5 sm:p-2 hover:bg-gray-50 rounded-full transition-colors"
+                              className="p-2 sm:p-2 hover:bg-gray-50 rounded-full transition-colors"
                             >
                               {savedIds.has(s.id) ? (
                                 <HeartSolidIcon className="w-5 h-5 text-red-500" />
@@ -441,7 +441,7 @@ export default function FindTalentPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center gap-2 mt-8">
+          <div className="flex justify-center gap-2 mt-8 overflow-x-auto">
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
               .map((p, idx, arr) => (

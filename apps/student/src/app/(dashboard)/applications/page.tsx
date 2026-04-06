@@ -93,10 +93,10 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl">
+    <div className="max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Applications</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Applications</h1>
           <p className="text-sm text-gray-500 mt-1">Track your gig applications</p>
         </div>
       </div>
@@ -175,7 +175,7 @@ export default function ApplicationsPage() {
               )}
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
                   <span>
                     Budget:{' '}
                     <span className="font-medium text-gray-900">

@@ -427,7 +427,7 @@ export default function PricingPage() {
             </p>
 
             {/* Stats bar */}
-            <div ref={statsRef.ref} className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
+            <div ref={statsRef.ref} className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10">
                 <p className="text-2xl sm:text-3xl font-bold">{stat1}+</p>
                 <p className="text-xs sm:text-sm text-primary-200">Gig Categories</p>

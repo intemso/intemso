@@ -69,7 +69,7 @@ export default function EmployerDashboardLayout({ children }: { children: React.
         <header className="sticky top-0 z-40 bg-white border-b border-gray-100 h-16">
           <div className="flex items-center justify-between h-full px-4 lg:px-6">
             <div className="flex items-center gap-3">
-              <button className="lg:hidden p-2 rounded-lg hover:bg-gray-100" onClick={() => setMobileMenuOpen(true)}>
+              <button className="lg:hidden p-2.5 rounded-lg hover:bg-gray-100" onClick={() => setMobileMenuOpen(true)}>
                 <Bars3Icon className="w-5 h-5 text-gray-600" />
               </button>
               <Link href="/" className="flex items-center gap-2">
@@ -82,7 +82,7 @@ export default function EmployerDashboardLayout({ children }: { children: React.
 
             <div className="flex items-center gap-3">
               <NotificationDropdown unreadCount={unreadCount} onUnreadChange={setUnreadCount} />
-              <Link href="/messages" className="p-2 rounded-lg hover:bg-gray-100">
+              <Link href="/messages" className="p-2.5 rounded-lg hover:bg-gray-100">
                 <ChatBubbleLeftRightIcon className="w-5 h-5 text-gray-600" />
               </Link>
               <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
@@ -171,7 +171,7 @@ export default function EmployerDashboardLayout({ children }: { children: React.
           </aside>
 
           {/* Mobile bottom nav */}
-          <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-lg border-t border-gray-200 safe-bottom animate-slide-up-nav">
+          <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-lg border-t border-gray-200 pb-[env(safe-area-inset-bottom)] animate-slide-up-nav">
             <div className="flex items-stretch justify-around px-1 py-1">
               {navigation.slice(0, 5).map((item) => {
                 const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));

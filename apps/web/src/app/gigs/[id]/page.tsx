@@ -157,7 +157,7 @@ export default function GigDetailPage() {
                 <ChevronRightIcon className="w-3 h-3" />
               </>
             )}
-            <span className="text-gray-600 truncate max-w-xs">{gig.title}</span>
+            <span className="text-gray-600 truncate max-w-[50vw] sm:max-w-xs">{gig.title}</span>
           </nav>
         </div>
       </div>

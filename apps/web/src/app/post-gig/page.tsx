@@ -517,7 +517,7 @@ export default function PostGigPage() {
                         {milestones.length > 1 && (
                           <button
                             onClick={() => removeMilestone(idx)}
-                            className="text-gray-400 hover:text-red-500 transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
                           >
                             <TrashIcon className="w-4 h-4" />
                           </button>

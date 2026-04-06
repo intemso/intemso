@@ -117,7 +117,7 @@ export default function ConnectsPage() {
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Connects</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Connects</h1>
         <p className="text-gray-500 mt-1">
           Connects are used to apply for gigs. You get 15 free connects every month.
         </p>

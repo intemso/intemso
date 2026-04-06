@@ -83,7 +83,7 @@ export default function ContactPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
                   <textarea rows={5} required className="input-field" placeholder="Tell us how we can help..." />
                 </div>
-                <button type="submit" className="btn-primary">Send Message</button>
+                <button type="submit" className="btn-primary w-full sm:w-auto">Send Message</button>
               </form>
             ) : (
               <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">

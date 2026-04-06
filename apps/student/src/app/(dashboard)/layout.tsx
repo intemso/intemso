@@ -102,7 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center justify-between h-full px-4 lg:px-6">
             <div className="flex items-center gap-3">
               <button
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+                className="lg:hidden p-2.5 rounded-lg hover:bg-gray-100"
                 onClick={() => setMobileMenuOpen(true)}
               >
                 <Bars3Icon className="w-5 h-5 text-gray-600" />
@@ -120,7 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <NotificationDropdown unreadCount={unreadCount} onUnreadChange={setUnreadCount} />
 
               {/* Messages */}
-              <Link href="/messages" className="p-2 rounded-lg hover:bg-gray-100">
+              <Link href="/messages" className="p-2.5 rounded-lg hover:bg-gray-100">
                 <ChatBubbleLeftRightIcon className="w-5 h-5 text-gray-600" />
               </Link>
 
@@ -218,7 +218,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </aside>
 
           {/* Mobile bottom navigation */}
-          <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-lg border-t border-gray-200 safe-bottom animate-slide-up-nav">
+          <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-lg border-t border-gray-200 pb-[env(safe-area-inset-bottom)] animate-slide-up-nav">
             <div className="flex items-stretch justify-around px-1 py-1">
               {navigation.slice(0, 5).map((item) => {
                 const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
