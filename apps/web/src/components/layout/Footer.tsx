@@ -19,6 +19,7 @@ const footerLinks = {
     { name: 'Help Center', href: '/help' },
     { name: 'Blog', href: '/blog' },
     { name: 'Community', href: '/community' },
+    { name: 'Download App', href: '/download' },
   ],
   Company: [
     { name: 'About Us', href: '/about' },

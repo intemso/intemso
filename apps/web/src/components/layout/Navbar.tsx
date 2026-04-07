@@ -26,6 +26,7 @@ const navigation = [
   { name: 'Showcase', href: '/showcase' },
   { name: 'Blog', href: '/blog' },
   { name: 'Why Intemso', href: '/about' },
+  { name: 'Get the App', href: '/download' },
 ];
 
 function getNotificationRoute(type: string, data: Record<string, any>): string | null {
